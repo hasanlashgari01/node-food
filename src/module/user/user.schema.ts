@@ -24,9 +24,9 @@ const OtpSchema = new Schema({
         default: undefined,
     },
     expiresIn: {
-        type: Date,
+        type: Number,
         required: false,
-        default: null,
+        default: 0,
     },
     maxAttempts: {
         type: Number,
@@ -34,9 +34,9 @@ const OtpSchema = new Schema({
         default: 3,
     },
     maxAttemptsExpiresIn: {
-        type: Date,
+        type: Number,
         required: false,
-        default: null,
+        default: 0,
     },
 });
 

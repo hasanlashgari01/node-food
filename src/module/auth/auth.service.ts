@@ -6,10 +6,10 @@ import AuthMessage from "./auth.messages";
 
 class AuthService {
     #model;
-    #now: number = Date.now();
-    #minute: number = 1000 * 60;
-    #EXPIRED_TIME: number = this.#now + this.#minute * 2;
-    #ATTEMPTS_EXPIRED_TIME: number = this.#now + this.#minute * 10;
+    #MINUTE: number = 1000 * 60;
+    #EXPIRED_TIME: number = this.#MINUTE * 2;
+    #MAX_ATTEMPTS: number = 3;
+    #ATTEMPTS_EXPIRED_TIME: number = this.#MINUTE * 10;
 
     constructor() {
         autoBind(this);
@@ -47,14 +47,24 @@ class AuthService {
 
     public async isThereAttempt(user: UserSchemaType) {
         let otp = user?.otp || null;
-        if (new Date(otp?.maxAttemptsExpiresIn).getTime() > this.#now)
-            throw createHttpError.BadRequest(AuthMessage.TryLater);
+        let now: number = new Date().getTime();
+        const isBannedTimeOver = otp.maxAttemptsExpiresIn < now;
+
+        // if before 10 minute send message
+        if (otp.maxAttemptsExpiresIn > now) throw createHttpError.BadRequest(AuthMessage.TryLater);
+        // if after 10 minute tried everything reset
         if (otp?.maxAttempts == 0) {
-            otp.maxAttemptsExpiresIn = this.#ATTEMPTS_EXPIRED_TIME;
+            otp.maxAttempts = this.#MAX_ATTEMPTS;
             return otp;
         }
+
         if (otp?.maxAttempts > 0) {
             otp.maxAttempts--;
+            // if try 3 times more user banned for 10 minutes
+            if (otp.maxAttempts == 0 && isBannedTimeOver) {
+                otp.maxAttemptsExpiresIn = now + this.#ATTEMPTS_EXPIRED_TIME;
+                return otp;
+            }
 
             return otp;
         }
@@ -62,9 +72,11 @@ class AuthService {
     }
 
     public async generateOtp() {
+        let now: number = new Date().getTime();
+
         const otp = {
             code: randomInt(10000, 99999),
-            expiresIn: this.#EXPIRED_TIME, // 2 minutes
+            expiresIn: now + this.#EXPIRED_TIME, // 2 minutes
         };
         return otp;
     }

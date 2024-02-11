@@ -11,7 +11,7 @@ class AuthController {
         this.#service = new AuthService();
     }
 
-    async register(req: Request, res: Response, next: NextFunction) {
+    async sendOtp(req: Request, res: Response, next: NextFunction) {
         try {
             const { mobile, email } = req.body;
             await this.#service.sendOtp(mobile, email);
@@ -24,7 +24,7 @@ class AuthController {
         }
     }
 
-    async login(req: Request, res: Response, next: NextFunction) {
+    async checkOtp(req: Request, res: Response, next: NextFunction) {
         try {
             const { mobile, email } = req.body;
 
