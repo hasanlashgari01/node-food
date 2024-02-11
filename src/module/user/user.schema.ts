@@ -16,6 +16,8 @@ export interface UserSchemaType extends Document {
     role: "ADMIN" | "USER";
     age: number;
     otp: OtpSchemaType;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const OtpSchema = new Schema({

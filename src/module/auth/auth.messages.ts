@@ -9,6 +9,7 @@ interface AuthMessageType {
     OtpCodeUsed: string;
     WrongOtp: string;
     TryLater: string;
+    BanUser: string;
 }
 
 const AuthMessage: AuthMessageType = {
@@ -22,6 +23,7 @@ const AuthMessage: AuthMessageType = {
     OtpCodeUsed: "کد قبلا استفاده شده است",
     WrongOtp: "کد وارد شده اشتباه است",
     TryLater: "لطفا بعدا تلاش کنید",
+    BanUser: "حساب کاربری شما مسدود شده است",
 };
 
 export default AuthMessage;

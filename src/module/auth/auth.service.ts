@@ -1,11 +1,13 @@
 import autoBind from "auto-bind";
 import { randomInt } from "crypto";
 import createHttpError from "http-errors";
+import BanUserModel, { BanUserSchemaType } from "../user/ban.schema";
 import UserModel, { UserSchemaType } from "../user/user.schema";
 import AuthMessage from "./auth.messages";
 
 class AuthService {
     #model;
+    #banModel;
     #MINUTE: number = 1000 * 60;
     #EXPIRED_TIME: number = this.#MINUTE * 2;
     #MAX_ATTEMPTS: number = 3;
@@ -14,6 +16,7 @@ class AuthService {
     constructor() {
         autoBind(this);
         this.#model = UserModel;
+        this.#banModel = BanUserModel;
     }
 
     public async sendOtp(mobile: string, email: string) {
@@ -57,6 +60,9 @@ class AuthService {
 
     public async checkUserExist(mobile: string, email: string) {
         const isUserExist: UserSchemaType | null = await this.#model.findOne({ $or: [{ mobile }, { email }] });
+        const isBanExist: BanUserSchemaType | null = await this.#banModel.findOne({ $or: [{ mobile }, { email }] });
+        if (isBanExist) throw createHttpError.Forbidden(AuthMessage.BanUser);
+
         return isUserExist;
     }
 
