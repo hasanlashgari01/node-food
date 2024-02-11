@@ -3,6 +3,7 @@ import { Document, Schema, model, models } from "mongoose";
 interface OtpSchemaType {
     code: string;
     expiresIn: number;
+    isActive: boolean;
     maxAttempts: number;
     maxAttemptsExpiresIn: number;
 }
@@ -11,7 +12,7 @@ export interface UserSchemaType extends Document {
     fullName: string;
     mobile: string;
     email: string;
-    verifiedMobile: boolean;
+    verifiedAccount: boolean;
     role: "ADMIN" | "USER";
     age: number;
     otp: OtpSchemaType;
@@ -27,6 +28,11 @@ const OtpSchema = new Schema({
         type: Number,
         required: false,
         default: 0,
+    },
+    isActive: {
+        type: Boolean,
+        required: false,
+        default: false,
     },
     maxAttempts: {
         type: Number,

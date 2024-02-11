@@ -16,9 +16,7 @@ class AuthController {
             const { mobile, email } = req.body;
             await this.#service.sendOtp(mobile, email);
 
-            return res.json({
-                message: AuthMessage.SendOtpSuccessfully,
-            });
+            return res.status(201).json({ message: AuthMessage.SendOtpSuccessfully });
         } catch (error) {
             next(error);
         }
@@ -26,13 +24,11 @@ class AuthController {
 
     async checkOtp(req: Request, res: Response, next: NextFunction) {
         try {
-            const { mobile, email } = req.body;
+            const { mobile, email, code } = req.body;
+            await this.#service.checkOtp(mobile, email, code);
 
-            return res.json({
-                message: AuthMessage.SendOtpSuccessfully,
-            });
+            return res.status(201).json({ message: AuthMessage.VerifyOtpSuccessfully });
         } catch (error) {
-            console.log("🚀 ~ AuthController ~ register ~ error:", error);
             next(error);
         }
     }

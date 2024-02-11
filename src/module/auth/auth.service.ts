@@ -18,57 +18,70 @@ class AuthService {
 
     public async sendOtp(mobile: string, email: string) {
         const dbLength = await this.#model.countDocuments();
-        const { isUserExist } = await this.checkUserExist(mobile, email);
-        if (!isUserExist) {
+        const user = await this.checkUserExist(mobile, email);
+        if (!user) {
             const otp = await this.generateOtp();
             const user = await this.#model.create({ mobile, email, otp, role: dbLength ? "USER" : "ADMIN" });
             return user;
         }
-        if (isUserExist?.verifiedAccount) throw createHttpError.Conflict(AuthMessage.UserExist);
-
-        const { maxAttempts, maxAttemptsExpiresIn } = await this.isThereAttempt(isUserExist);
+        // if (user?.verifiedAccount) throw createHttpError.Conflict(AuthMessage.UserExist);
+        await this.isThereAttempt(user, false);
         const { code, expiresIn } = await this.generateOtp();
-        const otp = { code, expiresIn, maxAttempts, maxAttemptsExpiresIn };
-        const user = await this.#model.findOneAndUpdate({ $or: [{ mobile }, { email }] }, { otp }, { new: true });
+        const otp = { code, expiresIn };
+        await this.#model.findOneAndUpdate({ $or: [{ mobile }, { email }] }, { otp }, { new: true });
+
         return user;
     }
 
-    public async checkOtp(mobile: string, email: string) {
-        const { isUserExist } = await this.checkUserExist(mobile, email);
+    public async checkOtp(mobile: string, email: string, code: string) {
+        let now = new Date().getTime();
+        const user = await this.checkUserExist(mobile, email);
+        if (!user) throw createHttpError.NotFound(AuthMessage.NotFound);
+        // if code does not match => attempt - 1 and throw error
+        if (user?.otp?.code !== code) {
+            const otp = await this.isThereAttempt(user, true);
+            await this.#model.findOneAndUpdate({ $or: [{ mobile }, { email }] }, { otp }, { new: true });
+            throw createHttpError.BadRequest(AuthMessage.WrongOtp);
+        }
+        // if code expired throw error
+        if (user?.otp?.expiresIn < now) throw createHttpError.BadRequest(AuthMessage.OtpCodeExpired);
+        // if code matched but used before throw error
+        if (user?.otp?.isActive) throw createHttpError.BadRequest(AuthMessage.OtpCodeUsed);
 
-        if (new Date(`${isUserExist.otp.expiresIn}`).getTime() < Date.now())
-            throw createHttpError.BadRequest(AuthMessage.OtpCodeExpired);
+        user.verifiedAccount = true;
+        user.otp.isActive = true;
+        await user.save();
+
+        return user;
     }
 
     public async checkUserExist(mobile: string, email: string) {
-        const isUserExist = await this.#model.findOne({ $or: [{ mobile }, { email }] });
-        return { isUserExist };
+        const isUserExist: UserSchemaType | null = await this.#model.findOne({ $or: [{ mobile }, { email }] });
+        return isUserExist;
     }
 
-    public async isThereAttempt(user: UserSchemaType) {
+    public async isThereAttempt(user: UserSchemaType, turnOnDecrement: boolean) {
         let otp = user?.otp || null;
         let now: number = new Date().getTime();
-        const isBannedTimeOver = otp.maxAttemptsExpiresIn < now;
 
         // if before 10 minute send message
         if (otp.maxAttemptsExpiresIn > now) throw createHttpError.BadRequest(AuthMessage.TryLater);
         // if after 10 minute tried everything reset
-        if (otp?.maxAttempts == 0) {
+        if (otp?.maxAttempts == 0 && turnOnDecrement) {
             otp.maxAttempts = this.#MAX_ATTEMPTS;
             return otp;
         }
 
-        if (otp?.maxAttempts > 0) {
+        if (otp?.maxAttempts > 0 && turnOnDecrement) {
             otp.maxAttempts--;
             // if try 3 times more user banned for 10 minutes
-            if (otp.maxAttempts == 0 && isBannedTimeOver) {
+            if (otp.maxAttempts == 0 && otp.maxAttemptsExpiresIn < now) {
                 otp.maxAttemptsExpiresIn = now + this.#ATTEMPTS_EXPIRED_TIME;
                 return otp;
             }
 
             return otp;
         }
-        return createHttpError.BadRequest(AuthMessage.WrongOtp);
     }
 
     public async generateOtp() {
