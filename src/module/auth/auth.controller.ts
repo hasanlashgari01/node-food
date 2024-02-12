@@ -25,9 +25,13 @@ class AuthController {
     async checkOtp(req: Request, res: Response, next: NextFunction) {
         try {
             const { mobile, email, code } = req.body;
-            await this.#service.checkOtp(mobile, email, code);
+            const { accessToken, refreshToken } = await this.#service.checkOtp(mobile, email, code);
 
-            return res.status(201).json({ message: AuthMessage.VerifyOtpSuccessfully });
+            return res
+                .cookie("accessToken", accessToken, { httpOnly: true, secure: true })
+                .cookie("refreshToken", refreshToken, { httpOnly: true, secure: true })
+                .status(201)
+                .json({ message: AuthMessage.VerifyOtpSuccessfully });
         } catch (error) {
             next(error);
         }

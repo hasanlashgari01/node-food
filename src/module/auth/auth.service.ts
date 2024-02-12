@@ -1,9 +1,10 @@
 import autoBind from "auto-bind";
 import { randomInt } from "crypto";
 import createHttpError from "http-errors";
-import BanUserModel, { BanUserSchemaType } from "../user/ban.schema";
+import BanUserModel, { BanUserSchemaType } from "../ban/ban.schema";
 import UserModel, { UserSchemaType } from "../user/user.schema";
 import AuthMessage from "./auth.messages";
+import jwt from "jsonwebtoken";
 
 class AuthService {
     #model;
@@ -54,8 +55,11 @@ class AuthService {
         user.verifiedAccount = true;
         user.otp.isActive = true;
         await user.save();
+        const payload = { _id: user?._id, mobile: user.mobile, email: user.email };
+        const accessToken = await this.generateAccessToken(payload);
+        const refreshToken = await this.generateRefreshToken(payload);
 
-        return user;
+        return { accessToken, refreshToken };
     }
 
     public async checkUserExist(mobile: string, email: string) {
@@ -98,6 +102,14 @@ class AuthService {
             expiresIn: now + this.#EXPIRED_TIME, // 2 minutes
         };
         return otp;
+    }
+
+    public async generateAccessToken(payload: object) {
+        return jwt.sign(payload, String(process.env.ACCESS_TOKEN_SECRET_KEY), { expiresIn: "1h" });
+    }
+
+    public async generateRefreshToken(payload: object) {
+        return jwt.sign(payload, String(process.env.REFRESH_TOKEN_SECRET_KEY), { expiresIn: "30d" });
     }
 }
 

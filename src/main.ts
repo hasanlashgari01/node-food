@@ -1,4 +1,4 @@
-import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Application } from "express";
@@ -19,8 +19,9 @@ const main = async () => {
 
     app.use(cors());
     app.use("/foods/covers", express.static(path.join(__dirname, "public", "foods", "covers")));
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(bodyParser.json());
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
     app.use(AppRouter);
 
     SwaggerConfig(app); // use swagger configuration
