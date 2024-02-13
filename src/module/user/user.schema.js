@@ -32,7 +32,7 @@ const UserSchema = new Schema(
     {
         fullName: {
             type: String,
-            required: false,
+            required: true,
         },
         mobile: {
             type: String,
