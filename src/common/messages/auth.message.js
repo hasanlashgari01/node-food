@@ -1,17 +1,10 @@
-interface AuthorizationMessageType {
-    Login: string;
-    LoginAgain: string;
-    Unauthorized: string;
-    NotFoundUser: string;
-    InvalidToken: string;
-}
-
-const AuthorizationMessage: AuthorizationMessageType = Object.freeze({
+const AuthorizationMessage = Object.freeze({
     Login: "وارد حساب کاربری خود شوید",
     LoginAgain: "لطفا دوباره وارد حساب کاربری خود شوید",
     Unauthorized: "شما اجازه دسترسی ندارید ابتدا وارد حساب کاربری خود شوید",
     NotFoundUser: "کاربری یافت نشد",
     InvalidToken: "توکن اشتباه است",
+    ExpiredToken: "توکن منقضی شده است",
 });
 
-export default AuthorizationMessage;
+module.exports = AuthorizationMessage;

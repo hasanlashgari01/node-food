@@ -1,18 +1,18 @@
-import autoBind from "auto-bind";
-import { randomInt } from "crypto";
-import createHttpError from "http-errors";
-import BanUserModel, { BanUserSchemaType } from "../ban/ban.schema";
-import UserModel, { UserSchemaType } from "../user/user.schema";
-import AuthMessage from "./auth.messages";
-import jwt from "jsonwebtoken";
+const autoBind = require("auto-bind");
+const createHttpError = require("http-errors");
+const BanUserModel = require("../ban/ban.schema");
+const UserModel = require("../user/user.schema");
+const AuthMessage = require("./auth.messages");
+const { randomInt } = require("crypto");
+const { generateAccessToken, generateRefreshToken } = require("../../common/utils/auth");
 
 class AuthService {
     #model;
     #banModel;
-    #MINUTE: number = 1000 * 60;
-    #EXPIRED_TIME: number = this.#MINUTE * 2;
-    #MAX_ATTEMPTS: number = 3;
-    #ATTEMPTS_EXPIRED_TIME: number = this.#MINUTE * 10;
+    #MINUTE = 1000 * 60;
+    #EXPIRED_TIME = this.#MINUTE * 2;
+    #MAX_ATTEMPTS = 3;
+    #ATTEMPTS_EXPIRED_TIME = this.#MINUTE * 10;
 
     constructor() {
         autoBind(this);
@@ -20,7 +20,7 @@ class AuthService {
         this.#banModel = BanUserModel;
     }
 
-    public async sendOtp(mobile: string, email: string) {
+    async sendOtp(mobile, email) {
         const dbLength = await this.#model.countDocuments();
         const user = await this.checkUserExist(mobile, email);
         if (!user) {
@@ -37,7 +37,7 @@ class AuthService {
         return user;
     }
 
-    public async checkOtp(mobile: string, email: string, code: string) {
+    async checkOtp(mobile, email, code) {
         let now = new Date().getTime();
         const user = await this.checkUserExist(mobile, email);
         if (!user) throw createHttpError.NotFound(AuthMessage.NotFound);
@@ -56,23 +56,23 @@ class AuthService {
         user.otp.isActive = true;
         await user.save();
         const payload = { _id: user?._id, mobile: user.mobile, email: user.email };
-        const accessToken = await this.generateAccessToken(payload);
-        const refreshToken = await this.generateRefreshToken(payload);
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
 
         return { accessToken, refreshToken };
     }
 
-    public async checkUserExist(mobile: string, email: string) {
-        const isUserExist: UserSchemaType | null = await this.#model.findOne({ $or: [{ mobile }, { email }] });
-        const isBanExist: BanUserSchemaType | null = await this.#banModel.findOne({ $or: [{ mobile }, { email }] });
+    async checkUserExist(mobile, email) {
+        const isUserExist = await this.#model.findOne({ $or: [{ mobile }, { email }] });
+        const isBanExist = await this.#banModel.findOne({ $or: [{ mobile }, { email }] });
         if (isBanExist) throw createHttpError.Forbidden(AuthMessage.BanUser);
 
         return isUserExist;
     }
 
-    public async isThereAttempt(user: UserSchemaType, turnOnDecrement: boolean) {
+    async isThereAttempt(user, turnOnDecrement) {
         let otp = user?.otp || null;
-        let now: number = new Date().getTime();
+        let now = new Date().getTime();
 
         // if before 10 minute send message
         if (otp.maxAttemptsExpiresIn > now) throw createHttpError.BadRequest(AuthMessage.TryLater);
@@ -94,8 +94,8 @@ class AuthService {
         }
     }
 
-    public async generateOtp() {
-        let now: number = new Date().getTime();
+    async generateOtp() {
+        let now = new Date().getTime();
 
         const otp = {
             code: randomInt(10000, 99999),
@@ -103,14 +103,6 @@ class AuthService {
         };
         return otp;
     }
-
-    public async generateAccessToken(payload: object) {
-        return jwt.sign(payload, String(process.env.ACCESS_TOKEN_SECRET_KEY), { expiresIn: "1h" });
-    }
-
-    public async generateRefreshToken(payload: object) {
-        return jwt.sign(payload, String(process.env.REFRESH_TOKEN_SECRET_KEY), { expiresIn: "30d" });
-    }
 }
 
-export default AuthService;
+module.exports = AuthService;

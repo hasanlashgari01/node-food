@@ -1,6 +1,5 @@
-import autoBind from "auto-bind";
-import { NextFunction, Request, Response } from "express";
-import UserService from "./user.service";
+const autoBind = require("auto-bind");
+const UserService = require("./user.service");
 
 class UserController {
     #service;
@@ -10,9 +9,8 @@ class UserController {
         this.#service = new UserService();
     }
 
-    async whoAmI(req: Request, res: Response, next: NextFunction) {
+    async whoAmI(req, res, next) {
         try {
-
             return res.json(req.user);
         } catch (error) {
             next(error);
@@ -20,4 +18,4 @@ class UserController {
     }
 }
 
-export default new UserController();
+module.exports = UserController;

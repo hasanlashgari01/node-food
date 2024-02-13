@@ -1,7 +1,6 @@
-import autoBind from "auto-bind";
-import { NextFunction, Request, Response } from "express";
-import AuthMessage from "./auth.messages";
-import AuthService from "./auth.service";
+const autoBind = require("auto-bind");
+const AuthService = require("./auth.service");
+const AuthMessage = require("./auth.messages");
 
 class AuthController {
     #service;
@@ -11,7 +10,7 @@ class AuthController {
         this.#service = new AuthService();
     }
 
-    async sendOtp(req: Request, res: Response, next: NextFunction) {
+    async sendOtp(req, res, next) {
         try {
             const { mobile, email } = req.body;
             await this.#service.sendOtp(mobile, email);
@@ -22,7 +21,7 @@ class AuthController {
         }
     }
 
-    async checkOtp(req: Request, res: Response, next: NextFunction) {
+    async checkOtp(req, res, next) {
         try {
             const { mobile, email, code } = req.body;
             const { accessToken, refreshToken } = await this.#service.checkOtp(mobile, email, code);
@@ -40,4 +39,4 @@ class AuthController {
     async logout() {}
 }
 
-export default new AuthController();
+module.exports = AuthController;

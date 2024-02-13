@@ -1,24 +1,4 @@
-import { Document, Schema, model, models } from "mongoose";
-
-interface OtpSchemaType {
-    code: string;
-    expiresIn: number;
-    isActive: boolean;
-    maxAttempts: number;
-    maxAttemptsExpiresIn: number;
-}
-
-export interface UserSchemaType extends Document {
-    fullName: string;
-    mobile: string;
-    email: string;
-    verifiedAccount: boolean;
-    role: "ADMIN" | "USER";
-    age: number;
-    otp: OtpSchemaType;
-    createdAt: Date;
-    updatedAt: Date;
-}
+const { Schema, model, models } = require("mongoose");
 
 const OtpSchema = new Schema({
     code: {
@@ -86,6 +66,6 @@ const UserSchema = new Schema(
     { timestamps: true }
 );
 
-const UserModel = models.User<UserSchemaType> || model<UserSchemaType>("User", UserSchema);
+const UserModel = models.User || model("User", UserSchema);
 
-export default UserModel;
+module.exports = UserModel;

@@ -1,18 +1,16 @@
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import dotenv from "dotenv";
-import express, { Application } from "express";
-import path from "path";
-import AppRouter from "./app.routes";
-import ErrorExceptionHandler from "./common/exception/error.exception";
-import NotFoundHandler from "./common/exception/notfound.exception";
-import connectToDB from "./config/mongoose.config";
-import SwaggerConfig from "./config/swagger.config";
-
-dotenv.config();
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const path = require("path");
+const AppRouter = require("./app.routes");
+const connectToDB = require("./config/mongoose.config");
+const SwaggerConfig = require("./config/swagger.config");
+const NotFoundHandler = require("./common/exception/notfound.exception");
+const ErrorExceptionHandler = require("./common/exception/error.exception");
+require('dotenv').config()
 
 const main = async () => {
-    const app: Application = express();
+    const app = express();
     const port = process.env.PORT || 8000;
     // configs
     await connectToDB(); // connect to DataBase

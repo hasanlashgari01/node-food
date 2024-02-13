@@ -1,4 +1,4 @@
-import UserModel from "./user.schema";
+const UserModel = require("./user.schema");
 
 class UserService {
     #model;
@@ -7,4 +7,4 @@ class UserService {
     }
 }
 
-export default UserService;
+module.exports = UserService;

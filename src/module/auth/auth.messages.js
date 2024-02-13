@@ -1,18 +1,4 @@
-interface AuthMessageType {
-    SendOtpSuccessfully: string;
-    VerifyOtpSuccessfully: string;
-    UserExist: string;
-    WrongMobileOrEmail: string;
-    NotFound: string;
-    OtpCodeAlive: string;
-    OtpCodeExpired: string;
-    OtpCodeUsed: string;
-    WrongOtp: string;
-    TryLater: string;
-    BanUser: string;
-}
-
-const AuthMessage: AuthMessageType = {
+const AuthMessage = {
     SendOtpSuccessfully: "کد با موفقیت ارسال شد",
     VerifyOtpSuccessfully: "کد وارد شده صحیح است",
     UserExist: "کاربر با این مشخصات وجود دارد",
@@ -26,4 +12,4 @@ const AuthMessage: AuthMessageType = {
     BanUser: "حساب کاربری شما مسدود شده است",
 };
 
-export default AuthMessage;
+module.exports = AuthMessage;
