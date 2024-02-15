@@ -31,6 +31,15 @@ class CategoryController {
 
     }
 
+    async getCategoryTitle(req,res,next) {
+        try {
+            const categories = await this.#service.getTitles();
+
+            res.json(categories);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = CategoryController;

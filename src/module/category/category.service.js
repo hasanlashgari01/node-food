@@ -33,6 +33,10 @@ class CategoryService {
         return category;
     }
 
+    async getTitles() {
+        return await this.#model.find({ parent: { $exists: true } }).select("title");
+    }
+
     async checkExistById(id) {
         const category = await this.#model.findById(id);
         if (!category) throw createHttpError.NotFound(CategoryMessage.NotExist);

@@ -7,5 +7,6 @@ const controller = new CategoryController();
 
 router.get("/", controller.getAll);
 router.post("/create", validate(createCategoryValidator), controller.create);
+router.get("/categoryTitle", controller.getCategoryTitle);
 
 module.exports = { CategoryRouter: router };
