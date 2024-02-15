@@ -31,9 +31,19 @@ class CategoryController {
 
     }
 
-    async getCategoryTitle(req,res,next) {
+    async getCategoryTitle(req, res, next) {
         try {
             const categories = await this.#service.getTitles();
+
+            res.json(categories);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async searchByTitle(req, res, next) {
+        try {
+            const categories = await this.#service.searchCategoriesByTitle(req.params);
 
             res.json(categories);
         } catch (error) {

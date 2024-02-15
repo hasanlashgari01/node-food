@@ -37,6 +37,11 @@ class CategoryService {
         return await this.#model.find({ parent: { $exists: true } }).select("title");
     }
 
+    async searchCategoriesByTitle({ search }) {
+        const result = new RegExp(search, "ig");
+        return await this.#model.find({ title: result }, {}).select("title slug");
+    }
+
     async checkExistById(id) {
         const category = await this.#model.findById(id);
         if (!category) throw createHttpError.NotFound(CategoryMessage.NotExist);
@@ -62,7 +67,7 @@ class CategoryService {
                 .map(id => new Types.ObjectId(id))
         )];
 
-        return parents
+        return parents;
     }
 }
 

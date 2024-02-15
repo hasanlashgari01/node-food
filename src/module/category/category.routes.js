@@ -8,5 +8,6 @@ const controller = new CategoryController();
 router.get("/", controller.getAll);
 router.post("/create", validate(createCategoryValidator), controller.create);
 router.get("/categoryTitle", controller.getCategoryTitle);
+router.get("/search/:search", controller.searchByTitle)
 
 module.exports = { CategoryRouter: router };
