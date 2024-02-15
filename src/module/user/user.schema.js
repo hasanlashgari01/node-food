@@ -32,17 +32,14 @@ const UserSchema = new Schema(
     {
         fullName: {
             type: String,
-            required: true,
         },
         mobile: {
             type: String,
             unique: true,
-            required: false,
         },
         email: {
             type: String,
             unique: true,
-            required: false,
         },
         password: {
             type: String,
@@ -56,12 +53,10 @@ const UserSchema = new Schema(
         },
         age: {
             type: Number,
-            required: false,
         },
         verifiedAccount: {
             type: Boolean,
             default: false,
-            required: true,
         },
         otp: {
             type: OtpSchema,

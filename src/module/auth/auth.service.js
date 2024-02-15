@@ -20,15 +20,21 @@ class AuthService {
         this.#banModel = BanUserModel;
     }
 
-    async sendOtp(mobile, email) {
+    async sendOtp({ mobile, email, fullName, password }) {
         const dbLength = await this.#model.countDocuments();
         const user = await this.checkUserExist(mobile, email);
         if (!user) {
             const otp = await this.generateOtp();
-            const user = await this.#model.create({ mobile, email, otp, role: dbLength ? "USER" : "ADMIN" });
+            const user = await this.#model.create({
+                mobile,
+                email,
+                fullName,
+                otp,
+                role: dbLength ? "USER" : "ADMIN",
+                password
+            });
             return user;
         }
-        // if (user?.verifiedAccount) throw createHttpError.Conflict(AuthMessage.UserExist);
         await this.isThereAttempt(user, false);
         const { code, expiresIn } = await this.generateOtp();
         const otp = { code, expiresIn };
@@ -37,7 +43,7 @@ class AuthService {
         return user;
     }
 
-    async checkOtp(mobile, email, code) {
+    async checkOtp({ mobile, email, code }) {
         let now = new Date().getTime();
         const user = await this.checkUserExist(mobile, email);
         if (!user) throw createHttpError.NotFound(AuthMessage.NotFound);
@@ -99,7 +105,7 @@ class AuthService {
 
         const otp = {
             code: randomInt(10000, 99999),
-            expiresIn: now + this.#EXPIRED_TIME, // 2 minutes
+            expiresIn: now + this.#EXPIRED_TIME // 2 minutes
         };
         return otp;
     }
