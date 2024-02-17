@@ -19,10 +19,29 @@ class RestaurantService {
         });
     }
 
+    async getOne(id) {
+        return await this.isValidRestaurant(id);
+    }
+
+    async update(id, restaurantDto) {
+        await this.isValidRestaurant(id);
+        if (!Object.keys(restaurantDto).length) throw createHttpError.BadRequest(RestaurentMessage.EditFieldsNotEmpty);
+        const update = await this.#model.updateOne({ _id: id }, restaurantDto);
+        if (update.modifiedCount === 0) throw new createHttpError.BadRequest(RestaurentMessage.EditFailed);
+    }
+
     async delete(id) {
-        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(RestaurentMessage.IdNotValid);
+        await this.isValidRestaurant(id);
         const result = await this.#model.deleteOne({ _id: id });
         if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurentMessage.NotExist);
+    }
+
+    async isValidRestaurant(id) {
+        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(RestaurentMessage.IdNotValid);
+        const restaurant = await this.#model.findById(id);
+        if (!restaurant) throw new createHttpError.NotFound(RestaurentMessage.NotExist);
+        if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurentMessage.NotValidRestaurant);
+        return restaurant;
     }
 }
 

@@ -6,6 +6,6 @@ const { RestaurantValidator } = require("./restaurant.validation");
 const controller = new RestaurantController();
 
 router.route("/").post(validate(RestaurantValidator), controller.create);
-router.route("/:id").delete(controller.delete);
+router.route("/:id").get(controller.getOne).patch(controller.update).delete(controller.delete);
 
 module.exports = { RestaurantRouter: router };

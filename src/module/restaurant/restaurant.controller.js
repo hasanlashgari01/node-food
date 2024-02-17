@@ -13,7 +13,29 @@ class RestaurantController {
     async create(req, res, next) {
         try {
             await this.#service.create(req.body);
-            res.status(201).json({ message: RestaurentMessage.CREATE });
+            res.status(201).json({ message: RestaurentMessage.CreatedSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getOne(req, res, next) {
+        try {
+            const { id } = req.params;
+            const restaurant = await this.#service.getOne(id);
+
+            res.json(restaurant);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async update(req, res, next) {
+        try {
+            const { id } = req.params;
+            await this.#service.update(id, req.body);
+
+            res.json({ message: RestaurentMessage.EditSuccess });
         } catch (error) {
             next(error);
         }
@@ -24,7 +46,7 @@ class RestaurantController {
             const { id } = req.params;
             await this.#service.delete(id);
 
-            res.status(201).json({ message: RestaurentMessage.Delete });
+            res.json({ message: RestaurentMessage.DeleteSuccess });
         } catch (error) {
             next(error);
         }
