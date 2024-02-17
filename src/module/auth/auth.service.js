@@ -23,20 +23,20 @@ class AuthService {
 
     async sendOtp(mobile, email, fullName, password) {
         const user = await this.checkUserExist(mobile, email);
-        if (!!user) {
+        if (!user) {
             const dbLength = await this.#model.countDocuments();
             const otp = await this.generateOtp();
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
-            const user = await this.#model.create({
+            await this.#model.create({
                 mobile,
                 email,
                 fullName,
                 otp,
                 role: dbLength ? "USER" : "ADMIN",
-                password: hashedPassword
+                password: hashedPassword,
             });
-            return  new createHttpError.Created(AuthMessage.SendOtpSuccessfully);
+            throw new createHttpError.Created(AuthMessage.SendOtpSuccessfully);
         }
         await this.isThereAttempt(user, false);
         const { code, expiresIn } = await this.generateOtp();
@@ -72,7 +72,9 @@ class AuthService {
     }
 
     async checkUserExist(mobileParam, emailParam) {
-        const isUserExist = await this.#model.findOne({ $or: [{ mobile: mobileParam }, { email: emailParam ? emailParam : "" }] });
+        const isUserExist = await this.#model.findOne({
+            $or: [{ mobile: mobileParam }, { email: emailParam ? emailParam : "" }],
+        });
         const isBanExist = await this.#banModel.findOne({ $or: [{ mobile: mobileParam }, { email: emailParam }] });
         if (isBanExist) throw createHttpError.Forbidden(AuthMessage.BanUser);
 
@@ -108,7 +110,7 @@ class AuthService {
 
         const otp = {
             code: randomInt(10000, 99999),
-            expiresIn: now + this.#EXPIRED_TIME // 2 minutes
+            expiresIn: now + this.#EXPIRED_TIME, // 2 minutes
         };
         return otp;
     }
