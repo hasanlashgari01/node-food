@@ -2,16 +2,8 @@ const { Schema, model, models } = require("mongoose");
 
 const BanUserSchema = new Schema(
     {
-        mobile: {
-            type: String,
-            unique: true,
-            required: false,
-        },
-        email: {
-            type: String,
-            unique: true,
-            required: false,
-        },
+        mobile: { type: String, unique: true, required: false },
+        email: { type: String, unique: true, required: false },
     },
     { timestamps: true }
 );
