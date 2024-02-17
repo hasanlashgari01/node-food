@@ -10,7 +10,7 @@ const MenuMessage = {
     AlreadyExist: "منو وجود دارد",
     NotExist: "منو وجود ندارد",
     NotFound: "منو یافت نشد",
-    NotAdmin: "فقط مدیریت منو دسترسی دارد",
+    NotAdmin: "فقط مدیریت رستوران دسترسی دارد",
 };
 
 module.exports = MenuMessage;
