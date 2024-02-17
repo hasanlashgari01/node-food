@@ -8,9 +8,6 @@ const controller = new MenuController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
 router.route("/").post(validate(MenuValidator), controller.create);
-router
-    .route("/:id")
-    .patch(validate(MenuUpdateValidator), controller.update)
-    .delete(validate(MenuUpdateValidator), controller.delete);
+router.route("/:id", validate(MenuUpdateValidator)).patch(controller.update).delete(controller.delete);
 
 module.exports = { MenuRouter: router };

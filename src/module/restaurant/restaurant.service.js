@@ -36,7 +36,7 @@ class RestaurantService {
     async getOne(id, userDto) {
         if (id === userDto._id.toString()) throw createHttpError.BadRequest(RestaurentMessage.NotAdmin);
         const restaurant = await this.isValidRestaurant(id);
-        const menu = await this.#menuModel.findOne({ restaurantId: restaurant._id });
+        const menu = await this.#menuModel.find({ restaurantId: restaurant._id });
 
         return { restaurant, menu };
     }
