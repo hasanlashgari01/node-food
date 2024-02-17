@@ -1,6 +1,6 @@
 const autoBind = require("auto-bind");
 const RestaurantService = require("./restaurant.service");
-const RestaurentMessage = require("./restaurant.messages");
+const RestaurantMessage = require("./restaurant.messages");
 
 class RestaurantController {
     #service;
