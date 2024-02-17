@@ -1,5 +1,5 @@
 const autoBind = require("auto-bind");
-const MenuService = require("./menu.service");
+const FoodService = require("./food.service");
 const FoodMessage = require("./food.messages");
 
 class FoodController {
@@ -7,7 +7,7 @@ class FoodController {
 
     constructor() {
         autoBind(this);
-        this.#service = new MenuService();
+        this.#service = new FoodService();
     }
 
     async create(req, res, next) {

@@ -24,8 +24,8 @@ class RestaurantService {
         const genrateSlug = await slugify(slug);
         const isExistSlug = await this.#model.findOne({ slug: genrateSlug });
         if (isExistSlug) throw new createHttpError.BadRequest(MenuMessage.AlreadyExist);
-        const resultCreateRestaurant = await this.#model.create({ title, image, slug: genrateSlug, restaurantId });
-        if (!resultCreateRestaurant) throw new createHttpError.InternalServerError(MenuMessage.CreateFailed);
+        const resultCreateMenu = await this.#model.create({ title, image, slug: genrateSlug, restaurantId });
+        if (!resultCreateMenu) throw new createHttpError.InternalServerError(MenuMessage.CreateFailed);
     }
 
     async update(id, restaurantDto, userDto) {
@@ -63,7 +63,6 @@ class RestaurantService {
 
     async isAdmin(restaurantId, { restaurants }) {
         const isAdmin = restaurants.some((id) => id.toString() === restaurantId.toString());
-        console.log("🚀 ~ RestaurantService ~ isAdmin ~ isAdmin:", isAdmin);
         if (!isAdmin) throw createHttpError.BadRequest(RestaurentMessage.NotAdmin);
         return isAdmin;
     }
