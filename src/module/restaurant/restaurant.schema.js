@@ -25,7 +25,7 @@ const RestaurantSchema = new Schema(
         phone: { type: String, unique: true },
         email: { type: String, unique: true },
         score: { type: String, default: 0 },
-        location: { type: String, required: true },
+        province: { type: String, required: true },
         order: { start: { type: Number }, end: { type: Number } },
         details: {
             average_delivery_time: { type: Number, default: 0 },
