@@ -13,7 +13,7 @@ const RestaurantValidator = Joi.object({
     order_start: Joi.number().required().label("تاریخ شروع کاری معتبرر نیست"),
     order_end: Joi.number().required().label("تاریخ پایان کاری معتبرر نیست"),
     average_delivery_time: Joi.number().required().label("میانگین زمان ارسال معتبر نیست"),
-    types: Joi.array().items(Joi.string()).required().label("نوع دسته بندی معتبر نیست"),
+    category: Joi.array().items(Joi.string()).required().label("نوع دسته بندی معتبر نیست"),
 });
 
 module.exports = { RestaurantValidator };

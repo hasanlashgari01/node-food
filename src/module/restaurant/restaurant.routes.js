@@ -1,10 +1,11 @@
 const router = require("express").Router();
-const RestaurantController = require("./category.controller");
+const RestaurantController = require("./restaurant.controller");
 const validate = require("../../common/middleware/joi.validator");
 const { RestaurantValidator } = require("./restaurant.validation");
 
 const controller = new RestaurantController();
 
-router.post("/create", validate(RestaurantValidator), controller.create);
+router.route("/").post(validate(RestaurantValidator), controller.create);
+router.route("/:id").delete(controller.delete);
 
 module.exports = { RestaurantRouter: router };

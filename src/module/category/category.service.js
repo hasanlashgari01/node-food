@@ -17,7 +17,7 @@ class CategoryService {
 
     async create(categoryDto) {
         if (categoryDto?.parent) {
-            if (!isValidObjectId(categoryDto?.parent)) throw new createHttpError.NotFound(CategoryMessage.IdNotValid);
+            if (!isValidObjectId(categoryDto?.parent)) throw new createHttpError.BadRequest(CategoryMessage.IdNotValid);
             const isExistCategory = await this.checkExistById(categoryDto.parent);
             categoryDto.parent = isExistCategory._id;
             categoryDto.parents = await this.getCategoryParents(isExistCategory);
@@ -34,7 +34,7 @@ class CategoryService {
     }
 
     async editCategory(id, categoryDto) {
-        if (!isValidObjectId(id)) throw new createHttpError.NotFound(CategoryMessage.IdNotValid);
+        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(CategoryMessage.IdNotValid);
         const update = await this.checkExistById(id);
 
         const category = await this.#model.updateOne({_id: id}, categoryDto);
