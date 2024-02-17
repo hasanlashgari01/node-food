@@ -12,7 +12,7 @@ class RestaurantController {
 
     async create(req, res, next) {
         try {
-            await this.#service.create(req.body);
+            await this.#service.create(req.body, req.user);
             res.status(201).json({ message: RestaurentMessage.CreatedSuccess });
         } catch (error) {
             next(error);
@@ -22,9 +22,9 @@ class RestaurantController {
     async getOne(req, res, next) {
         try {
             const { id } = req.params;
-            const restaurant = await this.#service.getOne(id);
+            const { restaurant, menu } = await this.#service.getOne(id);
 
-            res.json(restaurant);
+            res.json({ restaurant, menu });
         } catch (error) {
             next(error);
         }

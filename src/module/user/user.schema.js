@@ -49,6 +49,7 @@ const UserSchema = new Schema(
         email: { type: String, unique: true, lowercase: true, trim: true },
         password: { type: String, required: true },
         role: { type: String, enum: ["ADMIN", "USER", "SELLER"], default: "USER", required: true },
+        restaurants: { type: [ObjectId], ref: "Restaurant" },
         age: { type: Number },
         verifiedAccount: { type: Boolean, default: false },
         otp: { type: OtpSchema },

@@ -1,4 +1,5 @@
 const { Schema, model, models } = require("mongoose");
+const ObjectId = Schema.Types.ObjectId;
 
 const RestaurantSchema = new Schema(
     {
@@ -16,6 +17,7 @@ const RestaurantSchema = new Schema(
         },
         category: { type: [String], default: [] },
         isValid: { type: Boolean, default: false },
+        author: { type: ObjectId, ref: "User", required: true },
     },
     { timestamps: true }
 );

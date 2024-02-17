@@ -1,26 +1,43 @@
 const createHttpError = require("http-errors");
-const RestaurantModel = require("./restaurant.schema");
 const RestaurentMessage = require("./restaurant.messages");
 const { isValidObjectId } = require("mongoose");
+const RestaurantModel = require("./restaurant.schema");
+const MenuModel = require("../menu/menu.schema");
+const UserModel = require("../user/user.schema");
 
 class RestaurantService {
     #model;
+    #menuModel;
+    #userModel;
     constructor() {
         this.#model = RestaurantModel;
+        this.#menuModel = MenuModel;
+        this.#userModel = UserModel;
     }
 
-    async create(restaurantDto) {
+    async create(restaurantDto, userDto) {
         const { order_start, order_end, average_delivery_time } = restaurantDto;
 
-        await this.#model.create({
+        const resultCreateRestaurant = await this.#model.create({
             ...restaurantDto,
             order: { order_start, order_end },
             details: { average_delivery_time },
+            author: userDto._id,
         });
+        if (!resultCreateRestaurant) throw new createHttpError.InternalServerError(RestaurentMessage.CreateFailed);
+        const resultPushRestaurantID = await this.#userModel.updateOne(
+            { _id: userDto._id },
+            { $push: { restaurants: resultCreateRestaurant._id } }
+        );
+        if (resultPushRestaurantID.modifiedCount === 0)
+            throw createHttpError.BadRequest(RestaurentMessage.CreatedFailed);
     }
 
     async getOne(id) {
-        return await this.isValidRestaurant(id);
+        const restaurant = await this.isValidRestaurant(id);
+        const menu = await this.#menuModel.findOne({ restaurant: id });
+        console.log("🚀 ~ RestaurantService ~ getOne ~ menu:", menu);
+        return { restaurant, menu };
     }
 
     async update(id, restaurantDto) {
