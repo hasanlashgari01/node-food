@@ -32,6 +32,10 @@ class MenuController {
 
     async delete(req, res, next) {
         try {
+            const { id } = req.params;
+            await this.#service.delete(id, req.user);
+
+            res.json({ message: MenuMessage.DeleteSuccess });
         } catch (error) {
             next(error);
         }

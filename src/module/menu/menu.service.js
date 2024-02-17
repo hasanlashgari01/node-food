@@ -38,7 +38,13 @@ class RestaurantService {
         if (update.modifiedCount === 0) throw new createHttpError.BadRequest(MenuMessage.EditFailed);
     }
 
-    async delete(id, userDto) {}
+    async delete(id, userDto) {
+        const { restaurantId } = await this.isValidMenu(id);
+        await this.isValidRestaurant(restaurantId);
+        await this.isAdmin(restaurantId, userDto);
+        const result = await this.#model.deleteOne({ _id: id });
+        if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurentMessage.NotExist);
+    }
 
     async isValidRestaurant(id) {
         if (!isValidObjectId(id)) throw new createHttpError.BadRequest(RestaurentMessage.IdNotValid);
@@ -48,8 +54,16 @@ class RestaurantService {
         return restaurant;
     }
 
+    async isValidMenu(id) {
+        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(MenuMessage.IdNotValid);
+        const menu = await this.#model.findById(id);
+        if (!menu) throw new createHttpError.NotFound(MenuMessage.NotExist);
+        return menu;
+    }
+
     async isAdmin(restaurantId, { restaurants }) {
-        const isAdmin = restaurants.some((id) => id.toString() === restaurantId);
+        const isAdmin = restaurants.some((id) => id.toString() === restaurantId.toString());
+        console.log("🚀 ~ RestaurantService ~ isAdmin ~ isAdmin:", isAdmin);
         if (!isAdmin) throw createHttpError.BadRequest(RestaurentMessage.NotAdmin);
         return isAdmin;
     }
