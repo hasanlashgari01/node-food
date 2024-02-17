@@ -22,7 +22,7 @@ class RestaurantController {
     async getOne(req, res, next) {
         try {
             const { id } = req.params;
-            const { restaurant, menu } = await this.#service.getOne(id);
+            const { restaurant, menu } = await this.#service.getOne(id, req.user);
 
             res.json({ restaurant, menu });
         } catch (error) {
@@ -33,7 +33,7 @@ class RestaurantController {
     async update(req, res, next) {
         try {
             const { id } = req.params;
-            await this.#service.update(id, req.body);
+            await this.#service.update(id, req.body, req.user);
 
             res.json({ message: RestaurentMessage.EditSuccess });
         } catch (error) {
@@ -44,7 +44,7 @@ class RestaurantController {
     async delete(req, res, next) {
         try {
             const { id } = req.params;
-            await this.#service.delete(id);
+            await this.#service.delete(id, req.user);
 
             res.json({ message: RestaurentMessage.DeleteSuccess });
         } catch (error) {

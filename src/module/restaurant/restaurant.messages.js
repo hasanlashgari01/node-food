@@ -11,6 +11,7 @@ const RestaurentMessage = {
     NotExist: "رستوران وجود ندارد",
     NotFound: "رستوران یافت نشد",
     NotValidRestaurant: "رستوران توسط ادمین تایید نشده است",
+    NotAdmin: "فقط مدیریت رستوران دسترسی دارد",
 };
 
 module.exports = RestaurentMessage;
