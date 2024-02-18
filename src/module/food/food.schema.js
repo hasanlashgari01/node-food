@@ -10,6 +10,13 @@ const FoodSchema = new Schema({
     kindId: { type: ObjectId, ref: "KindOfFood", required: true },
 });
 
+function autoPopulate(next) {
+    this.populate("kindId", "-__v");
+    next();
+}
+
+FoodSchema.pre("find", autoPopulate).pre("findOne", autoPopulate);
+
 const FoodModel = models.Food || model("Food", FoodSchema);
 
 module.exports = FoodModel;
