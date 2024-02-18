@@ -33,8 +33,7 @@ class RestaurantService {
             throw createHttpError.BadRequest(RestaurentMessage.CreatedFailed);
     }
 
-    async getOne(id, userDto) {
-        if (id === userDto._id.toString()) throw createHttpError.BadRequest(RestaurentMessage.NotAdmin);
+    async getOne(id) {
         const restaurant = await this.isValidRestaurant(id);
         const menu = await this.#menuModel.find({ restaurantId: restaurant._id }, "-__v").populate("foods", "-__v");
 

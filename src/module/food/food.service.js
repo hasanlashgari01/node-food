@@ -23,18 +23,11 @@ class FoodService {
         this.#userModel = UserModel;
     }
 
-    async create(foodDto, userDto) {
-        const { title, image, description, menuId, kind } = foodDto;
+    async create(foodDto, userDto, fileDto) {
+        const { title, description, menuId } = foodDto;
         const menu = await this.isValidMenu(menuId);
         await this.isAdmin(menu, userDto);
-        const resultKindOfFood = await this.#kindOfFoodModel.create({ foods: kind });
-        const resultCreateFood = await this.#model.create({
-            title,
-            image,
-            description,
-            menuId,
-            kindId: resultKindOfFood._id,
-        });
+        const resultCreateFood = await this.#model.create({ title, image: fileDto.filename, description, menuId });
         if (!resultCreateFood) throw new createHttpError.InternalServerError(FoodMessage.CreateFailed);
         const resultPushMenuID = await this.#menuModel.updateOne(
             { _id: menuId },
@@ -65,6 +58,14 @@ class FoodService {
             { $pull: { foods: { _id: id } } }
         );
         if (resultPopKindOfFoodID.modifiedCount === 0) throw createHttpError.BadRequest(MenuMessage.DeleteFailed);
+    }
+
+    async deleteKindMany(id, kindsId, userDto) {
+        const resultPopKindOfFoodID = await this.#kindOfFoodModel.updateMany(
+            { _id: id },
+            { $pull: { foods: { _id: kindsId } } }
+        );
+        if (resultPopKindOfFoodID.modifiedCount === 0) throw createHttpError.BadRequest(FoodMessage.NotExist);
     }
 
     async isValidRestaurant(id) {

@@ -12,7 +12,7 @@ class FoodController {
 
     async create(req, res, next) {
         try {
-            await this.#service.create(req.body, req.user);
+            await this.#service.create(req.body, req.user, req.file);
             res.status(201).json({ message: FoodMessage.CreatedSuccess });
         } catch (error) {
             next(error);
@@ -45,6 +45,18 @@ class FoodController {
         try {
             const { id } = req.params;
             await this.#service.deleteKind(id, req.user);
+
+            res.json({ message: FoodMessage.DeleteSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteKindMany(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { kindsId } = req.body;
+            await this.#service.deleteKindMany(id, kindsId, req.user);
 
             res.json({ message: FoodMessage.DeleteSuccess });
         } catch (error) {

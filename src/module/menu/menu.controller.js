@@ -12,7 +12,7 @@ class MenuController {
 
     async create(req, res, next) {
         try {
-            await this.#service.create(req.body, req.user);
+            await this.#service.create(req.body, req.user, req.file);
             res.status(201).json({ message: MenuMessage.CreatedSuccess });
         } catch (error) {
             next(error);

@@ -7,7 +7,7 @@ const connectToDB = require("./config/mongoose.config");
 const SwaggerConfig = require("./config/swagger.config");
 const NotFoundHandler = require("./common/exception/notfound.exception");
 const ErrorExceptionHandler = require("./common/exception/error.exception");
-require('dotenv').config()
+require("dotenv").config();
 
 const main = async () => {
     const app = express();
@@ -16,7 +16,7 @@ const main = async () => {
     await connectToDB(); // connect to DataBase
 
     app.use(cors());
-    app.use("/foods/covers", express.static(path.join(__dirname, "public", "foods", "covers")));
+    app.get("/public/uploads", express.static(path.join(__dirname, "public", "uploads")));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser(process.env.COOKIE_SECRET_KEY));

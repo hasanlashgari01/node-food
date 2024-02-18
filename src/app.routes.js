@@ -6,14 +6,15 @@ const { CategoryRouter } = require("./module/category/category.routes");
 const { RestaurantRouter } = require("./module/restaurant/restaurant.routes");
 const { MenuRouter } = require("./module/menu/menu.routes");
 const { FoodRouter } = require("./module/food/food.routes");
+const { FilesRouter } = require("./module/files/files.routes");
 
+router.use("/files", FilesRouter);
 router.use("/auth", AuthRouter);
 router.use("/category", CategoryRouter);
 
-router.use(AccessTokenGuard, RefreshTokenGuard);
-router.use("/user", UserRouter);
-router.use("/restaurant", RestaurantRouter);
-router.use("/menu", MenuRouter);
-router.use("/food", FoodRouter);
+router.use("/api/user", UserRouter);
+router.use("/api/restaurant", RestaurantRouter);
+router.use("/api/menu", MenuRouter);
+router.use("/api/food", FoodRouter);
 
 module.exports = router;

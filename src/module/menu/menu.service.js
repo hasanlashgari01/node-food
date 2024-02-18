@@ -17,14 +17,19 @@ class RestaurantService {
         this.#userModel = UserModel;
     }
 
-    async create(restaurantDto, userDto) {
-        const { title, image, slug, restaurantId } = restaurantDto;
+    async create(restaurantDto, userDto, fileDto) {
+        const { title, slug, restaurantId } = restaurantDto;
         await this.isValidRestaurant(restaurantId);
         await this.isAdmin(restaurantId, userDto);
         const genrateSlug = await slugify(slug);
         const isExistSlug = await this.#model.findOne({ slug: genrateSlug });
         if (isExistSlug) throw new createHttpError.BadRequest(MenuMessage.AlreadyExist);
-        const resultCreateMenu = await this.#model.create({ title, image, slug: genrateSlug, restaurantId });
+        const resultCreateMenu = await this.#model.create({
+            title,
+            image: fileDto.filename,
+            slug: genrateSlug,
+            restaurantId,
+        });
         if (!resultCreateMenu) throw new createHttpError.InternalServerError(MenuMessage.CreateFailed);
     }
 
