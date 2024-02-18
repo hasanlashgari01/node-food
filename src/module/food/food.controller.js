@@ -40,6 +40,17 @@ class FoodController {
             next(error);
         }
     }
+
+    async deleteKind(req, res, next) {
+        try {
+            const { id } = req.params;
+            await this.#service.deleteKind(id, req.user);
+
+            res.json({ message: FoodMessage.DeleteSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = FoodController;
