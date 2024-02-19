@@ -20,12 +20,11 @@ class AdminController {
         }
     }
 
-    async getRestaurant(req, res, next) {
+    async getAllRestaurantBanned(req, res, next) {
         try {
-            const { id } = req.params;
-            const restaurant = await this.#service.getRestaurant(id);
+            const { restaurantBannedCount, restaurantsBanned } = await this.#service.allRestaurantBanned();
 
-            res.json(restaurant);
+            res.json({ count: restaurantBannedCount, restaurantsBanned });
         } catch (error) {
             next(error);
         }
@@ -37,6 +36,28 @@ class AdminController {
             const { isValid } = await this.#service.AcceptOrRejectRestaurant(id);
 
             res.json({ message: isValid ? AdminMessage.RestaurantRejectSuccess : AdminMessage.RestaurantAcceptSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async banRestaurant(req, res, next) {
+        try {
+            const { id } = req.params;
+            await this.#service.banRestaurant(id);
+
+            res.json({ message: AdminMessage.RestaurantBanSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getRestaurant(req, res, next) {
+        try {
+            const { id } = req.params;
+            const restaurant = await this.#service.getRestaurant(id);
+
+            res.json(restaurant);
         } catch (error) {
             next(error);
         }

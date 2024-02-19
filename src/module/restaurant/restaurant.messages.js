@@ -1,4 +1,4 @@
-const RestaurentMessage = {
+const RestaurantMessage = {
     CreatedSuccess: "رستوران با موفقیت ساخته شد",
     CreatedFailed: "ساختن رستوران با مشکل مواجه شد",
     EditSuccess: "رستوران با موفقیت ویرایش شد",
@@ -12,6 +12,7 @@ const RestaurentMessage = {
     NotFound: "رستوران یافت نشد",
     NotValidRestaurant: "رستوران توسط ادمین تایید نشده است",
     NotAdmin: "فقط مدیریت رستوران دسترسی دارد",
+    RestaurantBanned: "این رستوران بن شده است",
 };
 
-module.exports = RestaurentMessage;
+module.exports = RestaurantMessage;
