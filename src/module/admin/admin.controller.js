@@ -80,6 +80,20 @@ class AdminController {
             next(error);
         }
     }
+
+    // Menu
+    async createMenu(req, res, next) {
+        try {
+            const { title, slug } = req.body;
+            await this.#service.checkAlreadyMenuSuggestion(title, slug, req.file);
+            await this.#service.createMenuSuggestion(req.body, req.file);
+
+            res.json({message: AdminMessage.MenuSuggestionCreateSuccess})
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }
 
 module.exports = AdminController;

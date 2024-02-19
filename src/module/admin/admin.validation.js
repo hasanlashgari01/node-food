@@ -1,0 +1,10 @@
+const Joi = require("joi");
+
+const MenuValidator = Joi.object({
+    title: Joi.string().min(3).max(255).required().label("عنوان معتبر نیست"),
+    image: Joi.string().label("عکس معتبر نیست"),
+    slug: Joi.string().min(3).max(255).required().label("آدرس معتبر نیست"),
+    // restaurantId: Joi.string().required().label("شناسه رستوران معتبر نیست")
+});
+
+module.exports = { MenuValidator };

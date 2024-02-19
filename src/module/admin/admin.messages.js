@@ -9,6 +9,11 @@ const AdminMessage = {
     RestaurantRemoveBanSuccess: "رستوران با موفقیت از لیست بن حذف شد",
     RestaurantRemoveBanFailed: "حذف شدن رستوران از لیست بن با مشکل مواجه شد",
     RestaurantIsNotBanned: "این رستوران بن نشده است",
+    MenuSuggestionCreateSuccess: "منو پیشنهادی با موفقیت ساخته شد",
+    MenuSuggestionCreateFailed: "ساخت منو پیشنهادی با مشکل مواجه شد",
+    MenuSuggestionAlreadyExist: "منو پیشنهادی وجود دارد",
+    MenuSuggestionTitleAlreadyExist: "عنوان منو پیشنهادی وجود دارد",
+    MenuSuggestionSlugAlreadyExist: "آدرس منو پیشنهادی وجود دارد",
     DeleteFailed: "عملیات با مشکل مواجه شد"
 };
 
