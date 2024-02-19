@@ -12,7 +12,11 @@ class MenuController {
 
     async create(req, res, next) {
         try {
-            await this.#service.create(req.body, req.user, req.file);
+            const { restaurantId } = req.body;
+            const userDto = req.user;
+            await this.#service.isValidRestaurant(restaurantId);
+            await this.#service.isRestaurantAdmin(restaurantId, userDto);
+            await this.#service.create(req.body, userDto, req.file);
             res.status(201).json({ message: MenuMessage.CreatedSuccess });
         } catch (error) {
             next(error);
@@ -22,7 +26,12 @@ class MenuController {
     async update(req, res, next) {
         try {
             const { id } = req.params;
-            await this.#service.update(id, req.body, req.user);
+            const { restaurantId } = req.body;
+            const userDto = req.user;
+            await this.#service.checkIsBanRestaurant(restaurantId)
+            await this.#service.isValidRestaurant(restaurantId);
+            await this.#service.isRestaurantAdmin(restaurantId, userDto);
+            await this.#service.update(id, req.body);
 
             res.json({ message: MenuMessage.EditSuccess });
         } catch (error) {
@@ -33,6 +42,10 @@ class MenuController {
     async delete(req, res, next) {
         try {
             const { id } = req.params;
+            const { restaurantId } = await this.#service.isValidMenu(id);
+            await this.#service.checkIsBanRestaurant(restaurantId)
+            await this.#service.isValidRestaurant(restaurantId);
+            await this.#service.isRestaurantAdmin(restaurantId, req.user);
             await this.#service.delete(id, req.user);
 
             res.json({ message: MenuMessage.DeleteSuccess });
