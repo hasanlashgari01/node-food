@@ -33,36 +33,22 @@ class AdminService {
         return { restaurantBannedCount, restaurantsBanned };
     }
 
+    async acceptOrRejectRestaurant(id, isValid) {
+        const updateResult = await this.#restaurantModel.updateOne({ _id: id }, { isValid: !isValid });
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(isValid ? AdminMessage.RestaurantRejectFailed : AdminMessage.RestaurantRejectSuccess);
+    }
+
     async banRestaurant(id) {
-        const { isValid } = await this.checkIsValidRestaurant(id);
-        await this.checkIsBanRestaurant(id);
         const banResult = await this.#banRestaurantModel.create({ restaurantId: id });
         if (!banResult) throw createHttpError.BadRequest(AdminMessage.RestaurantBanFailed);
-
-        return { isValid };
     }
 
     async removeRestaurantBan(id) {
-        const { isValid } = await this.checkIsValidRestaurant(id);
-        await this.checkIsNotBanRestaurant(id);
         const banResult = await this.#banRestaurantModel.deleteOne({ restaurantId: id });
-        console.log(banResult);
         if (!banResult) throw createHttpError.BadRequest(AdminMessage.RestaurantRemoveBanFailed);
-
-        return { isValid };
-    }
-
-    async AcceptOrRejectRestaurant(id) {
-        const { isValid } = await this.checkIsValidRestaurant(id);
-        await this.checkIsBanRestaurant(id);
-        const updateResult = await this.#restaurantModel.updateOne({ _id: id }, { isValid: !isValid });
-        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(isValid ? AdminMessage.RestaurantRejectFailed : AdminMessage.RestaurantRejectSuccess);
-
-        return { isValid };
     }
 
     async getRestaurant(id) {
-        const restaurant = await this.checkIsValidRestaurant(id);
         await this.checkIsBanRestaurant(id);
 
         return restaurant;

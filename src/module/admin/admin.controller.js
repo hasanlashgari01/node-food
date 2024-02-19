@@ -33,7 +33,9 @@ class AdminController {
     async changeRestaurantValid(req, res, next) {
         try {
             const { id } = req.params;
-            const { isValid } = await this.#service.AcceptOrRejectRestaurant(id);
+            const { isValid } = await this.#service.checkIsValidRestaurant(id);
+            await this.#service.checkIsBanRestaurant(id);
+            await this.#service.acceptOrRejectRestaurant(id, isValid);
 
             res.json({ message: isValid ? AdminMessage.RestaurantRejectSuccess : AdminMessage.RestaurantAcceptSuccess });
         } catch (error) {
@@ -44,6 +46,8 @@ class AdminController {
     async banRestaurant(req, res, next) {
         try {
             const { id } = req.params;
+            await this.#service.checkIsValidRestaurant(id);
+            await this.#service.checkIsBanRestaurant(id);
             await this.#service.banRestaurant(id);
 
             res.json({ message: AdminMessage.RestaurantBanSuccess });
@@ -55,6 +59,8 @@ class AdminController {
     async removeRestaurantBan(req, res, next) {
         try {
             const { id } = req.params;
+            await this.#service.checkIsValidRestaurant(id);
+            await this.#service.checkIsNotBanRestaurant(id);
             await this.#service.removeRestaurantBan(id);
 
             res.json({ message: AdminMessage.RestaurantRemoveBanSuccess });
@@ -66,6 +72,7 @@ class AdminController {
     async getRestaurant(req, res, next) {
         try {
             const { id } = req.params;
+            await this.#service.checkIsValidRestaurant(id);
             const restaurant = await this.#service.getRestaurant(id);
 
             res.json(restaurant);
