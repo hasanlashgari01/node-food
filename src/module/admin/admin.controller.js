@@ -52,6 +52,17 @@ class AdminController {
         }
     }
 
+    async removeRestaurantBan(req, res, next) {
+        try {
+            const { id } = req.params;
+            await this.#service.removeRestaurantBan(id);
+
+            res.json({ message: AdminMessage.RestaurantRemoveBanSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getRestaurant(req, res, next) {
         try {
             const { id } = req.params;

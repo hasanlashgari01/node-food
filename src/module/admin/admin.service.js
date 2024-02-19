@@ -42,6 +42,16 @@ class AdminService {
         return { isValid };
     }
 
+    async removeRestaurantBan(id) {
+        const { isValid } = await this.checkIsValidRestaurant(id);
+        await this.checkIsNotBanRestaurant(id);
+        const banResult = await this.#banRestaurantModel.deleteOne({ restaurantId: id });
+        console.log(banResult);
+        if (!banResult) throw createHttpError.BadRequest(AdminMessage.RestaurantRemoveBanFailed);
+
+        return { isValid };
+    }
+
     async AcceptOrRejectRestaurant(id) {
         const { isValid } = await this.checkIsValidRestaurant(id);
         await this.checkIsBanRestaurant(id);
@@ -69,6 +79,11 @@ class AdminService {
     async checkIsBanRestaurant(id) {
         const isBanRestauRent = await this.#banRestaurantModel.findOne({ restaurantId: id });
         if (isBanRestauRent) throw new createHttpError.NotFound(RestaurentMessage.RestaurantBanned);
+    }
+
+    async checkIsNotBanRestaurant(id) {
+        const isBanRestauRent = await this.#banRestaurantModel.findOne({ restaurantId: id });
+        if (!isBanRestauRent) throw new createHttpError.NotFound(AdminMessage.RestaurantIsNotBanned);
     }
 }
 

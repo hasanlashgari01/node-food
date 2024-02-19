@@ -9,7 +9,7 @@ router.use(AccessTokenGuard, RefreshTokenGuard, isAdminGuard);
 router.route("/restaurant").get(controller.getAllRestaurant);
 router.route("/restaurant/banned").get(controller.getAllRestaurantBanned);
 router.route("/restaurant/:id/status").get(controller.changeRestaurantValid);
-router.route("/restaurant/:id/ban").get(controller.banRestaurant);
+router.route("/restaurant/:id/ban").get(controller.banRestaurant).delete(controller.removeRestaurantBan);
 router.route("/restaurant/:id").get(controller.getRestaurant);
 
 module.exports = { AdminRouter: router };
