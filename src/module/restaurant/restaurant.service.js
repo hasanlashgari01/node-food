@@ -1,5 +1,5 @@
 const createHttpError = require("http-errors");
-const RestaurentMessage = require("./restaurant.messages");
+const RestaurantMessage = require("./restaurant.messages");
 const { isValidObjectId } = require("mongoose");
 const RestaurantModel = require("./restaurant.schema");
 const MenuModel = require("../menu/menu.schema");
@@ -24,13 +24,13 @@ class RestaurantService {
             details: { average_delivery_time },
             author: userDto._id,
         });
-        if (!resultCreateRestaurant) throw new createHttpError.InternalServerError(RestaurentMessage.CreateFailed);
+        if (!resultCreateRestaurant) throw new createHttpError.InternalServerError(RestaurantMessage.CreateFailed);
         const resultPushRestaurantID = await this.#userModel.updateOne(
             { _id: userDto._id },
             { $push: { restaurants: resultCreateRestaurant._id } }
         );
         if (resultPushRestaurantID.modifiedCount === 0)
-            throw createHttpError.BadRequest(RestaurentMessage.CreatedFailed);
+            throw createHttpError.BadRequest(RestaurantMessage.CreatedFailed);
     }
 
     async getOne(id) {
@@ -41,25 +41,25 @@ class RestaurantService {
     }
 
     async update(id, restaurantDto, userDto) {
-        if (id === userDto._id.toString()) throw createHttpError.BadRequest(RestaurentMessage.NotAdmin);
+        if (id === userDto._id.toString()) throw createHttpError.BadRequest(RestaurantMessage.NotAdmin);
         await this.isValidRestaurant(id);
-        if (!Object.keys(restaurantDto).length) throw createHttpError.BadRequest(RestaurentMessage.EditFieldsNotEmpty);
+        if (!Object.keys(restaurantDto).length) throw createHttpError.BadRequest(RestaurantMessage.EditFieldsNotEmpty);
         const update = await this.#model.updateOne({ _id: id }, restaurantDto);
-        if (update.modifiedCount === 0) throw new createHttpError.BadRequest(RestaurentMessage.EditFailed);
+        if (update.modifiedCount === 0) throw new createHttpError.BadRequest(RestaurantMessage.EditFailed);
     }
 
     async delete(id, userDto) {
-        if (id === userDto._id.toString()) throw createHttpError.BadRequest(RestaurentMessage.NotAdmin);
+        if (id === userDto._id.toString()) throw createHttpError.BadRequest(RestaurantMessage.NotAdmin);
         await this.isValidRestaurant(id);
         const result = await this.#model.deleteOne({ _id: id });
-        if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurentMessage.NotExist);
+        if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurantMessage.NotExist);
     }
 
     async isValidRestaurant(id) {
-        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(RestaurentMessage.IdNotValid);
+        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(RestaurantMessage.IdNotValid);
         const restaurant = await this.#model.findById(id).populate("author", "-otp");
-        if (!restaurant) throw new createHttpError.NotFound(RestaurentMessage.NotExist);
-        if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurentMessage.NotValidRestaurant);
+        if (!restaurant) throw new createHttpError.NotFound(RestaurantMessage.NotExist);
+        if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurantMessage.NotValidRestaurant);
         return restaurant;
     }
 }
