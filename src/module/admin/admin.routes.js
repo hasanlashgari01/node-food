@@ -6,6 +6,7 @@ const { isAdminGuard } = require("../../common/guard/admin.guard");
 const controller = new AdminController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard, isAdminGuard);
-router.route("/dashboard").get(controller.test);
+router.route("/restaurant").get(controller.getAllRestaurant);
+router.route("/restaurant/:id").get(controller.getRestaurant);
 
 module.exports = { AdminRouter: router };

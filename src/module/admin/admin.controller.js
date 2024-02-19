@@ -10,9 +10,22 @@ class AdminController {
         this.#service = new AdminService();
     }
 
-    async test(req, res, next) {
+    async getAllRestaurant(req, res, next) {
         try {
-            res.json({ message: "ok" });
+            const { restaurantCount, restaurants } = await this.#service.allRestaurant();
+
+            res.json({ count: restaurantCount, restaurants });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getRestaurant(req, res, next) {
+        try {
+            const { id } = req.params;
+            const restaurant = await this.#service.getRestaurant(id);
+
+            res.json(restaurant);
         } catch (error) {
             next(error);
         }
