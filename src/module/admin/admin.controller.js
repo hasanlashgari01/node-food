@@ -30,6 +30,17 @@ class AdminController {
             next(error);
         }
     }
+
+    async changeRestaurantValid(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { isValid } = await this.#service.AcceptOrRejectRestaurant(id);
+
+            res.json({ message: isValid ? AdminMessage.RestaurantRejectSuccess : AdminMessage.RestaurantAcceptSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = AdminController;

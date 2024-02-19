@@ -20,7 +20,7 @@ class AdminService {
         const restaurantCount = await this.#restaurantModel.find().count();
         const restaurants = await this.#restaurantModel.find().lean();
 
-        return { restaurantCount,restaurants };
+        return { restaurantCount, restaurants };
     }
 
     async getRestaurant(id) {
@@ -29,11 +29,18 @@ class AdminService {
         return restaurant;
     }
 
+    async AcceptOrRejectRestaurant(id) {
+        const { isValid } = await this.isValidRestaurant(id);
+        const updateResult = await this.#restaurantModel.updateOne({ _id: id }, { isValid: !isValid });
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(isValid ? AdminMessage.RestaurantRejectFailed : AdminMessage.RestaurantRejectSuccess);
+
+        return { isValid };
+    }
+
     async isValidRestaurant(id) {
         if (!isValidObjectId(id)) throw new createHttpError.BadRequest(RestaurentMessage.IdNotValid);
         const restaurant = await this.#restaurantModel.findById(id).populate("author", "-otp");
         if (!restaurant) throw new createHttpError.NotFound(RestaurentMessage.NotExist);
-        if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurentMessage.NotValidRestaurant);
         return restaurant;
     }
 }
