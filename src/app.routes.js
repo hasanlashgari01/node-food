@@ -7,11 +7,13 @@ const { MenuRouter } = require("./module/menu/menu.routes");
 const { FoodRouter } = require("./module/food/food.routes");
 const { FilesRouter } = require("./module/files/files.routes");
 const { AdminRouter } = require("./module/admin/admin.routes");
+const { SearchRouter } = require("./module/search/search.routes");
 
 router.use("/files", FilesRouter);
 router.use("/auth", AuthRouter);
 router.use("/admin", AdminRouter);
 router.use("/category", CategoryRouter);
+router.use("/search", SearchRouter);
 
 router.use("/api/user", UserRouter);
 router.use("/api/restaurant", RestaurantRouter);
