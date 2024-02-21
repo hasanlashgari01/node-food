@@ -2,6 +2,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
+const morgan = require("morgan");
 const AppRouter = require("./app.routes");
 const connectToDB = require("./config/mongoose.config");
 const SwaggerConfig = require("./config/swagger.config");
@@ -16,7 +17,8 @@ const main = async () => {
     await connectToDB(); // connect to DataBase
 
     app.use(cors());
-    app.get("/public/uploads", express.static(path.join(__dirname, "public", "uploads")));
+    app.use("/public/uploads", express.static(path.join(__dirname, "public", "uploads")));
+    app.use(morgan("dev"));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
