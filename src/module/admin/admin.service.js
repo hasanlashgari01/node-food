@@ -2,27 +2,26 @@ const autoBind = require("auto-bind");
 const { isValidObjectId } = require("mongoose");
 const slugify = require("slugify");
 const createHttpError = require("http-errors");
+const fs = require("fs");
 const UserModel = require("../user/user.schema");
 const AdminMessage = require("./admin.messages");
 const RestaurantModel = require("./../restaurant/restaurant.schema");
 const BanRestaurantModel = require("./../ban-restautant/ban-restautant.schema");
 const RestaurentMessage = require("../restaurant/restaurant.messages");
-const MenuSuggestionModel = require("../menu/menu-suggestion.schema");
-const fs = require("fs");
-const removeFile = require("../../common/utils/file");
+const SuggestionMenuModel = require("../menu/menu-suggestion.schema");
 
 class AdminService {
     #model;
     #restaurantModel;
     #banRestaurantModel;
-    #menuSuggestionModel;
+    #suggestionMenuModel;
 
     constructor() {
         autoBind(this);
         this.#model = UserModel;
         this.#restaurantModel = RestaurantModel;
         this.#banRestaurantModel = BanRestaurantModel;
-        this.#menuSuggestionModel = MenuSuggestionModel;
+        this.#suggestionMenuModel = SuggestionMenuModel;
     }
 
     async allRestaurant() {
@@ -79,24 +78,47 @@ class AdminService {
     }
 
     // Menu
-    async createMenuSuggestion(menuDto, fileDto) {
+    async createSuggestionMenu(menuDto, fileDto) {
         const { title, slug } = menuDto;
         const genrateSlug = await slugify(slug);
-        const result = await this.#menuSuggestionModel.create({ title, image: fileDto.filename, slug: genrateSlug });
-        if (!result) throw createHttpError.Bad_Request(AdminMessage.MenuSuggestionCreateFailed);
+        const result = await this.#suggestionMenuModel.create({ title, image: fileDto.filename, slug: genrateSlug });
+        if (!result) throw createHttpError.Bad_Request(AdminMessage.SuggestionMenuCreateFailed);
     }
 
-    async checkAlreadyMenuSuggestion(title, slug, fileDto) {
-        const isTitle = await this.#menuSuggestionModel.findOne({ title }).lean();
+    async editSuggestionMenu(id, menuDto, fileDto) {
+        const { title, slug } = menuDto;
+        const result = await this.#suggestionMenuModel.updateOne({ _id: id }, { title, image: fileDto.filename, slug });
+        if (!result.modifiedCount) throw createHttpError.Bad_Request(AdminMessage.SuggestionMenuEditFailed);
+    }
+
+    async removeSuggestionMenu(id) {
+        const result = await this.#suggestionMenuModel.deleteOne({ _id: id });
+        if (!result.deletedCount) throw createHttpError.Bad_Request(AdminMessage.SuggestionMenuRemoveFailed);
+    }
+
+    async allSuggestionMenu() {
+        const result = await this.#suggestionMenuModel.find().lean();
+
+        return result;
+    }
+
+    async checkAlreadySuggestionMenu(title, slug, fileDto) {
+        const isTitle = await this.#suggestionMenuModel.findOne({ title }).lean();
         if (isTitle) {
             fs.unlinkSync(`public/uploads/menu/${fileDto.filename}`);
-            throw new createHttpError.Conflict(AdminMessage.MenuSuggestionTitleAlreadyExist);
+            throw new createHttpError.Conflict(AdminMessage.SuggestionMenuTitleAlreadyExist);
         }
-        const isSlug = await this.#menuSuggestionModel.findOne({ slug }).lean();
+        const isSlug = await this.#suggestionMenuModel.findOne({ slug }).lean();
         if (isSlug) {
             fs.unlinkSync(`public/uploads/menu/${fileDto.filename}`);
-            throw new createHttpError.Conflict(AdminMessage.MenuSuggestionSlugAlreadyExist);
+            throw new createHttpError.Conflict(AdminMessage.SuggestionMenuSlugAlreadyExist);
         }
+    }
+
+    async checkIsValidSuggestionMenu(id) {
+        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(AdminMessage.IdNotValid);
+        const menu = await this.#suggestionMenuModel.findById(id);
+        if (!menu) throw new createHttpError.NotFound(AdminMessage.SuggestionMenuNotExist);
     }
 
 }

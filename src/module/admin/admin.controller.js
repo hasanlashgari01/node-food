@@ -82,13 +82,49 @@ class AdminController {
     }
 
     // Menu
-    async createMenu(req, res, next) {
+    async createSuggestionMenu(req, res, next) {
         try {
             const { title, slug } = req.body;
-            await this.#service.checkAlreadyMenuSuggestion(title, slug, req.file);
-            await this.#service.createMenuSuggestion(req.body, req.file);
+            await this.#service.checkAlreadySuggestionMenu(title, slug, req.file);
+            await this.#service.createSuggestionMenu(req.body, req.file);
 
-            res.json({message: AdminMessage.MenuSuggestionCreateSuccess})
+            res.status(201).json({ message: AdminMessage.SuggestionMenuCreateSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async editSuggestionMenu(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { title, slug } = req.body;
+            await this.#service.checkIsValidSuggestionMenu(id);
+            await this.#service.checkAlreadySuggestionMenu(title, slug, req.file);
+            await this.#service.editSuggestionMenu(id, req.body, req.file);
+
+            res.json({ message: AdminMessage.SuggestionMenuEditSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeSuggestionMenu(req, res, next) {
+        try {
+            const { id } = req.params;
+            await this.#service.checkIsValidSuggestionMenu(id);
+            await this.#service.removeSuggestionMenu(id);
+
+            res.json({ message: AdminMessage.SuggestionMenuRemoveSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getAllSuggestionMenu(req, res, next) {
+        try {
+            const { suggestionMenuCount, suggestionMenus } = await this.#service.allSuggestionMenu();
+
+            res.json({ count: suggestionMenuCount, suggestionMenus });
         } catch (error) {
             next(error);
         }

@@ -9,11 +9,17 @@ const AdminMessage = {
     RestaurantRemoveBanSuccess: "رستوران با موفقیت از لیست بن حذف شد",
     RestaurantRemoveBanFailed: "حذف شدن رستوران از لیست بن با مشکل مواجه شد",
     RestaurantIsNotBanned: "این رستوران بن نشده است",
-    MenuSuggestionCreateSuccess: "منو پیشنهادی با موفقیت ساخته شد",
-    MenuSuggestionCreateFailed: "ساخت منو پیشنهادی با مشکل مواجه شد",
-    MenuSuggestionAlreadyExist: "منو پیشنهادی وجود دارد",
-    MenuSuggestionTitleAlreadyExist: "عنوان منو پیشنهادی وجود دارد",
-    MenuSuggestionSlugAlreadyExist: "آدرس منو پیشنهادی وجود دارد",
+    SuggestionMenuCreateSuccess: "منو پیشنهادی با موفقیت ساخته شد",
+    SuggestionMenuCreateFailed: "ساخت منو پیشنهادی با مشکل مواجه شد",
+    SuggestionMenuEditSuccess: "منو پیشنهادی با موفقیت ویرایش شد",
+    SuggestionMenuEditFailed: "ویرایش منو پیشنهادی با مشکل مواجه شد",
+    SuggestionMenuRemoveSuccess: "منو پیشنهادی با موفقیت حذف شد",
+    SuggestionMenuRemoveFailed: "حذف منو پیشنهادی با مشکل مواجه شد",
+    SuggestionMenuAlreadyExist: "منو پیشنهادی وجود دارد",
+    SuggestionMenuTitleAlreadyExist: "عنوان منو پیشنهادی وجود دارد",
+    SuggestionMenuSlugAlreadyExist: "آدرس منو پیشنهادی وجود دارد",
+    SuggestionMenuNotExist: "منو پیشنهادی وجود ندارد",
+    IdNotValid: "شناسه معتبر نیست",
     DeleteFailed: "عملیات با مشکل مواجه شد"
 };
 
