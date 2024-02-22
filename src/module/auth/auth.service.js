@@ -6,6 +6,7 @@ const AuthMessage = require("./auth.messages");
 const { randomInt } = require("crypto");
 const { generateAccessToken, generateRefreshToken, hashPassword } = require("../../common/utils/auth");
 const bcrypt = require("bcrypt");
+const { valid } = require("joi");
 
 class AuthService {
     #model;
@@ -23,25 +24,26 @@ class AuthService {
 
     async sendOtp(mobile, email, fullName, password) {
         const user = await this.checkUserExist(mobile, email);
+        let validParam = mobile ? { mobile } : { email };
         if (!user) {
-            const dbLength = await this.#model.countDocuments();
+            const dbLength = await this.#model.find().count();
             const otp = await this.generateOtp();
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
             await this.#model.create({
-                mobile,
-                email,
+                mobile: mobile || null,
+                email: email || null,
                 fullName,
                 otp,
                 role: dbLength ? "USER" : "ADMIN",
-                password: hashedPassword,
+                password: hashedPassword
             });
             throw new createHttpError.Created(AuthMessage.SendOtpSuccessfully);
         }
         await this.isThereAttempt(user, false);
         const { code, expiresIn } = await this.generateOtp();
         const otp = { code, expiresIn };
-        await this.#model.findOneAndUpdate({ $or: [{ mobile }, { email }] }, { otp }, { new: true });
+        await this.#model.findOneAndUpdate({ ...validParam }, { otp }, { new: true });
 
         return user;
     }
@@ -71,11 +73,10 @@ class AuthService {
         return { accessToken, refreshToken };
     }
 
-    async checkUserExist(mobileParam, emailParam) {
-        const isUserExist = await this.#model.findOne({
-            $or: [{ mobile: mobileParam }, { email: emailParam ? emailParam : "" }],
-        });
-        const isBanExist = await this.#banModel.findOne({ $or: [{ mobile: mobileParam }, { email: emailParam }] });
+    async checkUserExist(mobile, email) {
+        let validParam = mobile ? { mobile } : { email };
+        const isUserExist = await this.#model.findOne({ ...validParam });
+        const isBanExist = await this.#banModel.findOne({ mobile, email });
         if (isBanExist) throw createHttpError.Forbidden(AuthMessage.BanUser);
 
         return isUserExist;
@@ -110,7 +111,7 @@ class AuthService {
 
         const otp = {
             code: randomInt(10000, 99999),
-            expiresIn: now + this.#EXPIRED_TIME, // 2 minutes
+            expiresIn: now + this.#EXPIRED_TIME // 2 minutes
         };
         return otp;
     }

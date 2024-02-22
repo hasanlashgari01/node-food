@@ -18,7 +18,6 @@ class AuthController {
 
             return res.status(201).json({ message: AuthMessage.SendOtpSuccessfully });
         } catch (error) {
-            // console.log(error);
             next(error);
         }
     }
