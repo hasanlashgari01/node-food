@@ -58,9 +58,8 @@ class AdminService {
     }
 
     async getRestaurant(id) {
-        await this.checkIsBanRestaurant(id);
-
-        return restaurant;
+        const restaurant = await this.checkIsValidRestaurant(id);
+        return restaurant
     }
 
     async checkIsValidRestaurant(id) {
@@ -138,7 +137,7 @@ class AdminService {
         let banResult;
         if (isBanUser) {
             banResult = await this.#banUserModel.deleteOne({ mobile, email });
-            if (!banResult.deletedCount) throw createHttpError.BadRequest(AdminMessage.UserBanFailed);
+            if (!banResult.deletedCount) throw createHttpError.BadRequest(AdminMessage.UserUnBanFailed);
         } else {
             banResult = await this.#banUserModel.create({ mobile, email });
             if (!banResult) throw createHttpError.BadRequest(AdminMessage.UserBanFailed);

@@ -72,8 +72,8 @@ class AdminController {
     async getRestaurant(req, res, next) {
         try {
             const { id } = req.params;
-            await this.#service.checkIsValidRestaurant(id);
-            const restaurant = await this.#service.getRestaurant(id);
+            await this.#service.checkIsBanRestaurant(id);
+            const restaurant = await this.#service.checkIsValidRestaurant(id);
 
             res.json(restaurant);
         } catch (error) {
