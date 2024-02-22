@@ -9,12 +9,15 @@ const RestaurantModel = require("./../restaurant/restaurant.schema");
 const BanRestaurantModel = require("./../ban-restautant/ban-restautant.schema");
 const RestaurentMessage = require("../restaurant/restaurant.messages");
 const SuggestionMenuModel = require("../menu/menu-suggestion.schema");
+const BanUserModel = require("./../ban/ban.schema");
 
 class AdminService {
     #model;
     #restaurantModel;
     #banRestaurantModel;
     #suggestionMenuModel;
+    #userModel;
+    #banUserModel;
 
     constructor() {
         autoBind(this);
@@ -22,6 +25,7 @@ class AdminService {
         this.#restaurantModel = RestaurantModel;
         this.#banRestaurantModel = BanRestaurantModel;
         this.#suggestionMenuModel = SuggestionMenuModel;
+        this.#banUserModel = BanUserModel;
     }
 
     async allRestaurant() {
@@ -121,6 +125,38 @@ class AdminService {
         if (!menu) throw new createHttpError.NotFound(AdminMessage.SuggestionMenuNotExist);
     }
 
+    async allUsersByRole(role) {
+        const optionsUsersRole = { role };
+        const optionsUsersUnselect = { password: 0, otp: 0, resetLink: 0, __v: 0 };
+        const resultCount = await this.#model.find({ ...optionsUsersRole }).count();
+        const result = await this.#model.find({ ...optionsUsersRole }, { ...optionsUsersUnselect }).lean();
+
+        return { resultCount, result };
+    }
+
+    async banUserByAdmin(mobile, email, isBanUser) {
+        let banResult;
+        if (isBanUser) {
+            banResult = await this.#banUserModel.deleteOne({ mobile, email });
+            if (!banResult.deletedCount) throw createHttpError.BadRequest(AdminMessage.UserBanFailed);
+        } else {
+            banResult = await this.#banUserModel.create({ mobile, email });
+            if (!banResult) throw createHttpError.BadRequest(AdminMessage.UserBanFailed);
+        }
+        return banResult;
+    }
+
+    async checkIsValidUser(id) {
+        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(AdminMessage.IdNotValid);
+        const user = await this.#model.findById(id);
+        if (!user) throw new createHttpError.NotFound(AdminMessage.UserNotExist);
+        return user;
+    }
+
+    async checkIsUserOnBanList(mobile, email) {
+        const isBanUser = await this.#banUserModel.findOne({ $or: [{ mobile }, { email }] });
+        return isBanUser;
+    }
 }
 
 module.exports = AdminService;

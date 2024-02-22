@@ -81,7 +81,7 @@ class AdminController {
         }
     }
 
-    // Menu
+    // Suggestion Menu
     async createSuggestionMenu(req, res, next) {
         try {
             const { title, slug } = req.body;
@@ -130,6 +130,41 @@ class AdminController {
         }
     }
 
+    // Users
+    async getAllUsers(req, res, next) {
+        try {
+            const { resultCount: usersCount, result: users } = await this.#service.allUsersByRole("USER");
+
+            res.json({ count: usersCount, users });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getAllSellers(req, res, next) {
+        try {
+            const { resultCount: sellersCount, result: sellers } = await this.#service.allUsersByRole("SELLER");
+
+            res.json({ count: sellersCount, sellers });
+        } catch (error) {
+
+        }
+    }
+
+    async banUser(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { mobile, email } = await this.#service.checkIsValidUser(id);
+            const isBanUser = await this.#service.checkIsUserOnBanList(mobile, email);
+            const banResult = await this.#service.banUserByAdmin(mobile, email, isBanUser);
+
+            res
+                .status(banResult.deletedCount ? 200 : 201)
+                .json({ message: banResult.deletedCount ? AdminMessage.UserUnBanSuccess : AdminMessage.UserBanSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = AdminController;

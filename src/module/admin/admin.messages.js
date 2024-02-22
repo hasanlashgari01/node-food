@@ -19,6 +19,12 @@ const AdminMessage = {
     SuggestionMenuTitleAlreadyExist: "عنوان منو پیشنهادی وجود دارد",
     SuggestionMenuSlugAlreadyExist: "آدرس منو پیشنهادی وجود دارد",
     SuggestionMenuNotExist: "منو پیشنهادی وجود ندارد",
+    UserNotExist: "کاربر مورد نظر وجود ندارد",
+    UserAlreadyOnBanList: "کاربر مورد نظر در لیست بن وجود دارد",
+    UserBanSuccess: "کاربر با موفقیت بن شد",
+    UserBanFailed: "بن کاربر با مشکل مواجه شد",
+    UserUnBanSuccess: "کاربر با موفقیت از لیست بن حذف شد",
+    UserUnBanFailed: "حذف کاربر از لیست بن با مشکل مواجه شد",
     IdNotValid: "شناسه معتبر نیست",
     DeleteFailed: "عملیات با مشکل مواجه شد"
 };

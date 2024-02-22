@@ -20,5 +20,8 @@ router.route("/menu")
 router.route("/menu/:id")
     .patch(menuUpload(), validate(UpdateSuggestionMenuValidator), controller.editSuggestionMenu)
     .delete(controller.removeSuggestionMenu);
+router.route("/users").get(controller.getAllUsers);
+router.route("/users/:id/ban").get(controller.banUser);
+router.route("/sellers").get(controller.getAllSellers);
 
 module.exports = { AdminRouter: router };
