@@ -4,9 +4,12 @@ const validate = require("../../common/middleware/joi.validator");
 const { RestaurantValidator } = require("./restaurant.validation");
 const { restaurantUpload } = require("../../common/utils/multer");
 const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth.guard");
+const { checkResuatrantAdmin } = require("../../common/guard/checkResuatrantAdmin.guard");
 
 const controller = new RestaurantController();
 
+router.get("/comment", checkResuatrantAdmin, controller.allComments);
+router.patch("/comment/:id/status", checkResuatrantAdmin, controller.changeStatus);
 router
     .route("/")
     .post(AccessTokenGuard, RefreshTokenGuard, restaurantUpload(), validate(RestaurantValidator), controller.create);

@@ -5,7 +5,7 @@ const RestaurantCommentsSchema = new Schema(
     {
         body: { type: String, required: true },
         rate: { type: Number, required: true },
-        isAccepted: { type: Number, default: 0 },
+        isAccepted: { type: Boolean, default: false },
         isAnswer: { type: Number, required: true, default: 0 },
         restaurantId: { type: ObjectId, ref: "Restaurant", required: true },
         authorId: { type: ObjectId, ref: "User", required: true },

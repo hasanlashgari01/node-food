@@ -51,6 +51,27 @@ class RestaurantController {
             next(error);
         }
     }
+
+    async allComments(req, res, next) {
+        try {
+            const { comments } = await this.#service.getAllComments();
+
+            res.json({ comments });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async changeStatus(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            res.json({message: "کامنت با موفقیت آپدیت شد"})
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = RestaurantController;

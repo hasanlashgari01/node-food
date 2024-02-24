@@ -1,7 +1,7 @@
 const { Schema, model, models } = require("mongoose");
 const ObjectId = Schema.Types.ObjectId;
 
-const FoodCommentsSchema = new Schema(
+const CommentsOfFoodSchema = new Schema(
     {
         body: { type: String, required: true },
         rate: { type: Number, required: true },
@@ -15,6 +15,6 @@ const FoodCommentsSchema = new Schema(
     { timestamps: true }
 );
 
-const FoodCommentsModel = models.FoodComment || model("FoodComment", FoodCommentsSchema);
+const FoodCommentsModel = models.CommentsOfFood || model("CommentsOfFood", CommentsOfFoodSchema);
 
 module.exports = FoodCommentsModel;

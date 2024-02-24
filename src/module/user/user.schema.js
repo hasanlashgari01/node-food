@@ -77,13 +77,6 @@ UserSchema.methods.toJSON = function() {
     return obj;
 };
 
-// UserSchema.index({
-//     name: "text",
-//     email: "text",
-//     mobile: "text",
-//     username: "text"
-// });
-
 const UserModel = models.User || model("User", UserSchema);
 
 module.exports = UserModel;

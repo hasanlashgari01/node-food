@@ -2,15 +2,19 @@ const createHttpError = require("http-errors");
 const RestaurantMessage = require("./restaurant.messages");
 const { isValidObjectId } = require("mongoose");
 const RestaurantModel = require("./restaurant.schema");
+const RestaurantCommentsModel = require("./restaurant-comment.schema");
 const MenuModel = require("../menu/menu.schema");
 const UserModel = require("../user/user.schema");
 
 class RestaurantService {
     #model;
+    #restaurantCommentsModel;
     #menuModel;
     #userModel;
+
     constructor() {
         this.#model = RestaurantModel;
+        this.#restaurantCommentsModel = RestaurantCommentsModel;
         this.#menuModel = MenuModel;
         this.#userModel = UserModel;
     }
@@ -22,7 +26,7 @@ class RestaurantService {
             ...restaurantDto,
             order: { order_start, order_end },
             details: { average_delivery_time },
-            author: userDto._id,
+            author: userDto._id
         });
         if (!resultCreateRestaurant) throw new createHttpError.InternalServerError(RestaurantMessage.CreateFailed);
         const resultPushRestaurantID = await this.#userModel.updateOne(
@@ -36,6 +40,7 @@ class RestaurantService {
     async getOne(id) {
         const restaurant = await this.isValidRestaurant(id);
         const menu = await this.#menuModel.find({ restaurantId: restaurant._id }, "-__v").populate("foods", "-__v");
+        console.log(menu);
 
         return { restaurant, menu };
     }
@@ -61,6 +66,17 @@ class RestaurantService {
         if (!restaurant) throw new createHttpError.NotFound(RestaurantMessage.NotExist);
         if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurantMessage.NotValidRestaurant);
         return restaurant;
+    }
+
+    async getAllComments() {
+        const comments = await this.#restaurantCommentsModel.find().populate("authorId", "-otp");
+
+        return { comments };
+    }
+
+    async changeCommentStatus(id, status) {
+        const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: id }, { isAccepted: status });
+        console.log(changeResult);
     }
 }
 
