@@ -37,14 +37,21 @@ class AdminService {
 
     async allRestaurantBanned() {
         const restaurantBannedCount = await this.#banRestaurantModel.find().count();
-        const restaurantsBanned = await this.#banRestaurantModel.find().select("-__v").populate("restaurantId", "name phone email province category").lean();
+        const restaurantsBanned = await this.#banRestaurantModel
+            .find()
+            .select("-__v")
+            .populate("restaurantId", "name phone email province category")
+            .lean();
 
         return { restaurantBannedCount, restaurantsBanned };
     }
 
     async acceptOrRejectRestaurant(id, isValid) {
         const updateResult = await this.#restaurantModel.updateOne({ _id: id }, { isValid: !isValid });
-        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(isValid ? AdminMessage.RestaurantRejectFailed : AdminMessage.RestaurantRejectSuccess);
+        if (!updateResult.modifiedCount)
+            throw createHttpError.BadRequest(
+                isValid ? AdminMessage.RestaurantRejectFailed : AdminMessage.RestaurantRejectSuccess
+            );
     }
 
     async banRestaurant(id) {
@@ -59,7 +66,7 @@ class AdminService {
 
     async getRestaurant(id) {
         const restaurant = await this.checkIsValidRestaurant(id);
-        return restaurant
+        return restaurant;
     }
 
     async checkIsValidRestaurant(id) {
@@ -155,6 +162,14 @@ class AdminService {
     async checkIsUserOnBanList(mobile, email) {
         const isBanUser = await this.#banUserModel.findOne({ $or: [{ mobile }, { email }] });
         return isBanUser;
+    }
+
+    async getUsersByRole(role) {
+        const roles = ["ADMIN", "SELLER", "USER"];
+        if (!roles.includes(role)) throw new createHttpError.BadRequest(AdminMessage.UserNotExist); 
+
+        const result = await this.#userModel.find({ role });
+        return { result };
     }
 }
 

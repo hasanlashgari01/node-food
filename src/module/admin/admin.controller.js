@@ -37,7 +37,9 @@ class AdminController {
             await this.#service.checkIsBanRestaurant(id);
             await this.#service.acceptOrRejectRestaurant(id, isValid);
 
-            res.json({ message: isValid ? AdminMessage.RestaurantRejectSuccess : AdminMessage.RestaurantAcceptSuccess });
+            res.json({
+                message: isValid ? AdminMessage.RestaurantRejectSuccess : AdminMessage.RestaurantAcceptSuccess,
+            });
         } catch (error) {
             next(error);
         }
@@ -146,9 +148,7 @@ class AdminController {
             const { resultCount: sellersCount, result: sellers } = await this.#service.allUsersByRole("SELLER");
 
             res.json({ count: sellersCount, sellers });
-        } catch (error) {
-
-        }
+        } catch (error) {}
     }
 
     async banUser(req, res, next) {
@@ -158,9 +158,20 @@ class AdminController {
             const isBanUser = await this.#service.checkIsUserOnBanList(mobile, email);
             const banResult = await this.#service.banUserByAdmin(mobile, email, isBanUser);
 
-            res
-                .status(banResult.deletedCount ? 200 : 201)
-                .json({ message: banResult.deletedCount ? AdminMessage.UserUnBanSuccess : AdminMessage.UserBanSuccess });
+            res.status(banResult.deletedCount ? 200 : 201).json({
+                message: banResult.deletedCount ? AdminMessage.UserUnBanSuccess : AdminMessage.UserBanSuccess,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getUsersByRole(req, res, next) {
+        try {
+            const { role } = req.params;
+            const { result } = await this.#service.getUsersByRole(role);
+
+            res.json({ count: result.length, result });
         } catch (error) {
             next(error);
         }
