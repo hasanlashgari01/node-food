@@ -16,7 +16,6 @@ class AdminService {
     #restaurantModel;
     #banRestaurantModel;
     #suggestionMenuModel;
-    #userModel;
     #banUserModel;
 
     constructor() {
@@ -164,12 +163,27 @@ class AdminService {
         return isBanUser;
     }
 
+    async userBanListGuard(userDto) {
+        if (userDto) throw new createHttpError.BadRequest(AdminMessage.UserAlreadyOnBanList);
+    }
+
     async getUsersByRole(role) {
         const roles = ["ADMIN", "SELLER", "USER"];
-        if (!roles.includes(role)) throw new createHttpError.BadRequest(AdminMessage.UserNotExist); 
+        if (!roles.includes(role.toUpperCase())) throw new createHttpError.BadRequest(AdminMessage.UserNotExist);
 
-        const result = await this.#userModel.find({ role });
+        console.log(role);
+        const result = await this.#model.find({ role: role.toUpperCase() });
         return { result };
+    }
+
+    async getUsersBanned() {
+        const result = await this.#banUserModel.find();
+        return { result };
+    }
+
+    async changeRoleAsSeller(id) {
+        const result = await this.#model.updateOne({ _id: id }, { requestSeller: 1, role: "SELLER" });
+        if (!result.modifiedCount) throw new createHttpError.BadRequest(AdminMessage.UserChangeRoleFailed);
     }
 }
 

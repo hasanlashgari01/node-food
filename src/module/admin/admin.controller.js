@@ -176,6 +176,30 @@ class AdminController {
             next(error);
         }
     }
+
+    async getUsersBanned(req, res, next) {
+        try {
+            const { result } = await this.#service.getUsersBanned();
+
+            res.json({ count: result.length, result });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async acceptAsSeller(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { mobile, email } = await this.#service.checkIsValidUser(id);
+            const isBanUser = await this.#service.checkIsUserOnBanList(mobile, email);
+            await this.#service.userBanListGuard(isBanUser);
+            await this.#service.changeRoleAsSeller(id);
+
+            res.json({ message: AdminMessage.UserChangeRoleSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = AdminController;

@@ -25,8 +25,10 @@ const AdminMessage = {
     UserBanFailed: "بن کاربر با مشکل مواجه شد",
     UserUnBanSuccess: "کاربر با موفقیت از لیست بن حذف شد",
     UserUnBanFailed: "حذف کاربر از لیست بن با مشکل مواجه شد",
+    UserChangeRoleSuccess: "تغییر نقش کاربر با موفقیت بود",
+    UserChangeRoleFailed: "تغییر نقش کاربر موفقیت آمیز نبود",
     IdNotValid: "شناسه معتبر نیست",
-    DeleteFailed: "عملیات با مشکل مواجه شد"
+    DeleteFailed: "عملیات با مشکل مواجه شد",
 };
 
 module.exports = AdminMessage;
