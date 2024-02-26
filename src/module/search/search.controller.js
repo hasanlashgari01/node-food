@@ -12,8 +12,17 @@ class SearchController {
 
     async searchRestaurant(req, res, next) {
         try {
-            const { name, province } = req.query;
-            const result = await this.#service.searchRestaurant(name,  province);
+            const result = await this.#service.searchRestaurant(req.body);
+
+            res.send({ count: result.length, result });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async searchUser(req, res, next) {
+        try {
+            const result = await this.#service.searchUser(req.body);
 
             res.send({ count: result.length, result });
         } catch (error) {

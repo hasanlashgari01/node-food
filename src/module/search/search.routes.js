@@ -5,5 +5,7 @@ const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth
 const controller = new SearchController();
 
 router.get("/restaurant", controller.searchRestaurant);
+router.use(AccessTokenGuard, RefreshTokenGuard);
+router.get("/admin/users", controller.searchUser);
 
 module.exports = { SearchRouter: router };
