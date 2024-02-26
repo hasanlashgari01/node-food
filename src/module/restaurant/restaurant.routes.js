@@ -8,6 +8,7 @@ const { checkResuatrantAdmin } = require("../../common/guard/checkResuatrantAdmi
 
 const controller = new RestaurantController();
 
+router.route("/slug/:slug").get(controller.getRestaurantBySlug);
 router.get("/comment", checkResuatrantAdmin, controller.allComments);
 router.patch("/comment/:id/status", checkResuatrantAdmin, controller.changeStatus);
 router

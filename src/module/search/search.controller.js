@@ -1,6 +1,5 @@
 const autoBind = require("auto-bind");
 const SearchService = require("./search.service");
-const SearchMessage = require("./search.messages");
 
 class SearchController {
     #service;

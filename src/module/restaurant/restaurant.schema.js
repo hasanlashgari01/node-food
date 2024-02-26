@@ -8,16 +8,17 @@ const RestaurantSchema = new Schema(
         cover: { type: String },
         phone: { type: String, unique: true },
         email: { type: String, unique: true },
+        slug: { type: String, unique: true, lowercase: true },
         score: { type: String, default: 0 },
         province: { type: String, required: true },
         order: { start: { type: Number }, end: { type: Number } },
         details: {
             average_delivery_time: { type: Number, default: 0 },
-            send_outside_city: { type: Boolean, default: false },
+            send_outside_city: { type: Boolean, default: false }
         },
         category: { type: [String], default: [] },
         isValid: { type: Boolean, default: false },
-        author: { type: ObjectId, ref: "User", required: true },
+        author: { type: ObjectId, ref: "User", required: true }
     },
     { timestamps: true }
 );

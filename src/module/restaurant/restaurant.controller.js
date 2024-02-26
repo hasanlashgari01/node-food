@@ -15,6 +15,11 @@ class RestaurantController {
             await this.#service.create(req.body, req.user);
             res.status(201).json({ message: RestaurantMessage.CreatedSuccess });
         } catch (error) {
+            const field = Object.keys(error.keyPattern);
+            if (field[0] === "slug") error.message = RestaurantMessage.AlreadyExist;
+            if (field[0] === "phone") error.message = RestaurantMessage.AlreadyExist;
+            if (field[0] === "email") error.message = RestaurantMessage.AlreadyExist;
+
             next(error);
         }
     }
@@ -47,6 +52,17 @@ class RestaurantController {
             await this.#service.delete(id, req.user);
 
             res.json({ message: RestaurantMessage.DeleteSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getRestaurantBySlug(req, res, next) {
+        try {
+            const { slug } = req.params;
+            const restaurant = await this.#service.getRestaurantBySlug(slug);
+
+            res.json(restaurant);
         } catch (error) {
             next(error);
         }

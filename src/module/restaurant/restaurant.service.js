@@ -1,8 +1,10 @@
 const createHttpError = require("http-errors");
-const RestaurantMessage = require("./restaurant.messages");
 const { isValidObjectId } = require("mongoose");
+const translatte = require('translatte');
+const slugify = require("slugify");
 const RestaurantModel = require("./restaurant.schema");
 const RestaurantCommentsModel = require("./restaurant-comment.schema");
+const RestaurantMessage = require("./restaurant.messages");
 const MenuModel = require("../menu/menu.schema");
 const UserModel = require("../user/user.schema");
 
@@ -20,10 +22,13 @@ class RestaurantService {
     }
 
     async create(restaurantDto, userDto) {
-        const { order_start, order_end, average_delivery_time } = restaurantDto;
+        const { name, order_start, order_end, average_delivery_time } = restaurantDto;
+        const slugTranslate = await translatte(name, { from: 'fa', to: 'en' });
+        const slugifyText = slugify(slugTranslate.text, { lower: true });
 
         const resultCreateRestaurant = await this.#model.create({
             ...restaurantDto,
+            slug: slugifyText,
             order: { order_start, order_end },
             details: { average_delivery_time },
             author: userDto._id
@@ -58,6 +63,13 @@ class RestaurantService {
         await this.isValidRestaurant(id);
         const result = await this.#model.deleteOne({ _id: id });
         if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurantMessage.NotExist);
+    }
+
+    async getRestaurantBySlug(slug) {
+        const restaurant = await this.#model.findOne({ slug });
+        if (!restaurant) throw new createHttpError.NotFound(RestaurantMessage.NotFound);
+
+        return restaurant;
     }
 
     async isValidRestaurant(id) {

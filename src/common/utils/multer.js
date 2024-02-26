@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const createHttpError = require("http-errors");
 const { randomInt } = require("crypto");
+const { removeFile } = require("./file");
 
 const publicPath = "./public/uploads";
 const privatePath = "./private/uploads";
@@ -12,7 +13,7 @@ const menuUpload = () => upload(false, "menu", 1).single("image");
 const restaurantUpload = () => {
     return upload(false, "restaurant", 1).fields([
         { name: "logo", maxCount: 1 },
-        { name: "cover", maxCount: 1 },
+        { name: "cover", maxCount: 1 }
     ]);
 };
 
@@ -24,14 +25,21 @@ const storage = (isPrivate, directory) => {
         },
         filename: (req, file, cb) => {
             const whiteListFormat = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-            if (whiteListFormat.includes(file.mimetype)) {
-                const format = path.extname(file.originalname);
-                const fileName = generateFileName() + format;
-                cb(null, fileName);
-            } else {
-                cb(new createHttpError.BadRequest("Invalid file type!"));
+            const format = path.extname(file.originalname);
+            const fileName = generateFileName() + format;
+            try {
+                if (whiteListFormat.includes(file.mimetype)) {
+                    cb(null, fileName);
+                } else {
+                    removeFile(directory, fileName);
+                    cb(new createHttpError.BadRequest("Invalid file type!"));
+                }
+            } catch (err) {
+                removeFile(directory, fileName);
+                cb(err);
             }
-        },
+
+        }
     });
 };
 
@@ -52,7 +60,7 @@ const generateFileName = () => {
 const upload = (isPrivate, dir, size) => {
     return multer({
         storage: storage(isPrivate, dir),
-        limits: { fileSize: 1024 * 1024 * size }, // 1 MB
+        limits: { fileSize: 1024 * 1024 * size } // 1 MB
     });
 };
 
