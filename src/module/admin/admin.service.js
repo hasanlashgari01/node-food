@@ -46,6 +46,15 @@ class AdminService {
         return { restaurantBannedCount, restaurantsBanned };
     }
 
+    async allRestaurantWithStatus(isValid) {
+        console.log(isValid);
+        const restaurantCount = await this.#restaurantModel.find({ isValid }).count();
+        const restaurants = await this.#restaurantModel.find({ isValid }).lean();
+        console.log(restaurants);
+
+        return { restaurantCount, restaurants };
+    }
+
     async acceptOrRejectRestaurant(id, isValid) {
         const updateResult = await this.#restaurantModel.updateOne({ _id: id }, { isValid: !isValid });
         if (!updateResult.modifiedCount)
