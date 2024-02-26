@@ -1,7 +1,7 @@
 const { Schema, model, models } = require("mongoose");
 const ObjectId = Schema.Types.ObjectId;
 
-const CommentsOfRestaurantSchema = new Schema(
+const RestaurantSchema = new Schema(
     {
         name: { type: String },
         logo: { type: String },
@@ -22,6 +22,6 @@ const CommentsOfRestaurantSchema = new Schema(
     { timestamps: true }
 );
 
-const RestaurantModel = models.CommentsOfRestaurant || model("CommentsOfRestaurant", CommentsOfRestaurantSchema);
+const RestaurantModel = models.Restaurant || model("Restaurant", RestaurantSchema);
 
 module.exports = RestaurantModel;

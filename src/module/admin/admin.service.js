@@ -41,6 +41,7 @@ class AdminService {
             .select("-__v")
             .populate("restaurantId", "name phone email province category")
             .lean();
+        console.log(restaurantsBanned);
 
         return { restaurantBannedCount, restaurantsBanned };
     }
@@ -184,6 +185,10 @@ class AdminService {
     async changeRoleAsSeller(id) {
         const result = await this.#model.updateOne({ _id: id }, { requestSeller: 1, role: "SELLER" });
         if (!result.modifiedCount) throw new createHttpError.BadRequest(AdminMessage.UserChangeRoleFailed);
+    }
+
+    async changeRoleAsAdmin() {
+        
     }
 }
 
