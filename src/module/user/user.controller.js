@@ -110,6 +110,29 @@ class UserController {
             next(error);
         }
     }
+
+    async bookmarkFood(req, res, next) {
+        try {
+            await this.#service.checkExistFood(req.params);
+            await this.#service.checkIsBookmarkedFood(req.params, req.user, req.method);
+            await this.#service.bookmarkFood(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.BookmarkSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeBookmarkFood(req, res, next) {
+        try {
+            await this.#service.checkIsBookmarkedFood(req.params, req.user, req.method);
+            await this.#service.unbookmarkFood(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.UnbookmarkSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;
