@@ -12,7 +12,9 @@ class UserController {
 
     async whoAmI(req, res, next) {
         try {
-            return res.json(req.user);
+            const { userResult } = await this.#service.getMe(req.user);
+
+            return res.json(userResult);
         } catch (error) {
             next(error);
         }

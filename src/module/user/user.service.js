@@ -18,6 +18,20 @@ class UserService {
         this.#foodModel = FoodModel;
     }
 
+    async getMe({ _id: userId }) {
+        const selectFoodFields = "title image kind";
+        const selectRestaurantFields = "name province slug logo cover";
+
+        const userResult = await this.#model
+            .findById(userId)
+            .select("-otp -__v")
+            .populate("likedFoods", selectFoodFields)
+            .populate("bookmarkedFoods", selectFoodFields)
+            .populate("likedRestaurants", selectRestaurantFields)
+            .populate("bookmarkedRestaurants", selectRestaurantFields);
+        return { userResult };
+    }
+
     async addCommentForRestaurant(commentDto, userDto) {
         const { body, rate, restaurantId } = commentDto;
         const { _id } = userDto;
