@@ -31,14 +31,14 @@ class AuthService {
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
             await this.#model.create({
-                mobile: mobile || null,
-                email: email || null,
+                mobile: mobile,
+                email: email,
                 fullName,
                 otp,
                 role: dbLength ? "USER" : "ADMIN",
                 password: hashedPassword
             });
-            throw new createHttpError.Created(AuthMessage.SendOtpSuccessfully);
+            throw createHttpError.Created(AuthMessage.SendOtpSuccessfully);
         }
         await this.isThereAttempt(user, false);
         const { code, expiresIn } = await this.generateOtp();

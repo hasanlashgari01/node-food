@@ -41,6 +41,28 @@ class UserController {
             next(error);
         }
     }
+
+    async likeRestaurant(req, res, next) {
+        try {
+            await this.#service.checkIsLikedRestaurant(req.params, req.user, req.method);
+            await this.#service.likeRestaurant(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.LikeSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeLikeRestaurant(req, res, next) {
+        try {
+            await this.#service.checkIsLikedRestaurant(req.params, req.user, req.method);
+            await this.#service.unlikeRestaurant(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.UnlikeSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;

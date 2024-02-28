@@ -4,8 +4,10 @@ const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth
 
 const controller = new UserController();
 
-router.get("/whoami", AccessTokenGuard, RefreshTokenGuard, controller.whoAmI);
-router.route("/comment").post(AccessTokenGuard, RefreshTokenGuard, controller.createComment);
-router.route("/comment/:id").patch(AccessTokenGuard, RefreshTokenGuard, controller.changeRateForRestaurant);
+router.use(AccessTokenGuard, RefreshTokenGuard);
+router.get("/whoami", controller.whoAmI);
+router.route("/comment").post(controller.createComment);
+router.route("/comment/:id").patch(controller.changeRateForRestaurant);
+router.route("/restaurant/:id/like").patch(controller.likeRestaurant).delete(controller.removeLikeRestaurant);
 
 module.exports = { UserRouter: router };
