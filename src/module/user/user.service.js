@@ -44,6 +44,21 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.UnlikeFailed);
     }
 
+    async likeFood(foodDto, userDto) {
+        const { id: restaurantId } = foodDto;
+        const { _id: userId } = userDto;
+        const result = await this.#model.updateOne({ _id: userId }, { $push: { likedFoods: restaurantId } });
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.LikeFailed);
+    }
+
+    async unlikeFood(foodDto, userDto) {
+        const { id: restaurantId } = foodDto;
+        const { _id: userId } = userDto;
+
+        const result = await this.#model.updateOne({ _id: userId }, { $pull: { likedFoods: restaurantId } });
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.UnlikeFailed);
+    }
+
     async findCommentById(id) {
         const comment = await this.#restaurantCommentModel.findById(id);
         if (!comment) throw createHttpError.BadRequest(UserMessage.CommentNotExist);
@@ -64,6 +79,15 @@ class UserService {
         const result = await this.#model.findOne({ _id: userId, likedRestaurants: restaurantId });
         if (result && HttpMethod === "PATCH") throw createHttpError.BadRequest(UserMessage.RestaurantAlreadyLiked);
         if (!result && HttpMethod === "DELETE") throw createHttpError.BadRequest(UserMessage.RestaurantIsNotList);
+    }
+
+    async checkIsLikedFood(foodDto, userDto, HttpMethod) {
+        const { id: foodId } = foodDto;
+        const { _id: userId } = userDto;
+
+        const result = await this.#model.findOne({ _id: userId, likedFoods: foodId });
+        if (result && HttpMethod === "PATCH") throw createHttpError.BadRequest(UserMessage.FoodAlreadyLiked);
+        if (!result && HttpMethod === "DELETE") throw createHttpError.BadRequest(UserMessage.FoodIsNotList);
     }
 }
 

@@ -63,6 +63,28 @@ class UserController {
             next(error);
         }
     }
+
+    async likeFood(req, res, next) {
+        try {
+            await this.#service.checkIsLikedFood(req.params, req.user, req.method);
+            await this.#service.likeFood(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.LikeSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+    
+    async removeLikeFood(req, res, next) {
+        try {
+            await this.#service.checkIsLikedFood(req.params, req.user, req.method);
+            await this.#service.unlikeFood(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.UnlikeSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;
