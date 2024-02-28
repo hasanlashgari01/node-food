@@ -23,6 +23,24 @@ class UserService {
         });
         if (!comment) return createHttpError.BadRequest(UserMessage.CommentCreated);
     }
+
+    async changeRateForRestaurant(commentId, { rate }) {
+        const result = await this.#restaurantCommentModel.updateOne({ _id: commentId }, { rate });
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.CommentEditedFailed);
+    }
+
+    async findCommentById(id) {
+        const comment = await this.#restaurantCommentModel.findById(id);
+        if (!comment) throw createHttpError.BadRequest(UserMessage.CommentNotExist);
+
+        return comment;
+    }
+
+    async checkIsUserCreatedComment(commentDto, userDto) {
+        const { _id } = userDto;
+        const { authorId } = commentDto;
+        if (String(authorId) != String(_id)) throw createHttpError.BadRequest(UserMessage.CommentNotForYou);
+    }
 }
 
 module.exports = UserService;

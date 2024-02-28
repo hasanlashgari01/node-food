@@ -45,7 +45,6 @@ class RestaurantService {
     async getOne(id) {
         const restaurant = await this.isValidRestaurant(id);
         const menu = await this.#menuModel.find({ restaurantId: restaurant._id }, "-__v").populate("foods", "-__v");
-        console.log(menu);
 
         return { restaurant, menu };
     }
@@ -88,7 +87,6 @@ class RestaurantService {
 
     async changeCommentStatus(id, status) {
         const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: id }, { isAccepted: status });
-        console.log(changeResult);
     }
 }
 

@@ -4,7 +4,7 @@ const ObjectId = Schema.Types.ObjectId;
 const RestaurantCommentsSchema = new Schema(
     {
         body: { type: String, required: true },
-        rate: { type: Number },
+        rate: { type: Number, default: 0 },
         isAccepted: { type: Boolean, default: false },
         isAnswer: { type: Number, required: true, default: 0 },
         restaurantId: { type: ObjectId, ref: "Restaurant", required: true },

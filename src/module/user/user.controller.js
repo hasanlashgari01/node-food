@@ -1,5 +1,6 @@
 const autoBind = require("auto-bind");
 const UserService = require("./user.service");
+const UserMessage = require("./user.messages");
 
 class UserController {
     #service;
@@ -22,6 +23,20 @@ class UserController {
             await this.#service.addCommentForRestaurant(req.body, req.user);
 
             res.status(201).json({ message: "Comment created successfully" });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async changeRateForRestaurant(req, res, next) {
+        try {
+            const { id } = req.params;
+
+            const comment = await this.#service.findCommentById(id);
+            await this.#service.checkIsUserCreatedComment(comment, req.user);
+            await this.#service.changeRateForRestaurant(id, req.body);
+
+            res.status(200).json({ message: UserMessage.CommentEditedSuccess });
         } catch (error) {
             next(error);
         }
