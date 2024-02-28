@@ -44,6 +44,7 @@ class UserController {
 
     async likeRestaurant(req, res, next) {
         try {
+            await this.#service.checkExistRestaurant(req.params);
             await this.#service.checkIsLikedRestaurant(req.params, req.user, req.method);
             await this.#service.likeRestaurant(req.params, req.user);
 
@@ -66,6 +67,7 @@ class UserController {
 
     async likeFood(req, res, next) {
         try {
+            await this.#service.checkExistFood(req.params);
             await this.#service.checkIsLikedFood(req.params, req.user, req.method);
             await this.#service.likeFood(req.params, req.user);
 
@@ -74,7 +76,7 @@ class UserController {
             next(error);
         }
     }
-    
+
     async removeLikeFood(req, res, next) {
         try {
             await this.#service.checkIsLikedFood(req.params, req.user, req.method);

@@ -11,8 +11,12 @@ const UserMessage = {
     UnlikeFailed: "عملیات آنلایک با مشکل مواجه شد",
     RestaurantAlreadyLiked: "شما قبلا این رستوران را لایک کرده اید",
     RestaurantIsNotList: "این رستوران در لیست نمیباشد",
+    RestaurantNotExist: "رستوران وجود ندارد",
+    NotValidRestaurant: "رستوران توسط تایید نشده است",
     FoodAlreadyLiked: "شما قبلا این غذا را لایک کرده اید",
     FoodIsNotList: "این غذا در لیست نمیباشد",
+    FoodNotExist: "غذا وجود ندارد",
+    IdNotValid: "شناسه صحیح نمی باشد",
 };
 
 module.exports = UserMessage;

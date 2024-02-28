@@ -1,14 +1,21 @@
 const createHttpError = require("http-errors");
 const UserModel = require("./user.schema");
+const RestaurantModel = require("../restaurant/restaurant.schema");
 const RestaurantCommentsModel = require("../restaurant/restaurant-comment.schema");
+const FoodModel = require("../food/food.schema");
 const UserMessage = require("./user.messages");
+const { isValidObjectId } = require("mongoose");
 
 class UserService {
     #model;
+    #restaurantModel;
     #restaurantCommentModel;
+    #foodModel;
     constructor() {
         this.#model = UserModel;
+        this.#restaurantModel = RestaurantModel;
         this.#restaurantCommentModel = RestaurantCommentsModel;
+        this.#foodModel = FoodModel;
     }
 
     async addCommentForRestaurant(commentDto, userDto) {
@@ -88,6 +95,19 @@ class UserService {
         const result = await this.#model.findOne({ _id: userId, likedFoods: foodId });
         if (result && HttpMethod === "PATCH") throw createHttpError.BadRequest(UserMessage.FoodAlreadyLiked);
         if (!result && HttpMethod === "DELETE") throw createHttpError.BadRequest(UserMessage.FoodIsNotList);
+    }
+
+    async checkExistRestaurant({ id }) {
+        if (!isValidObjectId(id)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
+        const restaurant = await this.#restaurantModel.findById(id);
+        if (!restaurant) throw createHttpError.NotFound(UserMessage.RestaurantNotExist);
+        if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(UserMessage.NotValidRestaurant);
+    }
+
+    async checkExistFood({ id }) {
+        if (!isValidObjectId(id)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
+        const food = await this.#foodModel.findById(id);
+        if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
     }
 }
 
