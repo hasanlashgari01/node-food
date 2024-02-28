@@ -51,6 +51,21 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.UnlikeFailed);
     }
 
+    async bookmarkRestaurant(restaurantDto, userDto) {
+        const { id: restaurantId } = restaurantDto;
+        const { _id: userId } = userDto;
+        const result = await this.#model.updateOne({ _id: userId }, { $push: { bookmarkedRestaurants: restaurantId } });
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.BookmarkFailed);
+    }
+
+    async unbookmarkRestaurant(restaurantDto, userDto) {
+        const { id: restaurantId } = restaurantDto;
+        const { _id: userId } = userDto;
+
+        const result = await this.#model.updateOne({ _id: userId }, { $pull: { bookmarkedRestaurants: restaurantId } });
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.BookmarkFailed);
+    }
+
     async likeFood(foodDto, userDto) {
         const { id: restaurantId } = foodDto;
         const { _id: userId } = userDto;
@@ -88,6 +103,15 @@ class UserService {
         if (!result && HttpMethod === "DELETE") throw createHttpError.BadRequest(UserMessage.RestaurantIsNotList);
     }
 
+    async checkIsBookmarkedRestaurant(restaurantDto, userDto, HttpMethod) {
+        const { id: restaurantId } = restaurantDto;
+        const { _id: userId } = userDto;
+
+        const result = await this.#model.findOne({ _id: userId, bookmarkedRestaurants: restaurantId });
+        if (result && HttpMethod === "PATCH") throw createHttpError.BadRequest(UserMessage.RestaurantAlreadyBookmarked);
+        if (!result && HttpMethod === "DELETE") throw createHttpError.BadRequest(UserMessage.RestaurantIsNotList);
+    }
+
     async checkIsLikedFood(foodDto, userDto, HttpMethod) {
         const { id: foodId } = foodDto;
         const { _id: userId } = userDto;
@@ -95,6 +119,15 @@ class UserService {
         const result = await this.#model.findOne({ _id: userId, likedFoods: foodId });
         if (result && HttpMethod === "PATCH") throw createHttpError.BadRequest(UserMessage.FoodAlreadyLiked);
         if (!result && HttpMethod === "DELETE") throw createHttpError.BadRequest(UserMessage.FoodIsNotList);
+    }
+
+    async checkIsBookmarkedFood(foodDto, userDto, HttpMethod) {
+        const { id: foodId } = foodDto;
+        const { _id: userId } = userDto;
+
+        const result = await this.#model.findOne({ _id: userId, bookmarkedFoods: foodId });
+        if (result && HttpMethod === "PATCH") throw createHttpError.BadRequest(UserMessage.RestaurantAlreadyBookmarked);
+        if (!result && HttpMethod === "DELETE") throw createHttpError.BadRequest(UserMessage.RestaurantIsNotList);
     }
 
     async checkExistRestaurant({ id }) {

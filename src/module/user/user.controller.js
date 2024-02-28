@@ -65,6 +65,29 @@ class UserController {
         }
     }
 
+    async bookmarkRestaurant(req, res, next) {
+        try {
+            await this.#service.checkExistRestaurant(req.params);
+            await this.#service.checkIsBookmarkedRestaurant(req.params, req.user, req.method);
+            await this.#service.bookmarkRestaurant(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.BookmarkSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeBookmarkRestaurant(req, res, next) {
+        try {
+            await this.#service.checkIsBookmarkedRestaurant(req.params, req.user, req.method);
+            await this.#service.unbookmarkRestaurant(req.params, req.user);
+
+            res.status(200).json({ message: UserMessage.UnbookmarkSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async likeFood(req, res, next) {
         try {
             await this.#service.checkExistFood(req.params);
