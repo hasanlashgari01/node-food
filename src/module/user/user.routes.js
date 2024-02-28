@@ -4,6 +4,7 @@ const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth
 
 const controller = new UserController();
 
-router.get("/whoami",AccessTokenGuard, RefreshTokenGuard, controller.whoAmI);
+router.get("/whoami", AccessTokenGuard, RefreshTokenGuard, controller.whoAmI);
+router.route("/comment").post(AccessTokenGuard, RefreshTokenGuard, controller.createComment);
 
 module.exports = { UserRouter: router };

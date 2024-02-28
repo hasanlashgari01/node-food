@@ -2,41 +2,21 @@ const { Schema, model, models } = require("mongoose");
 const ObjectId = Schema.Types.ObjectId;
 
 const OtpSchema = new Schema({
-    code: {
-        type: String,
-        required: false,
-        default: undefined
-    },
-    expiresIn: {
-        type: Number,
-        required: false,
-        default: 0
-    },
-    isActive: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    maxAttempts: {
-        type: Number,
-        required: false,
-        default: 3
-    },
-    maxAttemptsExpiresIn: {
-        type: Number,
-        required: false,
-        default: 0
-    }
+    code: { type: String, required: false, default: undefined },
+    expiresIn: { type: Number, required: false, default: 0 },
+    isActive: { type: Boolean, required: false, default: false },
+    maxAttempts: { type: Number, required: false, default: 3 },
+    maxAttemptsExpiresIn: { type: Number, required: false, default: 0 },
 });
 
 const ProductSchema = new Schema({
     quantity: { type: Number, default: 1 },
-    productId: { type: ObjectId, ref: "Product" }
+    productId: { type: ObjectId, ref: "Product" },
 });
 
 const CartSchema = new Schema({
     products: { type: [ProductSchema], default: [] },
-    coupon: { type: ObjectId, ref: "Coupon", default: null }
+    coupon: { type: ObjectId, ref: "Coupon", default: null },
 });
 
 const UserSchema = new Schema(
@@ -59,17 +39,17 @@ const UserSchema = new Schema(
         bookmarkedRestaurants: [{ type: ObjectId, ref: "Restaurant" }],
         resetLink: { type: String, default: null },
         foods: [{ type: ObjectId, ref: "Food" }],
-        cart: { type: CartSchema }
+        cart: { type: CartSchema },
     },
     { timestamps: true, toJSON: { virtuals: true } }
 );
 
-UserSchema.virtual("avatarUrl").get(function() {
+UserSchema.virtual("avatarUrl").get(function () {
     if (this.avatar) return `${process.env.SERVER_URL}/${this.avatar}`;
     return null;
 });
 
-UserSchema.methods.toJSON = function() {
+UserSchema.methods.toJSON = function () {
     const obj = this.toObject();
     obj.avatarUrl = this.avatarUrl;
     delete obj.password;

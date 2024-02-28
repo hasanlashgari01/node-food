@@ -16,6 +16,16 @@ class UserController {
             next(error);
         }
     }
+
+    async createComment(req, res, next) {
+        try {
+            await this.#service.addCommentForRestaurant(req.body, req.user);
+
+            res.status(201).json({ message: "Comment created successfully" });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;
