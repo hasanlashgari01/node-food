@@ -153,6 +153,17 @@ class UserService {
         if (!updateRestaurantLikes.modifiedCount) throw createHttpError.BadRequest(UserMessage.LikeFailed);
     }
 
+    async addLikeFoodComment(commentDto, userDto) {
+        const { id: commentId } = commentDto;
+        const { _id: userId } = userDto;
+
+        const updateRestaurantLikes = await this.#foodCommentsModel.updateOne(
+            { _id: commentId },
+            { $push: { likes: userId } }
+        );
+        if (!updateRestaurantLikes.modifiedCount) throw createHttpError.BadRequest(UserMessage.LikeFailed);
+    }
+
     async findCommentById(id, model) {
         if (model === "restaurant") {
             const commentRestaurant = await this.#restaurantCommentsModel.findById(id).where({ isAccepted: true });
