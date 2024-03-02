@@ -1,11 +1,11 @@
 const { Schema, model, models } = require("mongoose");
 const ObjectId = Schema.Types.ObjectId;
 
-const CommentsOfFoodSchema = new Schema(
+const FoodCommentSchema = new Schema(
     {
         body: { type: String, required: true },
-        rate: { type: Number, required: true },
-        isAccepted: { type: Number, default: 0 },
+        rate: { type: Number, default: 0 },
+        isAccepted: { type: Boolean, default: false },
         isAnswer: { type: Number, required: true, default: 0 },
         foodId: { type: ObjectId, ref: "Food", required: true },
         authorId: { type: ObjectId, ref: "User", required: true },
@@ -15,6 +15,6 @@ const CommentsOfFoodSchema = new Schema(
     { timestamps: true }
 );
 
-const FoodCommentsModel = models.CommentsOfFood || model("CommentsOfFood", CommentsOfFoodSchema);
+const FoodCommentsModel = models.FoodComment || model("FoodComment", FoodCommentSchema);
 
 module.exports = FoodCommentsModel;

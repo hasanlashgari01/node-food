@@ -5,16 +5,19 @@ const RestaurantCommentsModel = require("../restaurant/restaurant-comment.schema
 const FoodModel = require("../food/food.schema");
 const UserMessage = require("./user.messages");
 const { isValidObjectId } = require("mongoose");
+const FoodCommentsModel = require("../food/food-comment.schema");
 
 class UserService {
     #model;
     #restaurantModel;
-    #restaurantCommentModel;
+    #restaurantCommentsModel;
+    #foodCommentsModel;
     #foodModel;
     constructor() {
         this.#model = UserModel;
         this.#restaurantModel = RestaurantModel;
-        this.#restaurantCommentModel = RestaurantCommentsModel;
+        this.#restaurantCommentsModel = RestaurantCommentsModel;
+        this.#foodCommentsModel = FoodCommentsModel;
         this.#foodModel = FoodModel;
     }
 
@@ -34,19 +37,37 @@ class UserService {
 
     async addCommentForRestaurant(commentDto, userDto) {
         const { body, rate, restaurantId } = commentDto;
-        const { _id } = userDto;
+        const { _id: userId } = userDto;
 
-        const comment = await this.#restaurantCommentModel.create({
+        const comment = await this.#restaurantCommentsModel.create({
             body,
             rate,
             restaurantId,
-            authorId: _id,
+            authorId: userId,
         });
-        if (!comment) return createHttpError.BadRequest(UserMessage.CommentCreated);
+        if (!comment) return createHttpError.BadRequest(UserMessage.CommentFailed);
     }
 
     async changeRateForRestaurant(commentId, { rate }) {
-        const result = await this.#restaurantCommentModel.updateOne({ _id: commentId }, { rate });
+        const result = await this.#restaurantCommentsModel.updateOne({ _id: commentId }, { rate });
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.CommentEditedFailed);
+    }
+
+    async addCommentForFood(commentDto, userDto) {
+        const { body, rate, foodId } = commentDto;
+        const { _id: userId } = userDto;
+
+        const comment = await this.#foodCommentsModel.create({
+            body,
+            rate,
+            foodId,
+            authorId: userId,
+        });
+        if (!comment) return createHttpError.BadRequest(UserMessage.CommentFailed);
+    }
+
+    async changeRateForFood(commentId, { rate }) {
+        const result = await this.#foodCommentsModel.updateOne({ _id: commentId }, { rate });
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.CommentEditedFailed);
     }
 
@@ -110,11 +131,16 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.BookmarkFailed);
     }
 
-    async findCommentById(id) {
-        const comment = await this.#restaurantCommentModel.findById(id);
-        if (!comment) throw createHttpError.BadRequest(UserMessage.CommentNotExist);
-
-        return comment;
+    async findCommentById(id, model) {
+        if (model === "restaurant") {
+            const commentRestaurant = await this.#restaurantCommentsModel.findById(id).where({ isAccepted: true });
+            if (!commentRestaurant) throw createHttpError.BadRequest(UserMessage.CommentNotExist);
+            return commentRestaurant;
+        } else if (model === "food") {
+            const commentFood = await this.#foodCommentsModel.findById(id).where({ isAccepted: true });
+            if (!commentFood) throw createHttpError.BadRequest(UserMessage.CommentNotExist);
+            return commentFood;
+        }
     }
 
     async checkIsUserCreatedComment(commentDto, userDto) {
@@ -166,9 +192,9 @@ class UserService {
         if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(UserMessage.NotValidRestaurant);
     }
 
-    async checkExistFood({ id }) {
-        if (!isValidObjectId(id)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
-        const food = await this.#foodModel.findById(id);
+    async checkExistFood({ id, foodId }) {
+        if (!isValidObjectId(id ?? foodId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
+        const food = await this.#foodModel.findById(id ?? foodId);
         if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
     }
 }

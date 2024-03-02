@@ -20,11 +20,11 @@ class UserController {
         }
     }
 
-    async createComment(req, res, next) {
+    async addCommentRestaurant(req, res, next) {
         try {
             await this.#service.addCommentForRestaurant(req.body, req.user);
 
-            res.status(201).json({ message: "Comment created successfully" });
+            res.status(201).json({ message: UserMessage.CommentCreated });
         } catch (error) {
             next(error);
         }
@@ -34,9 +34,34 @@ class UserController {
         try {
             const { id } = req.params;
 
-            const comment = await this.#service.findCommentById(id);
+            const comment = await this.#service.findCommentById(id, "restaurant");
             await this.#service.checkIsUserCreatedComment(comment, req.user);
             await this.#service.changeRateForRestaurant(id, req.body);
+
+            res.status(200).json({ message: UserMessage.CommentEditedSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async addCommentFood(req, res, next) {
+        try {
+            await this.#service.checkExistFood(req.body);
+            await this.#service.addCommentForFood(req.body, req.user);
+
+            res.status(201).json({ message: UserMessage.CommentCreated });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async changeRateForFood(req, res, next) {
+        try {
+            const { id } = req.params;
+
+            const comment = await this.#service.findCommentById(id, "food");
+            await this.#service.checkIsUserCreatedComment(comment, req.user);
+            await this.#service.changeRateForFood(id, req.body);
 
             res.status(200).json({ message: UserMessage.CommentEditedSuccess });
         } catch (error) {
