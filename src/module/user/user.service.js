@@ -163,6 +163,17 @@ class UserService {
         );
         if (!updateRestaurantLikes.modifiedCount) throw createHttpError.BadRequest(UserMessage.LikeFailed);
     }
+    
+    async removeLikeFoodComment(commentDto, userDto) {
+        const { id: commentId } = commentDto;
+        const { _id: userId } = userDto;
+
+        const updateRestaurantLikes = await this.#foodCommentsModel.updateOne(
+            { _id: commentId },
+            { $pull: { likes: userId } }
+        );
+        if (!updateRestaurantLikes.modifiedCount) throw createHttpError.BadRequest(UserMessage.LikeFailed);
+    }
 
     async findCommentById(id, model) {
         if (model === "restaurant") {

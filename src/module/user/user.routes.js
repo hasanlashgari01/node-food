@@ -21,6 +21,7 @@ router.patch("/food/:id/comment", controller.changeRateForFood);
 router.post("/food/comment", controller.addCommentFood);
 router.route("/food/:id/like").patch(controller.likeFood).delete(controller.removeLikeFood);
 router.patch("/food/comment/:id/like", controller.addLikeFoodComment);
+router.patch("/food/comment/:id/unlike", controller.removeLikeFoodComment);
 router.route("/food/:id/bookmark").patch(controller.bookmarkFood).delete(controller.removeBookmarkFood);
 
 module.exports = { UserRouter: router };
