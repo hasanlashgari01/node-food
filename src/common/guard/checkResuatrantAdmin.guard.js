@@ -4,11 +4,13 @@ const RestaurantMessage = require("../../module/restaurant/restaurant.messages")
 
 const checkResuatrantAdmin = async (req, res, next) => {
     try {
-        const { author } = req.params;
-        const isResaurantAdmin = await RestaurantModel.findById(author._id);
-        if (!isResaurantAdmin) throw createHttpError.MethodNotAllowed(RestaurantMessage.NotAdmin)
+        const { id: restaurantId } = req.params;
+        const { _id: userId } = req.user;
+        const { author } = await RestaurantModel.findById(restaurantId, "author").lean();
+        if (author?.toString() !== userId?.toString())
+            throw createHttpError.MethodNotAllowed(RestaurantMessage.NotAdmin);
 
-        return next()
+        return next();
     } catch (error) {
         next(error);
     }

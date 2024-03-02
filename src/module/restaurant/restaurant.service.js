@@ -1,6 +1,6 @@
 const createHttpError = require("http-errors");
 const { isValidObjectId } = require("mongoose");
-const translatte = require('translatte');
+const translatte = require("translatte");
 const slugify = require("slugify");
 const RestaurantModel = require("./restaurant.schema");
 const RestaurantCommentsModel = require("./restaurant-comment.schema");
@@ -23,7 +23,7 @@ class RestaurantService {
 
     async create(restaurantDto, userDto) {
         const { name, order_start, order_end, average_delivery_time } = restaurantDto;
-        const slugTranslate = await translatte(name, { from: 'fa', to: 'en' });
+        const slugTranslate = await translatte(name, { from: "fa", to: "en" });
         const slugifyText = slugify(slugTranslate.text, { lower: true });
 
         const resultCreateRestaurant = await this.#model.create({
@@ -31,7 +31,7 @@ class RestaurantService {
             slug: slugifyText,
             order: { order_start, order_end },
             details: { average_delivery_time },
-            author: userDto._id
+            author: userDto._id,
         });
         if (!resultCreateRestaurant) throw new createHttpError.InternalServerError(RestaurantMessage.CreateFailed);
         const resultPushRestaurantID = await this.#userModel.updateOne(
@@ -79,8 +79,8 @@ class RestaurantService {
         return restaurant;
     }
 
-    async getAllComments() {
-        const comments = await this.#restaurantCommentsModel.find().populate("authorId", "-otp");
+    async getAllComments(id) {
+        const comments = await this.#restaurantCommentsModel.find({ restaurantId: id }, "-__v").populate("authorId", "fullName mobile");
 
         return { comments };
     }

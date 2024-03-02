@@ -70,7 +70,8 @@ class RestaurantController {
 
     async allComments(req, res, next) {
         try {
-            const { comments } = await this.#service.getAllComments();
+            const { id } = req.params;
+            const { comments } = await this.#service.getAllComments(id);
 
             res.json({ comments });
         } catch (error) {
@@ -83,7 +84,7 @@ class RestaurantController {
             const { id } = req.params;
             const { status } = req.body;
 
-            res.json({message: "کامنت با موفقیت آپدیت شد"})
+            res.json({ message: "کامنت با موفقیت آپدیت شد" });
         } catch (error) {
             next(error);
         }
