@@ -10,8 +10,8 @@ router.get("/whoami", controller.whoAmI);
 router.patch("/restaurant/:id/comment", controller.changeRateForRestaurant);
 router.route("/restaurant/:id/like").patch(controller.likeRestaurant).delete(controller.removeLikeRestaurant);
 router.patch("/restaurant/comment/:id/like", controller.addLikeRestaurantComment);
-// router.patch("/restaurant/comment/:id/unlike", controller.removeLikeRestaurantComment);
-router.post("/restaurant/comment", controller.addCommentRestaurant);
+router.patch("/restaurant/comment/:id/unlike", controller.removeLikeRestaurantComment);
+router.patch("/restaurant/comment", controller.addCommentRestaurant);
 router
     .route("/restaurant/:id/bookmark")
     .patch(controller.bookmarkRestaurant)

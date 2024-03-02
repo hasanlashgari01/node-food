@@ -127,6 +127,18 @@ class UserController {
         }
     }
 
+    async removeLikeRestaurantComment(req, res, next) {
+        try {
+            const { id } = req.params;
+            const comment = await this.#service.findCommentById(id, "restaurant");
+            await this.#service.removeLikeRestaurantComment(comment, req.user);
+
+            return res.status(200).json({ message: UserMessage.UnlikeSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async likeFood(req, res, next) {
         try {
             await this.#service.checkExistFood(req.params);
