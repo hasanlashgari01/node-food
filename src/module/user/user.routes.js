@@ -6,15 +6,19 @@ const controller = new UserController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
 router.get("/whoami", controller.whoAmI);
-router.patch("/comment/restaurant/:id", controller.changeRateForRestaurant);
-router.post("/comment/restaurant", controller.addCommentRestaurant);
-router.patch("/comment/food/:id", controller.changeRateForFood);
-router.post("/comment/food", controller.addCommentFood);
+// restaurant
+router.patch("/restaurant/:id/comment", controller.changeRateForRestaurant);
 router.route("/restaurant/:id/like").patch(controller.likeRestaurant).delete(controller.removeLikeRestaurant);
+router.patch("/restaurant/comment/:id/like", controller.addLikeRestaurantComment);
+// router.patch("/restaurant/comment/:id/unlike", controller.removeLikeRestaurantComment);
+router.post("/restaurant/comment", controller.addCommentRestaurant);
 router
     .route("/restaurant/:id/bookmark")
     .patch(controller.bookmarkRestaurant)
     .delete(controller.removeBookmarkRestaurant);
+// food
+router.patch("/food/:id/comment", controller.changeRateForFood);
+router.post("/food/comment", controller.addCommentFood);
 router.route("/food/:id/like").patch(controller.likeFood).delete(controller.removeLikeFood);
 router.route("/food/:id/bookmark").patch(controller.bookmarkFood).delete(controller.removeBookmarkFood);
 
