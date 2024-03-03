@@ -68,10 +68,21 @@ class RestaurantController {
         }
     }
 
-    async allComments(req, res, next) {
+    async getMenusByAdmin(req, res, next) {
         try {
             const { id } = req.params;
-            const { comments } = await this.#service.getAllComments(id);
+            const { menus } = await this.#service.getMenusByAdmin(id);
+
+            res.json({ count: menus.length, menus });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getCommentsByAdmin(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { comments } = await this.#service.getCommentsByAdmin(id);
 
             res.json({ count: comments.length, comments });
         } catch (error) {

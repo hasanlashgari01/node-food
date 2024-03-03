@@ -9,7 +9,8 @@ const { checkResuatrantAdmin } = require("../../common/guard/checkResuatrantAdmi
 const controller = new RestaurantController();
 
 router.route("/slug/:slug").get(controller.getRestaurantBySlug);
-router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.allComments);
+router.get("/:id/menu", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusByAdmin);
+router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getCommentsByAdmin);
 router.patch("/comment/:id/status", checkResuatrantAdmin, controller.changeStatus);
 router
     .route("/")

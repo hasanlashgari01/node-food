@@ -79,7 +79,12 @@ class RestaurantService {
         return restaurant;
     }
 
-    async getAllComments(id) {
+    async getMenusByAdmin(id) {
+        const menus = await this.#menuModel.find({ restaurantId: id }, "title image slug");
+        return { menus };
+    }
+
+    async getCommentsByAdmin(id) {
         const comments = await this.#restaurantCommentsModel
             .find({ restaurantId: id }, "-__v")
             .populate("authorId", "fullName mobile");
