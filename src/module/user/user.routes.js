@@ -5,7 +5,7 @@ const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth
 const controller = new UserController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
-router.route("/").put(controller.updateProfile);
+router.route("/").put(controller.updateProfile).patch(controller.updatePassword);
 router.get("/whoami", controller.whoAmI);
 // restaurant
 router.patch("/restaurant/:id/comment", controller.changeRateForRestaurant);

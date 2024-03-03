@@ -6,7 +6,6 @@ const AuthMessage = require("./auth.messages");
 const { randomInt } = require("crypto");
 const { generateAccessToken, generateRefreshToken, hashPassword } = require("../../common/utils/auth");
 const bcrypt = require("bcrypt");
-const { valid } = require("joi");
 
 class AuthService {
     #model;

@@ -23,6 +23,19 @@ class UserController {
         }
     }
 
+    async updatePassword(req, res, next) {
+        try {
+            const { _id: userId } = req.user;
+
+            await this.#service.checkExistUser(userId);
+            await this.#service.updatePassword(userId, req.body);
+
+            res.status(200).json({ message: UserMessage.PasswordUpdateSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async whoAmI(req, res, next) {
         try {
             const { userResult } = await this.#service.getMe(req.user);

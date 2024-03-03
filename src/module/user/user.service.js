@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const createHttpError = require("http-errors");
 const UserModel = require("./user.schema");
 const RestaurantModel = require("../restaurant/restaurant.schema");
@@ -34,6 +35,20 @@ class UserService {
         );
 
         if (!updateResult.modifiedCount) throw createHttpError.BadRequest(UserMessage.ProfileUpdateSuccess);
+    }
+
+    async updatePassword(userId, userDto) {
+        const { currentPassword } = userDto;
+
+        const user = await this.#model.findById(userId).select("password");
+        if (!user) throw createHttpError.NotFound(UserMessage.UserNotExist);
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) throw createHttpError.BadRequest(UserMessage.CurrentPasswordIsWrong);
+
+        const salt = await bcrypt.genSaltSync(10);
+        const hashedPassword = await bcrypt.hashSync(password, salt);
+        const updateResult = await this.#model.updateOne({ _id: userId }, { password: hashedPassword });
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(UserMessage.PasswordUpdateFailed);
     }
 
     async getMe({ _id: userId }) {
