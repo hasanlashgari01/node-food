@@ -8,16 +8,19 @@ const FoodMessage = require("./food.messages");
 const MenuMessage = require("../menu/menu.messages");
 const RestaurantMessage = require("../restaurant/restaurant.messages");
 const KindOfFoodModel = require("./food-kind.schema");
+const FoodCommentsModel = require("./food-comment.schema");
 
 class FoodService {
     #model;
     #kindOfFoodModel;
+    #foodCommentsModel;
     #restaurantModel;
     #menuModel;
     #userModel;
     constructor() {
         this.#model = FoodModel;
         this.#kindOfFoodModel = KindOfFoodModel;
+        this.#foodCommentsModel = FoodCommentsModel;
         this.#restaurantModel = RestaurantModel;
         this.#menuModel = MenuModel;
         this.#userModel = UserModel;
@@ -108,6 +111,14 @@ class FoodService {
         const isAdmin = restaurants.some((id) => id.toString() === restaurantId.toString());
         if (!isAdmin) throw createHttpError.BadRequest(RestaurantMessage.NotAdmin);
         return isAdmin;
+    }
+
+    async getAllComments(id) {
+        const comments = await this.#foodCommentsModel
+            .find({ foodId: id }, "-__v")
+            .populate("authorId", "fullName mobile");
+
+        return { comments };
     }
 }
 

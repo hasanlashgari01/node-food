@@ -80,7 +80,9 @@ class RestaurantService {
     }
 
     async getAllComments(id) {
-        const comments = await this.#restaurantCommentsModel.find({ restaurantId: id }, "-__v").populate("authorId", "fullName mobile");
+        const comments = await this.#restaurantCommentsModel
+            .find({ restaurantId: id }, "-__v")
+            .populate("authorId", "fullName mobile");
 
         return { comments };
     }

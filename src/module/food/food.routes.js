@@ -3,9 +3,11 @@ const FoodController = require("./food.controller");
 const validate = require("../../common/middleware/joi.validator");
 const { FoodValidator, FoodUpdateValidator } = require("./food.validation");
 const { foodUpload } = require("../../common/utils/multer");
+const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth.guard");
 
 const controller = new FoodController();
 
+router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, controller.allComments);
 router.route("/kind/many/:id").delete(controller.deleteKindMany);
 router.route("/kind/:id").delete(controller.deleteKind);
 router.route("/").post(foodUpload(), validate(FoodValidator), controller.create);

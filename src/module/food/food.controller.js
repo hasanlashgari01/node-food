@@ -63,6 +63,17 @@ class FoodController {
             next(error);
         }
     }
+
+    async allComments(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { comments } = await this.#service.getAllComments(id);
+
+            res.json({ count: comments.length, comments });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = FoodController;

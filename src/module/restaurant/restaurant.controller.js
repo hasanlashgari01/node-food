@@ -73,7 +73,7 @@ class RestaurantController {
             const { id } = req.params;
             const { comments } = await this.#service.getAllComments(id);
 
-            res.json({ comments });
+            res.json({ count: comments.length, comments });
         } catch (error) {
             next(error);
         }
