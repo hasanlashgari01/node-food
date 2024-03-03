@@ -1,4 +1,7 @@
 const UserMessage = {
+    UserNotExist: "کاربر مورد نظر وجود ندارد",
+    ProfileUpdateSuccess: "پروفایل با موفقیت به روز شد",
+    ProfileUpdateFailed: "به روز رسانی پروفایل با مشکل مواجه شد",
     CommentCreated: "نظر شما با موفقیت ثبت شد",
     CommentFailed: "ثبت نظر با مشکل مواجه شد",
     CommentEditedSuccess: "نظر شما با موفقیت ویرایش شد",

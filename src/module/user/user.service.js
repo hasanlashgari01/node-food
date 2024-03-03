@@ -21,6 +21,21 @@ class UserService {
         this.#foodModel = FoodModel;
     }
 
+    async updateProfile(userId, userDto) {
+        const { fullName, avatar, biography, age } = userDto;
+        const updateResult = await this.#model.updateOne(
+            { _id: userId },
+            {
+                fullName,
+                avatar,
+                biography,
+                age,
+            }
+        );
+
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(UserMessage.ProfileUpdateSuccess);
+    }
+
     async getMe({ _id: userId }) {
         const selectFoodFields = "title image kind";
         const selectRestaurantFields = "name province slug logo cover";
@@ -163,7 +178,7 @@ class UserService {
         );
         if (!updateRestaurantLikes.modifiedCount) throw createHttpError.BadRequest(UserMessage.LikeFailed);
     }
-    
+
     async removeLikeFoodComment(commentDto, userDto) {
         const { id: commentId } = commentDto;
         const { _id: userId } = userDto;
@@ -185,6 +200,11 @@ class UserService {
             if (!commentFood) throw createHttpError.BadRequest(UserMessage.CommentNotExist);
             return commentFood;
         }
+    }
+
+    async checkExistUser(id) {
+        const user = await this.#model.findById(id);
+        if (!user) throw createHttpError.NotFound(UserMessage.UserNotExist);
     }
 
     async checkIsUserCreatedComment(commentDto, userDto) {
