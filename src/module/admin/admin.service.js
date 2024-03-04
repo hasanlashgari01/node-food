@@ -10,10 +10,14 @@ const BanRestaurantModel = require("./../ban-restautant/ban-restautant.schema");
 const RestaurentMessage = require("../restaurant/restaurant.messages");
 const SuggestionMenuModel = require("../menu/menu-suggestion.schema");
 const BanUserModel = require("./../ban/ban.schema");
+const RestaurantCommentsModel = require("../restaurant/restaurant-comment.schema");
+const FoodCommentsModel = require("../food/food-comment.schema");
 
 class AdminService {
     #model;
     #restaurantModel;
+    #restaurantCommentModel;
+    #foodCommentModel;
     #banRestaurantModel;
     #suggestionMenuModel;
     #banUserModel;
@@ -22,6 +26,8 @@ class AdminService {
         autoBind(this);
         this.#model = UserModel;
         this.#restaurantModel = RestaurantModel;
+        this.#restaurantCommentModel = RestaurantCommentsModel;
+        this.#foodCommentModel = FoodCommentsModel;
         this.#banRestaurantModel = BanRestaurantModel;
         this.#suggestionMenuModel = SuggestionMenuModel;
         this.#banUserModel = BanUserModel;
@@ -96,7 +102,7 @@ class AdminService {
         if (!isBanRestauRent) throw new createHttpError.NotFound(AdminMessage.RestaurantIsNotBanned);
     }
 
-    // Menu
+    // * Menu
     async createSuggestionMenu(menuDto, fileDto) {
         const { title, slug } = menuDto;
         const genrateSlug = await slugify(slug);
@@ -140,6 +146,7 @@ class AdminService {
         if (!menu) throw new createHttpError.NotFound(AdminMessage.SuggestionMenuNotExist);
     }
 
+    // * User
     async allUsersByRole(role) {
         const optionsUsersRole = { role };
         const optionsUsersUnselect = { password: 0, otp: 0, resetLink: 0, __v: 0 };
@@ -196,8 +203,17 @@ class AdminService {
         if (!result.modifiedCount) throw new createHttpError.BadRequest(AdminMessage.UserChangeRoleFailed);
     }
 
-    async changeRoleAsAdmin() {
-        
+    async changeRoleAsAdmin() {}
+
+    // * Comment
+    async getRestaurantComments() {
+        const restaurantComments = await this.#restaurantCommentModel
+            .find()
+            .populate("restaurantId", "name phone email slug")
+            .populate("authorId", "fullName mobile email")
+            .lean();
+
+        return restaurantComments;
     }
 }
 

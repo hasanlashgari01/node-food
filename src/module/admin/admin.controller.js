@@ -49,7 +49,7 @@ class AdminController {
             await this.#service.acceptOrRejectRestaurant(id, isValid);
 
             res.json({
-                message: isValid ? AdminMessage.RestaurantRejectSuccess : AdminMessage.RestaurantAcceptSuccess
+                message: isValid ? AdminMessage.RestaurantRejectSuccess : AdminMessage.RestaurantAcceptSuccess,
             });
         } catch (error) {
             next(error);
@@ -159,8 +159,7 @@ class AdminController {
             const { resultCount: sellersCount, result: sellers } = await this.#service.allUsersByRole("SELLER");
 
             res.json({ count: sellersCount, sellers });
-        } catch (error) {
-        }
+        } catch (error) {}
     }
 
     async banUser(req, res, next) {
@@ -171,7 +170,7 @@ class AdminController {
             const banResult = await this.#service.banUserByAdmin(mobile, email, isBanUser);
 
             res.status(banResult.deletedCount ? 200 : 201).json({
-                message: banResult.deletedCount ? AdminMessage.UserUnBanSuccess : AdminMessage.UserBanSuccess
+                message: banResult.deletedCount ? AdminMessage.UserUnBanSuccess : AdminMessage.UserBanSuccess,
             });
         } catch (error) {
             next(error);
@@ -208,6 +207,16 @@ class AdminController {
             await this.#service.changeRoleAsSeller(id);
 
             res.json({ message: AdminMessage.UserChangeRoleSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getRestaurantComments(req, res, next) {
+        try {
+            const comments = await this.#service.getRestaurantComments();
+
+            res.json({ count: comments.length, comments });
         } catch (error) {
             next(error);
         }
