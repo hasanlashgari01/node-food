@@ -90,12 +90,13 @@ class RestaurantController {
         }
     }
 
-    async changeStatus(req, res, next) {
+    async changeCommentStatus(req, res, next) {
         try {
             const { id } = req.params;
-            const { status } = req.body;
 
-            res.json({ message: "کامنت با موفقیت آپدیت شد" });
+            await this.#service.changeCommentStatus(id, req.body);
+
+            res.json({ message: RestaurantMessage.CommentUpdateSuccess });
         } catch (error) {
             next(error);
         }

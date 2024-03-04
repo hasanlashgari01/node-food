@@ -13,6 +13,8 @@ const RestaurantMessage = {
     NotValidRestaurant: "رستوران توسط ادمین تایید نشده است",
     NotAdmin: "فقط مدیریت رستوران دسترسی دارد",
     RestaurantBanned: "این رستوران بن شده است",
+    CommentUpdateSuccess: "کامنت با موفقیت آپدیت شد",
+    CommentUpdateFailed: "ویرایش کامنت با مشکل مواجه شد",
 };
 
 module.exports = RestaurantMessage;

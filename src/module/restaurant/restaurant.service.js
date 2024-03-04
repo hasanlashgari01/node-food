@@ -92,8 +92,11 @@ class RestaurantService {
         return { comments };
     }
 
-    async changeCommentStatus(id, status) {
-        const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: id }, { isAccepted: status });
+    async changeCommentStatus(commentId, bodyDto) {
+        const { status } = bodyDto;
+        if (status !== true && status !== false) throw createHttpError.BadRequest(RestaurantMessage.CommentUpdateFailed);
+
+        const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: commentId }, { isAccepted: status });
     }
 }
 
