@@ -120,6 +120,19 @@ class FoodService {
 
         return { comments };
     }
+
+    async changeCommentStatus(commentDto) {
+        const { _id: commentId, isAccepted } = commentDto;
+
+        const updateResult = await this.#foodCommentsModel.updateOne({ _id: commentId }, { isAccepted: !isAccepted });
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(FoodMessage.CommentUpdateFailed);
+    }
+
+    async checkExistComment(commentId) {
+        const comment = await this.#foodCommentsModel.findById(commentId);
+        if (!comment) throw createHttpError.NotFound(FoodMessage.CommentNotExist);
+        return { comment };
+    }
 }
 
 module.exports = FoodService;

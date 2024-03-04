@@ -7,6 +7,7 @@ const RestaurantCommentsModel = require("./restaurant-comment.schema");
 const RestaurantMessage = require("./restaurant.messages");
 const MenuModel = require("../menu/menu.schema");
 const FoodModel = require("../food/food.schema");
+const FoodCommentsModel = require("../food/food-comment.schema");
 const UserModel = require("../user/user.schema");
 
 class RestaurantService {
@@ -100,12 +101,20 @@ class RestaurantService {
         return { comments };
     }
 
-    async changeCommentStatus(commentId, bodyDto) {
-        const { status } = bodyDto;
-        if (status !== true && status !== false)
-            throw createHttpError.BadRequest(RestaurantMessage.CommentUpdateFailed);
+    async changeCommentStatus(commentDto) {
+        const { _id: commentId, isAccepted } = commentDto;
 
-        const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: commentId }, { isAccepted: status });
+        const updateResult = await this.#restaurantCommentsModel.updateOne(
+            { _id: commentId },
+            { isAccepted: !isAccepted }
+        );
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(RestaurantMessage.CommentUpdateFailed);
+    }
+
+    async checkExistComment(commentId) {
+        const comment = await this.#restaurantCommentsModel.findById(commentId);
+        if (!comment) throw createHttpError.NotFound(RestaurantMessage.CommentNotExist);
+        return { comment };
     }
 
     async getAllFoods(menusId) {

@@ -105,7 +105,8 @@ class RestaurantController {
         try {
             const { id } = req.params;
 
-            await this.#service.changeCommentStatus(id, req.body);
+            const { comment } = await this.#service.checkExistComment(id);
+            await this.#service.changeCommentStatus(comment);
 
             res.json({ message: RestaurantMessage.CommentUpdateSuccess });
         } catch (error) {

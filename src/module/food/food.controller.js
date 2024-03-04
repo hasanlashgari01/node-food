@@ -74,6 +74,19 @@ class FoodController {
             next(error);
         }
     }
+
+    async changeCommentStatus(req, res, next) {
+        try {
+            const { id } = req.params;
+
+            const { comment } = await this.#service.checkExistComment(id);
+            await this.#service.changeCommentStatus(comment);
+
+            res.json({ message: FoodMessage.CommentUpdateSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = FoodController;

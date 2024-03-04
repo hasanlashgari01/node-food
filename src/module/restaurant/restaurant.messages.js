@@ -15,6 +15,7 @@ const RestaurantMessage = {
     RestaurantBanned: "این رستوران بن شده است",
     CommentUpdateSuccess: "کامنت با موفقیت آپدیت شد",
     CommentUpdateFailed: "ویرایش کامنت با مشکل مواجه شد",
+    CommentNotExist: "کامنت یافت نشد",
 };
 
 module.exports = RestaurantMessage;
