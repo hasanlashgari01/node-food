@@ -6,18 +6,21 @@ const RestaurantModel = require("./restaurant.schema");
 const RestaurantCommentsModel = require("./restaurant-comment.schema");
 const RestaurantMessage = require("./restaurant.messages");
 const MenuModel = require("../menu/menu.schema");
+const FoodModel = require("../food/food.schema");
 const UserModel = require("../user/user.schema");
 
 class RestaurantService {
     #model;
     #restaurantCommentsModel;
     #menuModel;
+    #foodModel;
     #userModel;
 
     constructor() {
         this.#model = RestaurantModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
         this.#menuModel = MenuModel;
+        this.#foodModel = FoodModel;
         this.#userModel = UserModel;
     }
 
@@ -103,6 +106,13 @@ class RestaurantService {
             throw createHttpError.BadRequest(RestaurantMessage.CommentUpdateFailed);
 
         const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: commentId }, { isAccepted: status });
+    }
+
+    async getAllFoods(restaurantId) {
+        const menusId = await this.#menuModel.find({ restaurantId }, "_id");
+        const foods = await this.#foodModel.find({ menuId: { $in: menusId } }, "-__v -menuId -description");
+
+        return { foods };
     }
 }
 

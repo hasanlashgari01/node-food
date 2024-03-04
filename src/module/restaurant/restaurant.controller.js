@@ -112,6 +112,17 @@ class RestaurantController {
             next(error);
         }
     }
+
+    async getAllFoods(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { foods } = await this.#service.getAllFoods(id);
+
+            res.json({ count: foods.length, foods });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = RestaurantController;

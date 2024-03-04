@@ -13,6 +13,7 @@ router.patch("/comment/:id/status", AccessTokenGuard, RefreshTokenGuard, control
 router.get("/:id/menu", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusByAdmin);
 router.get("/:id/menu/empty", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusEmpty);
 router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getCommentsByAdmin);
+router.route("/:id/food").get(controller.getAllFoods);
 router
     .route("/")
     .post(AccessTokenGuard, RefreshTokenGuard, restaurantUpload(), validate(RestaurantValidator), controller.create);
