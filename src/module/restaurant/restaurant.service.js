@@ -108,11 +108,26 @@ class RestaurantService {
         const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: commentId }, { isAccepted: status });
     }
 
-    async getAllFoods(restaurantId) {
-        const menusId = await this.#menuModel.find({ restaurantId }, "_id");
-        const foods = await this.#foodModel.find({ menuId: { $in: menusId } }, "-__v -menuId -description");
+    async getAllFoods(menusId) {
+        const foods = await this.#foodModel
+            .find({ menuId: { $in: menusId } })
+            .select("-__v -menuId -description")
+            .lean();
 
         return { foods };
+    }
+
+    async getAllFoodsHaveDiscount(menusId) {
+        const foods = await this.#foodModel
+            .find({ menuId: { $in: menusId }, discount: { $gt: 0 } })
+            .select("-__v -menuId -description")
+            .lean();
+
+        return { foods };
+    }
+
+    async getMenusId(restaurantId) {
+        return await this.#menuModel.find({ restaurantId }, "_id");
     }
 }
 

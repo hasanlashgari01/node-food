@@ -5,6 +5,7 @@ const KindOfFoodSchema = new Schema({
         {
             title: { type: String, required: true },
             price: { type: Number, required: true },
+            discount: { type: Number, default: 0, min: 0, max: 100 },
             weight: { type: Number, required: true },
         },
     ],

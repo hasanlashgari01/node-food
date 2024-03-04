@@ -116,7 +116,20 @@ class RestaurantController {
     async getAllFoods(req, res, next) {
         try {
             const { id } = req.params;
-            const { foods } = await this.#service.getAllFoods(id);
+            const menus = await this.#service.getMenusId(id);
+            const { foods } = await this.#service.getAllFoods(menus);
+
+            res.json({ count: foods.length, foods });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getAllFoodsHaveDiscount(req, res, next) {
+        try {
+            const { id } = req.params;
+            const menus = await this.#service.getMenusId(id);
+            const { foods } = await this.#service.getAllFoodsHaveDiscount(menus);
 
             res.json({ count: foods.length, foods });
         } catch (error) {
