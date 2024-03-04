@@ -84,6 +84,11 @@ class RestaurantService {
         return { menus };
     }
 
+    async getMenusEmpty(id) {
+        const menus = await this.#menuModel.find({ restaurantId: id, foods: { $size: 0 } }, "title image slug");
+        return { menus };
+    }
+
     async getCommentsByAdmin(id) {
         const comments = await this.#restaurantCommentsModel
             .find({ restaurantId: id }, "-__v")
@@ -94,7 +99,8 @@ class RestaurantService {
 
     async changeCommentStatus(commentId, bodyDto) {
         const { status } = bodyDto;
-        if (status !== true && status !== false) throw createHttpError.BadRequest(RestaurantMessage.CommentUpdateFailed);
+        if (status !== true && status !== false)
+            throw createHttpError.BadRequest(RestaurantMessage.CommentUpdateFailed);
 
         const changeResult = await this.#restaurantCommentsModel.updateOne({ _id: commentId }, { isAccepted: status });
     }

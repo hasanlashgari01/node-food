@@ -79,6 +79,17 @@ class RestaurantController {
         }
     }
 
+    async getMenusEmpty(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { menus } = await this.#service.getMenusEmpty(id);
+
+            res.json({ count: menus.length, menus });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getCommentsByAdmin(req, res, next) {
         try {
             const { id } = req.params;
