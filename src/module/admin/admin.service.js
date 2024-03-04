@@ -215,6 +215,16 @@ class AdminService {
 
         return restaurantComments;
     }
+
+    async rejectRestaurantComment(commentId) {
+        const { authorId } = await this.#restaurantCommentModel
+            .findByIdAndUpdate(commentId, { isAccepted: false })
+            .select("authorId")
+            .populate("authorId")
+            .lean();
+
+        return authorId;
+    }
 }
 
 module.exports = AdminService;

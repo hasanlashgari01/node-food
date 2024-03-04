@@ -221,6 +221,24 @@ class AdminController {
             next(error);
         }
     }
+
+    async rejectCommentAndBanUser(req, res, next) {
+        try {
+            const { id: commentId } = req.params;
+            const { _id: authorId } = await this.#service.rejectRestaurantComment(commentId);
+            const { mobile, email } = await this.#service.checkIsValidUser(authorId);
+            const result = await this.#service.banUserByAdmin(mobile, email, false);
+
+            res.json({ message: AdminMessage.UserBanSuccess });
+        } catch (error) {
+            if (error.code === 11000) {
+                const field = Object.keys(error.keyValue)[0];
+                const message = `An item with the same ${field} already exists.`;
+                return res.status(409).json({ error: message });
+            }
+            next(error);
+        }
+    }
 }
 
 module.exports = AdminController;
