@@ -45,6 +45,14 @@ class RestaurantService {
         if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurantMessage.NotExist);
     }
 
+    async getMenuBySlug(slug) {
+        return await this.#model.findOne({ slug });
+    }
+
+    async getMenuById(menuId) {
+        return await this.#model.findById(menuId);
+    }
+
     async isValidRestaurant(id) {
         if (!isValidObjectId(id)) throw new createHttpError.BadRequest(RestaurantMessage.IdNotValid);
         const restaurant = await this.#restaurantModel.findById(id);

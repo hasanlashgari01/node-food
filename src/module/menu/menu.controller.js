@@ -28,7 +28,7 @@ class MenuController {
             const { id } = req.params;
             const { restaurantId } = req.body;
             const userDto = req.user;
-            await this.#service.checkIsBanRestaurant(restaurantId)
+            await this.#service.checkIsBanRestaurant(restaurantId);
             await this.#service.isValidRestaurant(restaurantId);
             await this.#service.isRestaurantAdmin(restaurantId, userDto);
             await this.#service.update(id, req.body);
@@ -43,12 +43,34 @@ class MenuController {
         try {
             const { id } = req.params;
             const { restaurantId } = await this.#service.isValidMenu(id);
-            await this.#service.checkIsBanRestaurant(restaurantId)
+            await this.#service.checkIsBanRestaurant(restaurantId);
             await this.#service.isValidRestaurant(restaurantId);
             await this.#service.isRestaurantAdmin(restaurantId, req.user);
             await this.#service.delete(id, req.user);
 
             res.json({ message: MenuMessage.DeleteSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getMenuBySlug(req, res, next) {
+        try {
+            const { slug } = req.params;
+            const menu = await this.#service.getMenuBySlug(slug);
+
+            res.json(menu);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getMenuById(req, res, next) {
+        try {
+            const { id } = req.params;
+            const menu = await this.#service.getMenuById(id);
+
+            res.json(menu);
         } catch (error) {
             next(error);
         }

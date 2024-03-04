@@ -8,8 +8,10 @@ const { menuUpload } = require("../../common/utils/multer");
 const controller = new MenuController();
 
 router.route("/").post(AccessTokenGuard, RefreshTokenGuard, menuUpload(), validate(MenuValidator), controller.create);
+router.route("/slug/:slug").get(controller.getMenuBySlug);
 router
     .route("/:id", validate(MenuUpdateValidator))
+    .get(controller.getMenuById)
     .patch(AccessTokenGuard, RefreshTokenGuard, controller.update)
     .delete(AccessTokenGuard, RefreshTokenGuard, controller.delete);
 
