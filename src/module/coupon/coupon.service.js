@@ -42,6 +42,12 @@ class CouponService {
         if (!updateResult.matchedCount) throw createHttpError.NotFound(CouponMessage.CouponUpdatedFailed);
     }
 
+    async getAll(status) {
+        if (!status) return await this.#model.find({}).lean();
+        
+        return await this.#model.find({ status }).lean();
+    }
+
     async checkExistCode(code, showError = false) {
         const coupon = await this.#model.findOne({ code });
         if (showError && coupon) throw createHttpError.Conflict(CouponMessage.AlreadyExist);

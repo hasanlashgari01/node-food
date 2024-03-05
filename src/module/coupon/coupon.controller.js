@@ -33,6 +33,17 @@ class CouponController {
             next(error);
         }
     }
+
+    async getAll(req, res, next) {
+        try {
+            const { status } = req.query;
+            const coupons = await this.#service.getAll(status);
+
+            res.json({ count: coupons.length, coupons });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = CouponController;

@@ -8,7 +8,10 @@ const { CreateCouponValidator } = require("./coupon.validation");
 const controller = new CouponController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
-router.route("/").post(isAdminGuard, validate(CreateCouponValidator), controller.create);
+router
+    .route("/")
+    .post(isAdminGuard, validate(CreateCouponValidator), controller.create)
+    .get(isAdminGuard, controller.getAll);
 router.route("/:id").put(isAdminGuard, validate(CreateCouponValidator), controller.update);
 
 module.exports = { CouponRouter: router };
