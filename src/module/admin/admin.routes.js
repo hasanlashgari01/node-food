@@ -13,11 +13,12 @@ router.route("/restaurant").get(controller.getAllRestaurant);
 router.route("/restaurant/banned").get(controller.getAllRestaurantBanned);
 router.route("/restaurant/status/:isValid").get(controller.getAllRestaurantWithStatus);
 router.route("/restaurant/comment").get(controller.getRestaurantComments);
-router.route("/restaurant/comment/:id").get(controller.rejectCommentAndBanUser);
+router.route("/restaurant/comment/:id").get(controller.rejectRestaurantCommentAndBanUser);
 router.route("/restaurant/:id/status").get(controller.changeRestaurantValid);
 router.route("/restaurant/:id/ban").get(controller.banRestaurant).delete(controller.removeRestaurantBan);
 router.route("/restaurant/:id").get(controller.getRestaurant);
 router.route("/food/comment").get(controller.getFoodComments);
+router.route("/food/comment/:id").get(controller.rejectFoodCommentAndBanUser);
 router
     .route("/menu")
     .get(controller.getAllSuggestionMenu)

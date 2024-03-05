@@ -222,11 +222,12 @@ class AdminController {
         }
     }
 
-    async rejectCommentAndBanUser(req, res, next) {
+    async rejectRestaurantCommentAndBanUser(req, res, next) {
         try {
             const { id: commentId } = req.params;
             const { _id: authorId } = await this.#service.rejectRestaurantComment(commentId);
             const { mobile, email } = await this.#service.checkIsValidUser(authorId);
+            await this.#service.checkIsUserOnBanList(mobile, email, true);
             const result = await this.#service.banUserByAdmin(mobile, email, false);
 
             res.json({ message: AdminMessage.UserBanSuccess });
@@ -246,6 +247,25 @@ class AdminController {
 
             res.json({ count: comments.length, comments });
         } catch (error) {
+            next(error);
+        }
+    }
+
+    async rejectFoodCommentAndBanUser(req, res, next) {
+        try {
+            const { id: commentId } = req.params;
+            const { _id: authorId } = await this.#service.rejectFoodComment(commentId);
+            const { mobile, email } = await this.#service.checkIsValidUser(authorId);
+            await this.#service.checkIsUserOnBanList(mobile, email, true);
+            const result = await this.#service.banUserByAdmin(mobile, email, false);
+
+            res.json({ message: AdminMessage.UserBanSuccess });
+        } catch (error) {
+            if (error.code === 11000) {
+                const field = Object.keys(error.keyValue)[0];
+                const message = `An item with the same ${field} already exists.`;
+                return res.status(409).json({ error: message });
+            }
             next(error);
         }
     }

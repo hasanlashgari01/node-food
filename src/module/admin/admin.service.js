@@ -175,8 +175,9 @@ class AdminService {
         return user;
     }
 
-    async checkIsUserOnBanList(mobile, email) {
+    async checkIsUserOnBanList(mobile, email, showError = false) {
         const isBanUser = await this.#banUserModel.findOne({ $or: [{ mobile }, { email }] });
+        if (isBanUser && showError) throw new createHttpError.BadRequest(AdminMessage.UserAlreadyOnBanList);
         return isBanUser;
     }
 
@@ -234,6 +235,16 @@ class AdminService {
             .lean();
 
         return foodComments;
+    }
+
+    async rejectFoodComment(commentId) {
+        const { authorId } = await this.#foodCommentModel
+            .findByIdAndUpdate(commentId, { isAccepted: false })
+            .select("authorId")
+            .populate("authorId")
+            .lean();
+
+        return authorId;
     }
 }
 
