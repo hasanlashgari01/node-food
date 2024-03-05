@@ -246,6 +246,10 @@ class AdminService {
 
         return authorId;
     }
+
+    async changeCommentFoodToShowOrHide(commentId, status) {
+        
+    }
 }
 
 module.exports = AdminService;

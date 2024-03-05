@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const AdminController = require("./admin.controller");
+const FoodController = require("../food/food.controller");
 const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth.guard");
 const { isAdminGuard } = require("../../common/guard/admin.guard");
 const validate = require("../../common/middleware/joi.validator");
@@ -7,6 +8,7 @@ const { SuggestionMenuValidator, UpdateSuggestionMenuValidator } = require("./ad
 const { menuUpload } = require("../../common/utils/multer");
 
 const controller = new AdminController();
+const foodController = new FoodController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard, isAdminGuard);
 router.route("/restaurant").get(controller.getAllRestaurant);
@@ -19,6 +21,7 @@ router.route("/restaurant/:id/ban").get(controller.banRestaurant).delete(control
 router.route("/restaurant/:id").get(controller.getRestaurant);
 router.route("/food/comment").get(controller.getFoodComments);
 router.route("/food/comment/:id").get(controller.rejectFoodCommentAndBanUser);
+router.patch("/food/comment/:id/status", foodController.changeCommentStatus);
 router
     .route("/menu")
     .get(controller.getAllSuggestionMenu)
