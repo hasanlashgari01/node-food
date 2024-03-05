@@ -8,6 +8,7 @@ const { FoodRouter } = require("./module/food/food.routes");
 const { FilesRouter } = require("./module/files/files.routes");
 const { AdminRouter } = require("./module/admin/admin.routes");
 const { SearchRouter } = require("./module/search/search.routes");
+const { CouponRouter } = require("./module/coupon/coupon.routes");
 
 router.use("/files", FilesRouter);
 router.use("/auth", AuthRouter);
@@ -19,5 +20,6 @@ router.use("/api/user", UserRouter);
 router.use("/api/restaurant", RestaurantRouter);
 router.use("/api/menu", MenuRouter);
 router.use("/api/food", FoodRouter);
+router.use("/api/coupon", CouponRouter);
 
 module.exports = router;

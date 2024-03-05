@@ -1,6 +1,4 @@
 const createHttpError = require("http-errors");
-const jwt = require("jsonwebtoken");
-const UserModel = require("../../module/user/user.schema");
 const { AdminMessage } = require("../messages/admin.message");
 
 const isAdminGuard = async (req, res, next) => {
