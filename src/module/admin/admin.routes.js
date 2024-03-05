@@ -17,6 +17,7 @@ router.route("/restaurant/comment/:id").get(controller.rejectCommentAndBanUser);
 router.route("/restaurant/:id/status").get(controller.changeRestaurantValid);
 router.route("/restaurant/:id/ban").get(controller.banRestaurant).delete(controller.removeRestaurantBan);
 router.route("/restaurant/:id").get(controller.getRestaurant);
+router.route("/food/comment").get(controller.getFoodComments);
 router
     .route("/menu")
     .get(controller.getAllSuggestionMenu)

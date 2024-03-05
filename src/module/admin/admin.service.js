@@ -225,6 +225,16 @@ class AdminService {
 
         return authorId;
     }
+
+    async getFoodComments() {
+        const foodComments = await this.#foodCommentModel
+            .find()
+            .populate("foodId", "title image rate")
+            .populate("authorId", "fullName mobile email")
+            .lean();
+
+        return foodComments;
+    }
 }
 
 module.exports = AdminService;

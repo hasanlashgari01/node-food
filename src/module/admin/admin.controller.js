@@ -239,6 +239,16 @@ class AdminController {
             next(error);
         }
     }
+
+    async getFoodComments(req, res, next) {
+        try {
+            const comments = await this.#service.getFoodComments();
+
+            res.json({ count: comments.length, comments });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = AdminController;
