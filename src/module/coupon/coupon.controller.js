@@ -21,6 +21,18 @@ class CouponController {
             next(error);
         }
     }
+
+    async update(req, res, next) {
+        try {
+            const { id } = req.params;
+            await this.#service.checkIsCreator(req.user, id);
+            await this.#service.update(id, req.body);
+
+            res.json({ message: CouponMessage.CouponUpdatedSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = CouponController;

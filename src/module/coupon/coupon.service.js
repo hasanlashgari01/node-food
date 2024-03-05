@@ -31,10 +31,28 @@ class CouponService {
         if (!coupon) throw createHttpError.InternalServerError(CouponMessage.InternalServerError);
     }
 
+    async update(couponId, couponDto) {
+        const { code, type, amount, status, startDate, expireDate, usageCount, usageLimit, foodIds, userIds } =
+            couponDto;
+
+        const updateResult = await this.#model.updateOne(
+            { _id: couponId },
+            { code, type, amount, status, startDate, expireDate, usageCount, usageLimit, foodIds, userIds }
+        );
+        if (!updateResult.matchedCount) throw createHttpError.NotFound(CouponMessage.CouponUpdatedFailed);
+    }
+
     async checkExistCode(code, showError = false) {
         const coupon = await this.#model.findOne({ code });
         if (showError && coupon) throw createHttpError.Conflict(CouponMessage.AlreadyExist);
         return coupon;
+    }
+
+    async checkIsCreator(userDto, couponId) {
+        const { _id: userId } = userDto;
+
+        const coupon = await this.#model.findById(couponId);
+        if (coupon.creator.toString() !== userId.toString()) throw createHttpError.Forbidden(CouponMessage.NotCreator);
     }
 }
 

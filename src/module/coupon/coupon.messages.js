@@ -3,6 +3,7 @@ const CouponMessage = {
     CouponCreatedFailed: "ایجاد کوپن با مشکل مواجه شد",
     CouponUpdatedSuccess: "کوپن با موفقیت به روز رسانی شد",
     CouponUpdatedFailed: "به روز رسانی کوپن با مشکل مواجه شد",
+    NotCreator: "شما اجازه دسترسی به این کوپن را ندارید",
     NotFound: "کوپن یافت نشد",
     AlreadyExist: "کوپن تکراری است",
     IdNotValid: "شناسه کوپن صحیح نمی باشد",
