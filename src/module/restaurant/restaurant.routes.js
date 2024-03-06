@@ -23,6 +23,7 @@ router
 router
     .route("/:id/discount")
     .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountToAllFoods)
+    .patch(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.changeDiscountToAllFoods)
     .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountToAllFoods);
 router
     .route("/")
