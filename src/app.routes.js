@@ -22,6 +22,6 @@ router.use("/api/restaurant", RestaurantRouter);
 router.use("/api/menu", MenuRouter);
 router.use("/api/food", FoodRouter);
 router.use("/api/coupon", CouponRouter);
-router.use("/api/order", OrderRouter)
+router.use("/api/order", OrderRouter);
 
 module.exports = router;

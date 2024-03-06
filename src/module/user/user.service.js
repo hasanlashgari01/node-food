@@ -7,6 +7,7 @@ const FoodModel = require("../food/food.schema");
 const UserMessage = require("./user.messages");
 const { isValidObjectId } = require("mongoose");
 const FoodCommentsModel = require("../food/food-comment.schema");
+const KindOfFoodModel = require("../food/food-kind.schema");
 
 class UserService {
     #model;
@@ -14,12 +15,14 @@ class UserService {
     #restaurantCommentsModel;
     #foodCommentsModel;
     #foodModel;
+    #kindFoodModel;
     constructor() {
         this.#model = UserModel;
         this.#restaurantModel = RestaurantModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
         this.#foodCommentsModel = FoodCommentsModel;
         this.#foodModel = FoodModel;
+        this.#kindFoodModel = KindOfFoodModel;
     }
 
     async updateProfile(userId, userDto) {
@@ -274,6 +277,12 @@ class UserService {
     async checkExistFood({ id, foodId }) {
         if (!isValidObjectId(id ?? foodId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
         const food = await this.#foodModel.findById(id ?? foodId);
+        if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
+    }
+
+    async checkExistKindFood({ id, foodId }) {
+        if (!isValidObjectId(id ?? foodId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
+        const food = await this.#kindFoodModel.findById(id ?? foodId);
         if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
     }
 

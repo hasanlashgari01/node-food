@@ -238,7 +238,7 @@ class UserController {
     // * Cart
     async incrementCart(req, res, next) {
         try {
-            await this.#service.checkExistFood(req.body);
+            await this.#service.checkExistKindFood(req.body);
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);
             await this.#service.incrementCart(req.user, req.body, result);
 
@@ -250,7 +250,7 @@ class UserController {
 
     async decrementCart(req, res, next) {
         try {
-            await this.#service.checkExistFood(req.body);
+            await this.#service.checkExistKindFood(req.body);
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);
             await this.#service.decrementCart(req.user, req.body, result);
 

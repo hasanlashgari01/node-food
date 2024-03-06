@@ -5,7 +5,6 @@ const OrderSchema = new Schema(
     {
         user: { type: ObjectId, ref: "User", required: true },
         foods: { type: [ObjectId], ref: "Food", required: true },
-        restaurant: { type: ObjectId, ref: "Restaurant", required: true },
         total: { type: Number, required: true },
         province: { type: String, required: true },
         address: { type: String, required: true },
@@ -19,7 +18,7 @@ const OrderSchema = new Schema(
         couponAmount: { type: Number, default: 0 },
         discount: { type: Number, default: 0 },
         discountType: { type: String, enum: ["fixedProduct", "percent"], default: "fixedProduct" },
-        orderDate: { type: Date, default: Date.now().toLocaleDateString("fa-IR") },
+        orderDate: { type: Date, default: () => Date.now().toLocaleDateString("fa-IR") },
     },
     { timestamps: true }
 );
