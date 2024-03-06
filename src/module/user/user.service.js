@@ -295,6 +295,25 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.IncrementCartFailed);
     }
 
+    async decrementCart(userDto, foodDto, resultExistFood) {
+        const { _id: userId } = userDto;
+        const { foodId } = foodDto;
+
+        if (!resultExistFood) throw createHttpError.BadRequest(UserMessage.FoodNotExist);
+
+        let result = null;
+
+        if (resultExistFood.quantity === 1) {
+            result = await this.#model.updateOne({ _id: userId }, { $pull: { "cart.foods": { foodId } } });
+        } else {
+            result = await this.#model.updateOne(
+                { _id: userId, "cart.foods.foodId": foodId },
+                { $inc: { "cart.foods.$.quantity": -1 } }
+            );
+        }
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.DecrementCartFailed);
+    }
+
     async checkIsFoodInCart(userDto, foodDto) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
@@ -303,7 +322,7 @@ class UserService {
         const {
             cart: { foods },
         } = await this.#model.findOne({ $and: [{ _id: userId }] }).select("cart");
-        const result = foods?.some((food) => food?.foodId?.toString() === foodId);
+        const result = foods?.find((food) => food?.foodId?.toString() === foodId);
 
         return result;
     }

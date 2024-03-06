@@ -247,6 +247,18 @@ class UserController {
             next(error);
         }
     }
+
+    async decrementCart(req, res, next) {
+        try {
+            await this.#service.checkExistFood(req.body);
+            const result = await this.#service.checkIsFoodInCart(req.user, req.body);
+            await this.#service.decrementCart(req.user, req.body, result);
+
+            res.json({ message: UserMessage.IncrementCartSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;
