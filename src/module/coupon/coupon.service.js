@@ -44,8 +44,15 @@ class CouponService {
 
     async getAll(status) {
         if (!status) return await this.#model.find({}).lean();
-        
+
         return await this.#model.find({ status }).lean();
+    }
+
+    async deleteMany(couponDto) {
+        const { couponsId } = couponDto;
+
+        const result = await this.#model.deleteMany({ _id: { $in: couponsId } });
+        if (result.deletedCount === 0) throw createHttpError.NotFound(CouponMessage.CouponDeleteFailed);
     }
 
     async checkExistCode(code, showError = false) {

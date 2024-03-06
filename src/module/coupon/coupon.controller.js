@@ -44,6 +44,16 @@ class CouponController {
             next(error);
         }
     }
+
+    async deleteMany(req, res, next) {
+        try {
+            await this.#service.deleteMany(req.body);
+
+            res.json({ message: CouponMessage.CouponDeleteSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = CouponController;

@@ -11,7 +11,8 @@ router.use(AccessTokenGuard, RefreshTokenGuard);
 router
     .route("/")
     .post(isAdminGuard, validate(CreateCouponValidator), controller.create)
-    .get(isAdminGuard, controller.getAll);
+    .get(isAdminGuard, controller.getAll)
+    .delete(isAdminGuard, controller.deleteMany);
 router.route("/:id").put(isAdminGuard, validate(CreateCouponValidator), controller.update);
 
 module.exports = { CouponRouter: router };
