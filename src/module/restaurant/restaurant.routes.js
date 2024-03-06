@@ -18,6 +18,7 @@ router
     .route("/:id/food/discount")
     .get(controller.getAllFoodsHaveDiscount)
     .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountFoods)
+    .patch(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.changeDiscountFoods)
     .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountFoods);
 router
     .route("/:id/discount")

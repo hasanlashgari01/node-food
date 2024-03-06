@@ -179,6 +179,19 @@ class RestaurantService {
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
     }
 
+    async changeDiscountFoods(restaurantDto, discountDto) {
+        const { foodsId, percent, startDate, endDate, amount } = discountDto;
+        const { id: restaurantId } = restaurantDto;
+        if (percent == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
+
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#kindOfFoodModel.updateMany(
+            { _id: { $in: foodsId }, restaurantId },
+            { discount: { percent, startDate, endDate, amount } }
+        );
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
+    }
+
     async removeDiscountFoods(restaurantDto, discountDto) {
         const { foodsId } = discountDto;
         const { id: restaurantId } = restaurantDto;

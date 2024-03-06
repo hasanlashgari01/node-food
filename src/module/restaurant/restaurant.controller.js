@@ -167,6 +167,16 @@ class RestaurantController {
         }
     }
 
+    async changeDiscountFoods(req, res, next) {
+        try {
+            await this.#service.changeDiscountFoods(req.params, req.body);
+
+            res.json({ message: RestaurantMessage.ApplyDiscountSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async removeDiscountFoods(req, res, next) {
         try {
             await this.#service.removeDiscountFoods(req.params, req.body);
