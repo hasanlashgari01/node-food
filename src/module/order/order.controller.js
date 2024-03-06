@@ -29,6 +29,18 @@ class OrderController {
             next(error);
         }
     }
+
+    async allUsersHaveNotOrder(req, res, next) {
+        try {
+            const users = await this.#service.allUsersHaveNotOrder();
+
+            res.json({ count: users.length, users });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    
 }
 
 module.exports = OrderController;

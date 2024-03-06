@@ -79,6 +79,14 @@ class OrderService {
         const total = foodWithDiscount.reduce((acc, cur) => acc + cur, 0);
         return total;
     }
+
+    async allUsersHaveNotOrder() {
+        const orders = await this.#model.find().select("user").lean();
+        const usersHaveOrder = orders.map((order) => order.user);
+        const users = await this.#userModel.find({ _id: { $nin: usersHaveOrder } }).select("fullName mobile email").lean();
+
+        return users;
+    }
 }
 
 module.exports = OrderService;
