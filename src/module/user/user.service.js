@@ -326,6 +326,13 @@ class UserService {
 
         return result;
     }
+
+    async emptyCart(userDto) {
+        const { _id: userId } = userDto;
+
+        const result = await this.#model.updateOne({ _id: userId }, { $set: { "cart.foods": [] } });
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.EmptyCartFailed);
+    }
 }
 
 module.exports = UserService;

@@ -254,7 +254,17 @@ class UserController {
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);
             await this.#service.decrementCart(req.user, req.body, result);
 
-            res.json({ message: UserMessage.IncrementCartSuccess });
+            res.json({ message: UserMessage.DecrementCartSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async emptyCart(req, res, next) {
+        try {
+            await this.#service.emptyCart(req.user);
+
+            res.json({ message: UserMessage.EmptyCartSuccess });
         } catch (error) {
             next(error);
         }

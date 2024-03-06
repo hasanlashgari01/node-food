@@ -25,6 +25,7 @@ router.patch("/food/comment/:id/like", controller.addLikeFoodComment);
 router.patch("/food/comment/:id/unlike", controller.removeLikeFoodComment);
 router.route("/food/:id/bookmark").patch(controller.bookmarkFood).delete(controller.removeBookmarkFood);
 // cart
+router.route("/cart").delete(controller.emptyCart);
 router.put("/cart/increment", controller.incrementCart);
 router.put("/cart/decrement", controller.decrementCart);
 
