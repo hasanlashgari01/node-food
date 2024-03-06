@@ -234,6 +234,19 @@ class UserController {
             next(error);
         }
     }
+
+    // * Cart
+    async incrementCart(req, res, next) {
+        try {
+            await this.#service.checkExistFood(req.body);
+            const result = await this.#service.checkIsFoodInCart(req.user, req.body);
+            await this.#service.incrementCart(req.user, req.body, result);
+
+            res.json({ message: UserMessage.IncrementCartSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;

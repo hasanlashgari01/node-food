@@ -9,13 +9,14 @@ const OtpSchema = new Schema({
     maxAttemptsExpiresIn: { type: Number, required: false, default: 0 },
 });
 
-const ProductSchema = new Schema({
-    quantity: { type: Number, default: 1 },
-    productId: { type: ObjectId, ref: "Product" },
+const FoodSchema = new Schema({
+    quantity: { type: Number, required: true },
+    foodId: { type: ObjectId, ref: "KindOfFood", required: true },
+    coupon: { type: ObjectId, ref: "Coupon", default: null },
 });
 
 const CartSchema = new Schema({
-    products: { type: [ProductSchema], default: [] },
+    foods: { type: [FoodSchema], default: {} },
     coupon: { type: ObjectId, ref: "Coupon", default: null },
 });
 
@@ -39,7 +40,7 @@ const UserSchema = new Schema(
         bookmarkedRestaurants: [{ type: ObjectId, ref: "Restaurant" }],
         resetLink: { type: String, default: null },
         foods: [{ type: ObjectId, ref: "Food" }],
-        cart: { type: CartSchema },
+        cart: { type: CartSchema, default: {} },
     },
     { timestamps: true, toJSON: { virtuals: true } }
 );

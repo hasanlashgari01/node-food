@@ -24,5 +24,8 @@ router.route("/food/:id/like").patch(controller.likeFood).delete(controller.remo
 router.patch("/food/comment/:id/like", controller.addLikeFoodComment);
 router.patch("/food/comment/:id/unlike", controller.removeLikeFoodComment);
 router.route("/food/:id/bookmark").patch(controller.bookmarkFood).delete(controller.removeBookmarkFood);
+// cart
+router.put("/cart/increment", controller.incrementCart);
+// router.route("/cart/decrement").put(controller.addCart);
 
 module.exports = { UserRouter: router };

@@ -276,6 +276,37 @@ class UserService {
         const food = await this.#foodModel.findById(id ?? foodId);
         if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
     }
+
+    // * Cart
+    async incrementCart(userDto, foodDto, resultExistFood) {
+        const { _id: userId } = userDto;
+        const { foodId } = foodDto;
+
+        let result = null;
+
+        if (resultExistFood) {
+            result = await this.#model.updateOne(
+                { _id: userId, "cart.foods.foodId": foodId },
+                { $inc: { "cart.foods.$.quantity": 1 } }
+            );
+        } else {
+            result = await this.#model.updateOne({ _id: userId }, { $push: { "cart.foods": { quantity: 1, foodId } } });
+        }
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.IncrementCartFailed);
+    }
+
+    async checkIsFoodInCart(userDto, foodDto) {
+        const { _id: userId } = userDto;
+        const { foodId } = foodDto;
+        if (!isValidObjectId(userId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
+
+        const {
+            cart: { foods },
+        } = await this.#model.findOne({ $and: [{ _id: userId }] }).select("cart");
+        const result = foods?.some((food) => food?.foodId?.toString() === foodId);
+
+        return result;
+    }
 }
 
 module.exports = UserService;
