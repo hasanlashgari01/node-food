@@ -13,6 +13,9 @@ router
     .post(isAdminGuard, validate(CreateCouponValidator), controller.create)
     .get(isAdminGuard, controller.getAll)
     .delete(isAdminGuard, controller.deleteMany);
-router.route("/:id").put(isAdminGuard, validate(CreateCouponValidator), controller.update);
+router
+    .route("/:id")
+    .put(isAdminGuard, validate(CreateCouponValidator), controller.update)
+    .delete(isAdminGuard, controller.deleteOne);
 
 module.exports = { CouponRouter: router };

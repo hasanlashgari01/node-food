@@ -48,11 +48,23 @@ class CouponService {
         return await this.#model.find({ status }).lean();
     }
 
+    async deleteOne(couponDto) {
+        const { id: couponId } = couponDto;
+
+        await this.checkValidCouponId(couponId);
+        const result = await this.#model.deleteOne({ _id: couponId });
+        if (result.deletedCount === 0) throw createHttpError.NotFound(CouponMessage.CouponDeleteFailed);
+    }
+
     async deleteMany(couponDto) {
         const { couponsId } = couponDto;
 
         const result = await this.#model.deleteMany({ _id: { $in: couponsId } });
         if (result.deletedCount === 0) throw createHttpError.NotFound(CouponMessage.CouponDeleteFailed);
+    }
+
+    async checkValidCouponId(couponId) {
+        if (!isValidObjectId(couponId)) throw createHttpError.BadRequest(CouponMessage.IdNotValid);
     }
 
     async checkExistCode(code, showError = false) {
