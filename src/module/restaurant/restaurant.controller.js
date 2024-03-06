@@ -147,6 +147,16 @@ class RestaurantController {
         }
     }
 
+    async removeDiscountToAllFoods(req, res, next) {
+        try {
+            await this.#service.removeDiscountToAllFoods(req.params, req.body);
+
+            res.json({ message: RestaurantMessage.DiscountRemovedSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async applyDiscountFoods(req, res, next) {
         try {
             await this.#service.applyDiscountFoods(req.params, req.body);
@@ -161,7 +171,7 @@ class RestaurantController {
         try {
             await this.#service.removeDiscountFoods(req.params, req.body);
 
-            res.json({ message: RestaurantMessage.ApplyDiscountSuccess });
+            res.json({ message: RestaurantMessage.DiscountRemovedSuccess });
         } catch (error) {
             next(error);
         }

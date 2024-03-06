@@ -21,7 +21,8 @@ router
     .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountFoods);
 router
     .route("/:id/discount")
-    .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountToAllFoods);
+    .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountToAllFoods)
+    .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountToAllFoods);
 router
     .route("/")
     .post(AccessTokenGuard, RefreshTokenGuard, restaurantUpload(), validate(RestaurantValidator), controller.create);
