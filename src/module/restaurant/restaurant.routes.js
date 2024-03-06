@@ -14,7 +14,10 @@ router.get("/:id/menu", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmi
 router.get("/:id/menu/empty", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusEmpty);
 router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getCommentsByAdmin);
 router.route("/:id/food").get(controller.getAllFoods);
-router.route("/:id/food/discount").get(controller.getAllFoodsHaveDiscount);
+router
+    .route("/:id/food/discount")
+    .get(controller.getAllFoodsHaveDiscount)
+    .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountFoods);
 router
     .route("/:id/discount")
     .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountToAllFoods);

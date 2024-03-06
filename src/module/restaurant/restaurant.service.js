@@ -151,6 +151,16 @@ class RestaurantService {
         const result = await this.#kindOfFoodModel.updateMany({ restaurantId }, { discount });
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
     }
+
+    async applyDiscountFoods(restaurantDto, discountDto) {
+        const { foodsId, discount } = discountDto;
+        const { id: restaurantId } = restaurantDto;
+        if (discount == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
+
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#kindOfFoodModel.updateMany({ _id: { $in: foodsId }, restaurantId }, { discount });
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
+    }
 }
 
 module.exports = RestaurantService;

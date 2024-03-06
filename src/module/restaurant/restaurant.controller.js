@@ -146,6 +146,16 @@ class RestaurantController {
             next(error);
         }
     }
+
+    async applyDiscountFoods(req, res, next) {
+        try {
+            await this.#service.applyDiscountFoods(req.params, req.body);
+
+            res.json({ message: RestaurantMessage.ApplyDiscountSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = RestaurantController;
