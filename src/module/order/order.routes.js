@@ -6,6 +6,6 @@ const controller = new CouponController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
 
-router.route("/").post(controller.create);
+router.route("/").get(controller.getAll).post(controller.create);
 
 module.exports = { OrderRouter: router };

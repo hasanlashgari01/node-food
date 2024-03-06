@@ -4,7 +4,7 @@ const ObjectId = Schema.Types.ObjectId;
 const OrderSchema = new Schema(
     {
         user: { type: ObjectId, ref: "User", required: true },
-        foods: { type: [ObjectId], ref: "Food", required: true },
+        foods: { type: [ObjectId], ref: "KindOfFood", required: true },
         total: { type: Number, required: true },
         province: { type: String, required: true },
         address: { type: String, required: true },

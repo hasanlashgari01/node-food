@@ -22,7 +22,7 @@ class OrderController {
 
     async getAll(req, res, next) {
         try {
-            const orders = await this.getAll(req.user);
+            const orders = await this.#service.getAll(req.user);
 
             res.json({ count: orders.length, orders });
         } catch (error) {

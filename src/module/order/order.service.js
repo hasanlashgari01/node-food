@@ -43,6 +43,12 @@ class OrderService {
         return order;
     }
 
+    async getAll(userDto) {
+        const { _id: userId } = userDto;
+
+        return await this.#model.find({ user: userId }, "-__v").populate("foods", "-__v").lean();
+    }
+
     async checkExistCoupon(code) {
         if (!code) return;
         const coupon = await this.#couponModel.findOne({ code, status: "active" });
