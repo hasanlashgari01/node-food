@@ -129,10 +129,19 @@ class RestaurantController {
     async getAllFoodsHaveDiscount(req, res, next) {
         try {
             const { id } = req.params;
-            const menus = await this.#service.getMenusId(id);
-            const { foods } = await this.#service.getAllFoodsHaveDiscount(menus);
+            const { foods } = await this.#service.getAllFoodsHaveDiscount(id);
 
             res.json({ count: foods.length, foods });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async applyDiscountToAllFoods(req, res, next) {
+        try {
+            await this.#service.applyDiscountToAllFoods(req.params, req.body);
+
+            res.json({ message: RestaurantMessage.ApplyDiscountSuccess });
         } catch (error) {
             next(error);
         }

@@ -6,8 +6,9 @@ const FoodSchema = new Schema({
     image: { type: String },
     description: { type: String, required: true },
     rate: { type: Number, required: true, default: 0 },
+    // restaurantId: { type: ObjectId, ref: "Restaurant", required: true },
     menuId: { type: ObjectId, ref: "Menu", required: true },
-    kindId: { type: ObjectId, ref: "KindOfFood" },
+    kindId: { type: [ObjectId], ref: "KindOfFood" },
 });
 
 function autoPopulate(next) {

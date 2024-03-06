@@ -16,6 +16,9 @@ const RestaurantMessage = {
     CommentUpdateSuccess: "کامنت با موفقیت آپدیت شد",
     CommentUpdateFailed: "ویرایش کامنت با مشکل مواجه شد",
     CommentNotExist: "کامنت یافت نشد",
+    ApplyDiscountSuccess: "تخفیف با موفقیت اعمال شد",
+    ApplyDiscountFailed: "اعمال تخفیف با مشکل مواجه شد",
+    DiscountNotValid: "درصد تخفیف صحیح نمی باشد",
 };
 
 module.exports = RestaurantMessage;

@@ -7,8 +7,8 @@ const RestaurantCommentsModel = require("./restaurant-comment.schema");
 const RestaurantMessage = require("./restaurant.messages");
 const MenuModel = require("../menu/menu.schema");
 const FoodModel = require("../food/food.schema");
-const FoodCommentsModel = require("../food/food-comment.schema");
 const UserModel = require("../user/user.schema");
+const KindOfFoodModel = require("../food/food-kind.schema");
 
 class RestaurantService {
     #model;
@@ -16,6 +16,7 @@ class RestaurantService {
     #menuModel;
     #foodModel;
     #userModel;
+    #kindOfFoodModel;
 
     constructor() {
         this.#model = RestaurantModel;
@@ -23,6 +24,7 @@ class RestaurantService {
         this.#menuModel = MenuModel;
         this.#foodModel = FoodModel;
         this.#userModel = UserModel;
+        this.#kindOfFoodModel = KindOfFoodModel;
     }
 
     async create(restaurantDto, userDto) {
@@ -126,10 +128,10 @@ class RestaurantService {
         return { foods };
     }
 
-    async getAllFoodsHaveDiscount(menusId) {
-        const foods = await this.#foodModel
-            .find({ menuId: { $in: menusId }, discount: { $gt: 0 } })
-            .select("-__v -menuId -description")
+    async getAllFoodsHaveDiscount(restaurantId) {
+        const foods = await this.#kindOfFoodModel
+            .find({ restaurantId, discount: { $gt: 0 } })
+            .select("-__v")
             .lean();
 
         return { foods };
@@ -137,6 +139,17 @@ class RestaurantService {
 
     async getMenusId(restaurantId) {
         return await this.#menuModel.find({ restaurantId }, "_id");
+    }
+
+    // * Discount
+    async applyDiscountToAllFoods(restaurantDto, discountDto) {
+        const { discount } = discountDto;
+        const { id: restaurantId } = restaurantDto;
+        if (discount == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
+
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#kindOfFoodModel.updateMany({ restaurantId }, { discount });
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
     }
 }
 

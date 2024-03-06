@@ -16,6 +16,9 @@ router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, checkResuatrantA
 router.route("/:id/food").get(controller.getAllFoods);
 router.route("/:id/food/discount").get(controller.getAllFoodsHaveDiscount);
 router
+    .route("/:id/discount")
+    .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountToAllFoods);
+router
     .route("/")
     .post(AccessTokenGuard, RefreshTokenGuard, restaurantUpload(), validate(RestaurantValidator), controller.create);
 router
