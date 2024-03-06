@@ -130,7 +130,7 @@ class RestaurantService {
 
     async getAllFoodsHaveDiscount(restaurantId) {
         const foods = await this.#kindOfFoodModel
-            .find({ restaurantId, discount: { $gt: 0 } })
+            .find({ restaurantId, "discount.percent": { $gt: 0 } })
             .select("-__v")
             .lean();
 
