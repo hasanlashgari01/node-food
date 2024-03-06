@@ -18,6 +18,8 @@ const RestaurantMessage = {
     CommentNotExist: "کامنت یافت نشد",
     ApplyDiscountSuccess: "تخفیف با موفقیت اعمال شد",
     ApplyDiscountFailed: "اعمال تخفیف با مشکل مواجه شد",
+    DiscountRemovedSuccess: "تخفیف حذف شد",
+    DiscountRemovedFailed: "تخفیف حذف نشد",
     DiscountNotValid: "درصد تخفیف صحیح نمی باشد",
 };
 

@@ -143,23 +143,41 @@ class RestaurantService {
 
     // * Discount
     async applyDiscountToAllFoods(restaurantDto, discountDto) {
-        const { discount } = discountDto;
+        const { percent, startDate, endDate, amount } = discountDto;
         const { id: restaurantId } = restaurantDto;
-        if (discount == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
+        if (percent == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
 
         await this.isValidRestaurant(restaurantId);
-        const result = await this.#kindOfFoodModel.updateMany({ restaurantId }, { discount });
+        const result = await this.#kindOfFoodModel.updateMany(
+            { restaurantId },
+            { discount: { percent, startDate, endDate, amount } }
+        );
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
     }
 
     async applyDiscountFoods(restaurantDto, discountDto) {
-        const { foodsId, discount } = discountDto;
+        const { foodsId, percent, startDate, endDate, amount } = discountDto;
         const { id: restaurantId } = restaurantDto;
-        if (discount == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
+        if (percent == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
 
         await this.isValidRestaurant(restaurantId);
-        const result = await this.#kindOfFoodModel.updateMany({ _id: { $in: foodsId }, restaurantId }, { discount });
+        const result = await this.#kindOfFoodModel.updateMany(
+            { _id: { $in: foodsId }, restaurantId },
+            { discount: { percent, startDate, endDate, amount } }
+        );
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
+    }
+
+    async removeDiscountFoods(restaurantDto, discountDto) {
+        const { foodsId } = discountDto;
+        const { id: restaurantId } = restaurantDto;
+
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#kindOfFoodModel.updateMany(
+            { _id: { $in: foodsId }, restaurantId },
+            { discount: { percent: 0, startDate: null, endDate: null, amount: 0 } }
+        );
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountRemovedFailed);
     }
 }
 
