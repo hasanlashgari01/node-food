@@ -79,6 +79,16 @@ class OrderController {
             next(error);
         }
     }
+
+    async getOrdersByAdmin(req, res, next) {
+        try {
+            const orders = await this.#service.getAllOrdersByAdmin(req.query);
+
+            res.status(200).json({ count: orders.length, orders });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = OrderController;

@@ -114,6 +114,26 @@ class OrderService {
         return await this.checkValidOrder(false, orderId);
     }
 
+    async getAllOrdersByAdmin(queryDto) {
+        const queryResult = await this.checkQueryIsValid(queryDto);
+        let orders = [];
+        if (Object.keys(queryDto).length > 0) {
+            orders = await this.#model
+                .find({ $or: [{ ...queryResult }] })
+                .select("-__v")
+                .populate("user", "fullName mobile")
+                .populate("foods", "-__v -restaurantId -foodId")
+                .lean();
+        } else {
+            orders = await this.#model
+                .find({}, "-__v")
+                .populate("user", "fullName mobile")
+                .populate("foods", "-__v -restaurantId -foodId")
+                .lean();
+        }
+        return orders;
+    }
+
     async checkExistCoupon(code) {
         if (!code) return;
         const coupon = await this.#couponModel.findOne({ code, status: "active" });
