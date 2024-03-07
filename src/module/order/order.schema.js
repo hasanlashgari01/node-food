@@ -20,6 +20,7 @@ const OrderSchema = new Schema(
         discount: { type: Number, default: 0 },
         discountType: { type: String, enum: ["fixedProduct", "percent"], default: "fixedProduct" },
         orderDate: { type: Date, default: () => Date.now().toLocaleDateString("fa-IR") },
+        cancelDate: { type: Date },
     },
     { timestamps: true }
 );

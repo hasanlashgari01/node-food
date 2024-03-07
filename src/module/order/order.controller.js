@@ -40,6 +40,16 @@ class OrderController {
         }
     }
 
+    async cancelOrder(req, res, next) {
+        try {
+            await this.#service.cancelOrder(req.params, req.user);
+
+            res.json({ message: OrderMessage.OrderCancelSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async allUsersHaveNotOrder(req, res, next) {
         try {
             const users = await this.#service.allUsersHaveNotOrder();

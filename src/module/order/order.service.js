@@ -63,6 +63,21 @@ class OrderService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(OrderMessage.PaymentFailed);
     }
 
+    async cancelOrder(orderDto, userDto) {
+        const { id: orderId } = orderDto;
+        const { _id: userId } = userDto;
+
+        const validOrder = await this.checkValidOrder(orderId, userId);
+        await this.checkIsPayment(validOrder);
+        await this.checkIsCancel(validOrder);
+
+        const result = await this.#model.updateOne(
+            { _id: orderId, user: userId },
+            { status: "CANCELED", deliveryStatus: "CANCELED", cancelDate: Date.now() }
+        );
+        if (!result.modifiedCount) throw createHttpError.BadRequest(OrderMessage.OrderCancelFailed);
+    }
+
     async checkExistCoupon(code) {
         if (!code) return;
         const coupon = await this.#couponModel.findOne({ code, status: "active" });
@@ -106,7 +121,6 @@ class OrderService {
     }
 
     async checkValidOrder(orderId, userId) {
-        console.log("🚀 ~ OrderService ~ checkValidOrder ~ orderId:", orderId);
         if (!isValidObjectId(orderId) && !isValidObjectId(userId))
             throw createHttpError.Conflict(OrderMessage.IdNotValid);
         const order = await this.#model.findOne({ _id: orderId, user: userId }).lean();
@@ -115,8 +129,13 @@ class OrderService {
     }
 
     async checkIsPayment(orderDto) {
-        if (orderDto.status === "CANCELED") throw createHttpError.BadRequest(OrderMessage.OrderCanceled);
+        if (orderDto.status === "CANCELED" || orderDto.deliveryStatus === "CANCELED")
+            throw createHttpError.BadRequest(OrderMessage.OrderCanceled);
         if (orderDto.paymentStatus === "PAID") throw createHttpError.BadRequest(OrderMessage.OrderPaid);
+    }
+
+    async checkIsDelivered(orderDto) {
+        if (orderDto.deliveryStatus === "COMPLETED") throw createHttpError.BadRequest(OrderMessage.OrderDelivered);
     }
 }
 
