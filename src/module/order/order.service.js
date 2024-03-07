@@ -4,6 +4,7 @@ const OrderMessage = require("./order.messages");
 const CouponModel = require("../coupon/coupon.schema");
 const UserModel = require("../user/user.schema");
 const KindOfFoodModel = require("../food/food-kind.schema");
+const { isValidObjectId } = require("mongoose");
 
 class OrderService {
     #model;
@@ -49,6 +50,19 @@ class OrderService {
         return await this.#model.find({ user: userId }, "-__v").populate("foods", "-__v").lean();
     }
 
+    async payOrder(orderDto, userDto) {
+        const { id: orderId } = orderDto;
+        const { _id: userId } = userDto;
+
+        const validOrder = await this.checkValidOrder(orderId, userId);
+        await this.checkIsPayment(validOrder);
+        const result = await this.#model.updateOne(
+            { _id: orderId, user: userId },
+            { status: "PENDING", paymentStatus: "PAID", paymentDate: Date.now() }
+        );
+        if (!result.modifiedCount) throw createHttpError.BadRequest(OrderMessage.PaymentFailed);
+    }
+
     async checkExistCoupon(code) {
         if (!code) return;
         const coupon = await this.#couponModel.findOne({ code, status: "active" });
@@ -83,9 +97,26 @@ class OrderService {
     async allUsersHaveNotOrder() {
         const orders = await this.#model.find().select("user").lean();
         const usersHaveOrder = orders.map((order) => order.user);
-        const users = await this.#userModel.find({ _id: { $nin: usersHaveOrder } }).select("fullName mobile email").lean();
+        const users = await this.#userModel
+            .find({ _id: { $nin: usersHaveOrder } })
+            .select("fullName mobile email")
+            .lean();
 
         return users;
+    }
+
+    async checkValidOrder(orderId, userId) {
+        console.log("🚀 ~ OrderService ~ checkValidOrder ~ orderId:", orderId);
+        if (!isValidObjectId(orderId) && !isValidObjectId(userId))
+            throw createHttpError.Conflict(OrderMessage.IdNotValid);
+        const order = await this.#model.findOne({ _id: orderId, user: userId }).lean();
+        if (!order) throw createHttpError.NotFound(OrderMessage.NotExist);
+        return order;
+    }
+
+    async checkIsPayment(orderDto) {
+        if (orderDto.status === "CANCELED") throw createHttpError.BadRequest(OrderMessage.OrderCanceled);
+        if (orderDto.paymentStatus === "PAID") throw createHttpError.BadRequest(OrderMessage.OrderPaid);
     }
 }
 

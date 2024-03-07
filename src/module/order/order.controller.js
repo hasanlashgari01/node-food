@@ -30,6 +30,16 @@ class OrderController {
         }
     }
 
+    async payOrder(req, res, next) {
+        try {
+            await this.#service.payOrder(req.params, req.user);
+
+            res.json({ message: OrderMessage.PaymentSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async allUsersHaveNotOrder(req, res, next) {
         try {
             const users = await this.#service.allUsersHaveNotOrder();
@@ -39,8 +49,6 @@ class OrderController {
             next(error);
         }
     }
-
-    
 }
 
 module.exports = OrderController;

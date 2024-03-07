@@ -3,13 +3,14 @@ const ObjectId = Schema.Types.ObjectId;
 
 const OrderSchema = new Schema(
     {
+        orderId: { type: ObjectId, required: true },
         user: { type: ObjectId, ref: "User", required: true },
         foods: { type: [ObjectId], ref: "KindOfFood", required: true },
         total: { type: Number, required: true },
         province: { type: String, required: true },
         address: { type: String, required: true },
         status: { type: String, enum: ["PENDING", "COMPLETED", "CANCELED"], default: "PENDING" },
-        payment: { type: String, enum: ["CASH_ON_DELIVERY", "ONLINE"], default: "CASH_ON_DELIVERY" },
+        payment: { type: String, enum: ["CASH_ON_DELIVERY", "ONLINE"], default: "ONLINE" },
         paymentStatus: { type: String, enum: ["UNPAID", "PAID"], default: "UNPAID" },
         paymentDate: { type: Date },
         deliveryDate: { type: Date },
