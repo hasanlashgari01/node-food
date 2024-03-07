@@ -50,6 +50,17 @@ class OrderController {
         }
     }
 
+    async getAllOrders(req, res, next) {
+        try {
+            const orders = await this.#service.getAllOrders(req.params);
+
+            res.json({ count: orders.length, orders });
+            // res.json(orders);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async allUsersHaveNotOrder(req, res, next) {
         try {
             const users = await this.#service.allUsersHaveNotOrder();

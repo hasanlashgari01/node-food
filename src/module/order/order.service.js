@@ -1,18 +1,21 @@
+const { isValidObjectId } = require("mongoose");
 const createHttpError = require("http-errors");
 const OrderModel = require("./order.schema");
+const RestaurantModel = require("../restaurant/restaurant.schema");
 const OrderMessage = require("./order.messages");
 const CouponModel = require("../coupon/coupon.schema");
 const UserModel = require("../user/user.schema");
 const KindOfFoodModel = require("../food/food-kind.schema");
-const { isValidObjectId } = require("mongoose");
 
 class OrderService {
     #model;
+    #restaurantModel;
     #couponModel;
     #userModel;
     #kindFoodModel;
     constructor() {
         this.#model = OrderModel;
+        this.#restaurantModel = RestaurantModel;
         this.#couponModel = CouponModel;
         this.#userModel = UserModel;
         this.#kindFoodModel = KindOfFoodModel;
@@ -76,6 +79,20 @@ class OrderService {
             { status: "CANCELED", deliveryStatus: "CANCELED", cancelDate: Date.now() }
         );
         if (!result.modifiedCount) throw createHttpError.BadRequest(OrderMessage.OrderCancelFailed);
+    }
+
+    async getAllOrders(restaurantDto) {
+        const { id: restaurantId } = restaurantDto;
+
+        const restaurant = await this.#restaurantModel.findById(restaurantId).select("_id").lean();
+        const kindFoods = await this.#kindFoodModel.find({ restaurantId: restaurant._id }).select("_id").lean();
+        const orders = await this.#model
+            .find({ foods: { $in: kindFoods } }, "-__v")
+            .populate("user", "fullName mobile")
+            .populate("foods", "-__v -restaurantId -foodId")
+            .lean();
+
+        return orders;
     }
 
     async checkExistCoupon(code) {
