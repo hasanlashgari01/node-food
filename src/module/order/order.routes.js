@@ -17,6 +17,7 @@ router.route("/:id").put(controller.payOrder).patch(controller.cancelOrder);
 // * Admin
 router.use(isAdminGuard);
 router.route("/admin/orders").get(controller.getOrdersByAdmin);
+router.route("/admin/order/:orderId").get(controller.getOrder);
 router.route("/admin/users").get(controller.allUsersHaveNotOrder);
 
 module.exports = { OrderRouter: router };

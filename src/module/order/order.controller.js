@@ -89,6 +89,16 @@ class OrderController {
             next(error);
         }
     }
+
+    async getOrder(req, res, next) {
+        try {
+            const order = await this.#service.getOrder(req.params);
+
+            res.status(200).json(order);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = OrderController;
