@@ -36,5 +36,6 @@ router.route("/users/:id/ban").get(controller.banUser);
 router.route("/users/:id/acceptSeller").get(controller.acceptAsSeller);
 router.route("/users/:role").get(controller.getUsersByRole);
 router.route("/sellers").get(controller.getAllSellers);
+router.get("/dashboard", controller.getDashboardData);
 
 module.exports = { AdminRouter: router };

@@ -269,6 +269,16 @@ class AdminController {
             next(error);
         }
     }
+
+    async getDashboardData(req, res, next) {
+        try {
+            const result = await this.#service.getDashboardData(req, res, next);
+
+            res.json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = AdminController;

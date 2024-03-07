@@ -32,6 +32,7 @@ const UserSchema = new Schema(
         role: { type: String, enum: ["ADMIN", "USER", "SELLER"], default: "USER", required: true },
         restaurants: { type: [ObjectId], ref: "Restaurant" },
         age: { type: Number },
+        gender: { type: String, enum: ["male", "female", "other"], default: "other" },
         verifiedAccount: { type: Boolean, default: false },
         otp: { type: OtpSchema },
         likedFoods: [{ type: ObjectId, ref: "Food" }],

@@ -12,6 +12,8 @@ const SuggestionMenuModel = require("../menu/menu-suggestion.schema");
 const BanUserModel = require("./../ban/ban.schema");
 const RestaurantCommentsModel = require("../restaurant/restaurant-comment.schema");
 const FoodCommentsModel = require("../food/food-comment.schema");
+const OrderModel = require("../order/order.schema");
+const { todayOption, yesterdayOption, monthlyOption, thisWeekOption } = require("../../common/utils/options");
 
 class AdminService {
     #model;
@@ -21,6 +23,7 @@ class AdminService {
     #banRestaurantModel;
     #suggestionMenuModel;
     #banUserModel;
+    #orderModel;
 
     constructor() {
         autoBind(this);
@@ -31,6 +34,7 @@ class AdminService {
         this.#banRestaurantModel = BanRestaurantModel;
         this.#suggestionMenuModel = SuggestionMenuModel;
         this.#banUserModel = BanUserModel;
+        this.#orderModel = OrderModel;
     }
 
     async allRestaurant() {
@@ -247,8 +251,83 @@ class AdminService {
         return authorId;
     }
 
-    async changeCommentFoodToShowOrHide(commentId, status) {
-        
+    async changeCommentFoodToShowOrHide(commentId, status) {}
+
+    async getDashboardData() {
+        const users = await this.getUsersDetails();
+        const comments = await this.getCommentsDetails();
+        const restaurants = await this.getRestaurantsDetails();
+        const orders = await this.getOrders();
+
+        return { users, comments, restaurants, orders };
+    }
+
+    async getUsersDetails() {
+        const userCount = await this.#model.countDocuments();
+        const todayCount = await this.#model.countDocuments(todayOption);
+        const yesterdayCount = await this.#model.countDocuments(yesterdayOption);
+        const thisWeekCount = await this.#model.countDocuments(thisWeekOption);
+        const bannedUsersCount = await this.#banUserModel.countDocuments();
+        const genderCount = await this.#model.aggregate([
+            { $group: { _id: "$gender", count: { $sum: 1 }, gender: { $first: "$gender" } } },
+            { $sort: { _id: 1 } },
+            {
+                $project: {
+                    _id: 0,
+                    gender: "$_id",
+                    count: 1,
+                    percentage: { $round: [{ $multiply: [{ $divide: ["$count", userCount] }, 100] }, 2] },
+                },
+            },
+        ]);
+
+        return { userCount, todayCount, yesterdayCount, thisWeekCount, bannedUsersCount, genderCount };
+    }
+
+    async getCommentsDetails() {
+        const restaurantCount = await this.#restaurantCommentModel.countDocuments();
+        const restaurantTodayCount = await this.#restaurantCommentModel.countDocuments(todayOption);
+        const restaurantYesterdayCount = await this.#restaurantCommentModel.countDocuments(yesterdayOption);
+        const restaurantMonthlyCount = await this.#restaurantCommentModel.aggregate(monthlyOption);
+
+        const foodCount = await this.#foodCommentModel.countDocuments();
+        const foodTodayCount = await this.#foodCommentModel.countDocuments(todayOption);
+        const foodYesterdayCount = await this.#foodCommentModel.countDocuments(yesterdayOption);
+        const foodMonthlyCount = await this.#foodCommentModel.aggregate(monthlyOption);
+
+        return {
+            commentCount: restaurantCount + foodCount,
+            todayCount: restaurantTodayCount + foodTodayCount,
+            yesterdayCount: restaurantYesterdayCount + foodYesterdayCount,
+            restaurantMonthlyCount,
+            foodMonthlyCount,
+        };
+    }
+
+    async getRestaurantsDetails() {
+        const restaurantCount = await this.#restaurantModel.countDocuments();
+        const activeRestaurantCount = await this.#restaurantModel.countDocuments({ isValid: true });
+        const notActiveRestaurantCount = await this.#restaurantModel.countDocuments({ isValid: false });
+        const bannedRestaurantsCount = await this.#banRestaurantModel.countDocuments();
+        const monthlyRestaurantsCount = await this.#restaurantModel.aggregate(monthlyOption);
+
+        return {
+            restaurantCount,
+            activeRestaurantCount,
+            notActiveRestaurantCount,
+            bannedRestaurantsCount,
+            monthlyRestaurantsCount,
+        };
+    }
+
+    async getOrders() {
+        const ordersCount = await this.#orderModel.countDocuments();
+        const ordersPendingCount = await this.#orderModel.countDocuments({ status: "PENDING" });
+        const ordersCompletedCount = await this.#orderModel.countDocuments({ status: "COMPLETED" });
+        const ordersCanceledCount = await this.#orderModel.countDocuments({ status: "CANCELED" });
+        const monthlyCount = await this.#orderModel.aggregate(monthlyOption);
+
+        return { ordersCount, ordersPendingCount, ordersCompletedCount, ordersCanceledCount, monthlyCount };
     }
 }
 
