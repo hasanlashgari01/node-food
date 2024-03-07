@@ -60,6 +60,16 @@ class OrderController {
         }
     }
 
+    async getOrder(req, res, next) {
+        try {
+            const order = await this.#service.getOrder(req.params);
+
+            res.status(200).json(order);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async allUsersHaveNotOrder(req, res, next) {
         try {
             const users = await this.#service.allUsersHaveNotOrder();

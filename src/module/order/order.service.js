@@ -50,7 +50,7 @@ class OrderService {
     async getAll(userDto) {
         const { _id: userId } = userDto;
 
-        return await this.#model.find({ user: userId }, "-__v").populate("foods", "-__v").lean();
+        return await this.#model.find({ user: userId }, "-__v").populate("foods", "-__v -restaurantId -foodId").lean();
     }
 
     async payOrder(orderDto, userDto) {
@@ -108,6 +108,12 @@ class OrderService {
         return orders;
     }
 
+    async getOrder(orderDto) {
+        const { orderId } = orderDto;
+
+        return await this.checkValidOrder(false, orderId);
+    }
+
     async checkExistCoupon(code) {
         if (!code) return;
         const coupon = await this.#couponModel.findOne({ code, status: "active" });
@@ -150,10 +156,19 @@ class OrderService {
         return users;
     }
 
-    async checkValidOrder(orderId, userId) {
+    async checkValidOrder(checkAdminRestaurant = true, orderId, userId) {
         if (!isValidObjectId(orderId) && !isValidObjectId(userId))
             throw createHttpError.Conflict(OrderMessage.IdNotValid);
-        const order = await this.#model.findOne({ _id: orderId, user: userId }).lean();
+        let order = null;
+        if (!checkAdminRestaurant) {
+            order = await this.#model
+                .findOne({ _id: orderId }, "-__v")
+                .populate("user", "fullName mobile")
+                .populate("foods", "-__v -restaurantId -foodId")
+                .lean();
+        } else {
+            order = await this.#model.findOne({ _id: orderId, user: userId }).lean();
+        }
         if (!order) throw createHttpError.NotFound(OrderMessage.NotExist);
         return order;
     }
