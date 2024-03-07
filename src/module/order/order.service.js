@@ -81,17 +81,30 @@ class OrderService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(OrderMessage.OrderCancelFailed);
     }
 
-    async getAllOrders(restaurantDto) {
+    async getAllOrders(restaurantDto, queryDto) {
         const { id: restaurantId } = restaurantDto;
 
         const restaurant = await this.#restaurantModel.findById(restaurantId).select("_id").lean();
         const kindFoods = await this.#kindFoodModel.find({ restaurantId: restaurant._id }).select("_id").lean();
-        const orders = await this.#model
-            .find({ foods: { $in: kindFoods } }, "-__v")
-            .populate("user", "fullName mobile")
-            .populate("foods", "-__v -restaurantId -foodId")
-            .lean();
-
+        const queryResult = await this.checkQueryIsValid(queryDto);
+        let orders = [];
+        if (Object.keys(queryDto).length > 0) {
+            orders = await this.#model
+                .find({
+                    foods: { $in: kindFoods },
+                    $or: [{ ...queryResult }],
+                })
+                .select("-__v")
+                .populate("user", "fullName mobile")
+                .populate("foods", "-__v -restaurantId -foodId")
+                .lean();
+        } else {
+            orders = await this.#model
+                .find({ foods: { $in: kindFoods } }, "-__v")
+                .populate("user", "fullName mobile")
+                .populate("foods", "-__v -restaurantId -foodId")
+                .lean();
+        }
         return orders;
     }
 
@@ -153,6 +166,23 @@ class OrderService {
 
     async checkIsDelivered(orderDto) {
         if (orderDto.deliveryStatus === "COMPLETED") throw createHttpError.BadRequest(OrderMessage.OrderDelivered);
+    }
+
+    async checkQueryIsValid(queryDto) {
+        Object.keys(queryDto).forEach((key) => !queryDto[key] && delete queryDto[key]);
+        const { status, payment, paymentStatus, deliveryStatus } = queryDto;
+        const validStatus = ["COMPLETED", "PENDING", "CANCELED"];
+        const validPayment = ["CASH_ON_DELIVERY", "ONLINE"];
+        const validPaymentStatus = ["PAID", "UNPAID"];
+
+        if (status && !validStatus.includes(status)) throw createHttpError.BadRequest(OrderMessage.StatusNotValid);
+        if (payment && !validPayment.includes(payment)) throw createHttpError.BadRequest(OrderMessage.PaymentNotValid);
+        if (paymentStatus && !validPaymentStatus.includes(payment))
+            throw createHttpError.BadRequest(OrderMessage.PaymentStatusNotValid);
+        if (deliveryStatus && !validStatus.includes(deliveryStatus))
+            throw createHttpError.BadRequest(OrderMessage.DeliveryStatusNotValid);
+
+        return queryDto;
     }
 }
 

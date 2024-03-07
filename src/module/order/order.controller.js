@@ -14,7 +14,7 @@ class OrderController {
         try {
             await this.#service.create(req.body, req.user, req.body.food, req.body.restaurant);
 
-            res.status(200).json({ message: OrderMessage.CreateSuccess });
+            res.status(201).json({ message: OrderMessage.CreateSuccess });
         } catch (error) {
             next(error);
         }
@@ -52,10 +52,9 @@ class OrderController {
 
     async getAllOrders(req, res, next) {
         try {
-            const orders = await this.#service.getAllOrders(req.params);
+            const orders = await this.#service.getAllOrders(req.params, req.query);
 
-            res.json({ count: orders.length, orders });
-            // res.json(orders);
+            res.status(200).json({ count: orders.length, orders });
         } catch (error) {
             next(error);
         }

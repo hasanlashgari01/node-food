@@ -8,10 +8,11 @@ const controller = new CouponController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
 
-router.route("/").get(controller.getAll).post(controller.create);
-router.route("/:id").put(controller.payOrder).patch(controller.cancelOrder);
 // * Restaurant
 router.route("/restaurant/:id").get(checkResuatrantAdmin, controller.getAllOrders);
+// * User
+router.route("/").get(controller.getAll).post(controller.create);
+router.route("/:id").put(controller.payOrder).patch(controller.cancelOrder);
 // * Admin
 router.use(isAdminGuard);
 router.route("/admin").get(controller.allUsersHaveNotOrder);
