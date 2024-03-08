@@ -1,7 +1,7 @@
 const { Schema, model, models } = require("mongoose");
 
 const ProvinceSchema = new Schema({
-    name: { type: String },
+    name: { type: String, trim: true, required: true },
     englishTitle: { type: String, unique: true, lowercase: true, trim: true },
 });
 

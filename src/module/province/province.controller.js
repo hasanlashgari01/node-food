@@ -47,6 +47,16 @@ class ProvinceController {
         }
     }
 
+    async update(req, res, next) {
+        try {
+            await this.#service.update(req.params, req.body);
+
+            res.json({ message: ProvinceMessage.EditSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async delete(req, res, next) {
         try {
             await this.#service.delete(req.params);

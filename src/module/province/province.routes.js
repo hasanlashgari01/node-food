@@ -10,6 +10,9 @@ router
     .route("/many")
     .post(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.createMany)
     .delete(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.deleteMany);
-router.route("/:id").delete(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.delete);
+router
+    .route("/:id")
+    .put(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.update)
+    .delete(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.delete);
 
 module.exports = { ProvinceRouter: router };

@@ -16,7 +16,7 @@ class ProvinceService {
 
     async create(bodyDto) {
         const { name, englishTitle } = bodyDto;
-        if (!name || !englishTitle) throw new createHttpError.BadRequest(ProvinceMessage.FieldsNotEmpty);
+        if (!name && !englishTitle) throw new createHttpError.BadRequest(ProvinceMessage.FieldsNotEmpty);
 
         await this.checkExistByEnglishTitle(englishTitle);
         const result = await this.#model.create({ name, englishTitle });
@@ -27,6 +27,18 @@ class ProvinceService {
         if (!bodyDto.length) throw new createHttpError.BadRequest(ProvinceMessage.FieldsNotEmpty);
         const result = await this.#model.insertMany(bodyDto);
         if (!result) throw new createHttpError.InternalServerError(ProvinceMessage.CreatedFailed);
+    }
+
+    async update(paramsDto, bodyDto) {
+        const { id: provinceId } = paramsDto;
+        const { name, englishTitle } = bodyDto;
+
+        await this.checkValidId(provinceId);
+        if (name === "" || englishTitle === "") throw new createHttpError.BadRequest(ProvinceMessage.FieldsNotEmpty);
+        if (englishTitle !== "") await this.checkExistByEnglishTitle(englishTitle);
+        const result = await this.#model.updateOne({ _id: provinceId }, { name, englishTitle });
+        if (!result || result.modifiedCount === 0)
+            throw new createHttpError.InternalServerError(ProvinceMessage.EditFailed);
     }
 
     async delete(paramsDto) {
@@ -41,7 +53,8 @@ class ProvinceService {
         if (!bodyDto) throw new createHttpError.BadRequest(ProvinceMessage.FieldsNotEmpty);
 
         const result = await this.#model.deleteMany({ _id: { $in: bodyDto } });
-        if (!result || result.deletedCount === 0) throw new createHttpError.InternalServerError(ProvinceMessage.DeleteFailed);
+        if (!result || result.deletedCount === 0)
+            throw new createHttpError.InternalServerError(ProvinceMessage.DeleteFailed);
     }
 
     async checkExistByEnglishTitle(englishTitle) {
