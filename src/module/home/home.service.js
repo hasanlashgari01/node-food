@@ -43,8 +43,24 @@ class HomeService {
             .lean();
     }
 
+    async getNewestRestaurant(province) {
+        return await this.#restaurantModel
+            .find({ "province.englishTitle": province, isValid: true }, "-__v")
+            .sort({ createdAt: -1 })
+            .limit(12)
+            .lean();
+    }
+
+    async getBestRestaurants(province) {
+        return await this.#restaurantModel
+            .find({ "province.englishTitle": province, isValid: true, score: { $gte: 3 } }, "-__v")
+            .sort({ score: -1 })
+            .limit(12)
+            .lean();
+    }
+
     async getRestaurantByProvince(province) {
-        return await this.#restaurantModel.find({ "province.englishTitle": province }, "-__v");
+        return await this.#restaurantModel.find({ "province.englishTitle": province, isValid: true }, "-__v");
     }
 }
 

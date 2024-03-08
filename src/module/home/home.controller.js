@@ -42,9 +42,43 @@ class HomeController {
 
     async getListFoodsParty(req, res, next) {
         try {
-            const foods = await this.#service.getListFoodsParty();
+            const { user_province } = req?.cookies;
+            const foods = await this.#service.getListFoodsParty(user_province);
 
             res.json({ count: foods.length, foods });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getNewestRestaurant(req, res, next) {
+        try {
+            const { user_province } = req?.cookies;
+            const restaurants = await this.#service.getNewestRestaurant(user_province);
+
+            res.json({ count: restaurants.length, restaurants });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getRestaurants(req, res, next) {
+        try {
+            const { user_province } = req?.cookies;
+            const restaurants = await this.#service.getRestaurantByProvince(user_province);
+
+            res.json({ count: restaurants.length, restaurants });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getBestRestaurants(req, res, next) {
+        try {
+            const { user_province } = req?.cookies;
+            const restaurants = await this.#service.getBestRestaurants(user_province);
+
+            res.json({ count: restaurants.length, restaurants });
         } catch (error) {
             next(error);
         }
