@@ -46,6 +46,26 @@ class ProvinceController {
             next(error);
         }
     }
+
+    async delete(req, res, next) {
+        try {
+            await this.#service.delete(req.params);
+
+            res.json({ message: ProvinceMessage.DeleteSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteMany(req, res, next) {
+        try {
+            await this.#service.deleteMany(req.body);
+
+            res.json({ message: ProvinceMessage.DeleteSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = ProvinceController;

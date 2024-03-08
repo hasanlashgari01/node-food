@@ -1,6 +1,7 @@
 const createHttpError = require("http-errors");
 const ProvinceModel = require("./province.schema");
 const ProvinceMessage = require("./province.messages");
+const { isValidObjectId } = require("mongoose");
 
 class ProvinceService {
     #model;
@@ -28,9 +29,28 @@ class ProvinceService {
         if (!result) throw new createHttpError.InternalServerError(ProvinceMessage.CreatedFailed);
     }
 
+    async delete(paramsDto) {
+        const { id: provinceId } = paramsDto;
+        await this.checkValidId(provinceId);
+
+        const result = await this.#model.deleteOne({ _id: provinceId });
+        if (!result) throw new createHttpError.InternalServerError(ProvinceMessage.DeleteFailed);
+    }
+
+    async deleteMany(bodyDto) {
+        if (!bodyDto) throw new createHttpError.BadRequest(ProvinceMessage.FieldsNotEmpty);
+
+        const result = await this.#model.deleteMany({ _id: { $in: bodyDto } });
+        if (!result || result.deletedCount === 0) throw new createHttpError.InternalServerError(ProvinceMessage.DeleteFailed);
+    }
+
     async checkExistByEnglishTitle(englishTitle) {
         const isExist = await this.#model.findOne({ englishTitle });
         if (isExist) throw new createHttpError.BadRequest(ProvinceMessage.AlreadyExist);
+    }
+
+    async checkValidId(id) {
+        if (!isValidObjectId(id)) throw new createHttpError.BadRequest(ProvinceMessage.IdNotValid);
     }
 }
 
