@@ -4,7 +4,6 @@ const BanUserModel = require("../ban/ban.schema");
 const UserModel = require("../user/user.schema");
 const AuthMessage = require("./auth.messages");
 const { randomInt } = require("crypto");
-const { generateAccessToken, generateRefreshToken, hashPassword } = require("../../common/utils/auth");
 const bcrypt = require("bcrypt");
 
 class AuthService {
@@ -37,7 +36,7 @@ class AuthService {
                 role: dbLength ? "USER" : "ADMIN",
                 password: hashedPassword
             });
-            throw createHttpError.Created(AuthMessage.SendOtpSuccessfully);
+            return AuthMessage.SendOtpSuccessfully
         }
         await this.isThereAttempt(user, false);
         const { code, expiresIn } = await this.generateOtp();
@@ -54,7 +53,7 @@ class AuthService {
         // if code does not match => attempt - 1 and throw error
         if (user?.otp?.code !== code) {
             const otp = await this.isThereAttempt(user, true);
-            await this.#model.findOneAndUpdate({ $or: [{ mobile }, { email }] }, { otp }, { new: true });
+            await this.#model.updateOne({ mobile }, { otp });
             throw createHttpError.BadRequest(AuthMessage.WrongOtp);
         }
         // if code expired throw error
@@ -66,10 +65,8 @@ class AuthService {
         user.otp.isActive = true;
         await user.save();
         const payload = { _id: user?._id, mobile: user.mobile, email: user.email };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload);
 
-        return { accessToken, refreshToken };
+        return {payload}
     }
 
     async checkUserExist(mobile, email) {

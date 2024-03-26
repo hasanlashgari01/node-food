@@ -1,11 +1,16 @@
 const router = require("express").Router();
 const UserController = require("./user.controller");
 const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth.guard");
+const { avatarUpload } = require("../../common/utils/multer");
 
 const controller = new UserController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
-router.route("/").put(controller.updateProfile).patch(controller.updatePassword);
+router
+    .route("/")
+    .put(avatarUpload(), controller.updateProfile)
+    .patch(controller.updatePassword)
+    .delete(controller.removeAvatar);
 router.get("/whoami", controller.whoAmI);
 // restaurant
 router.patch("/restaurant/:id/comment", controller.changeRateForRestaurant);

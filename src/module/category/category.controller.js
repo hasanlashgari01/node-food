@@ -28,30 +28,25 @@ class CategoryController {
         } catch (error) {
             next(error);
         }
-
     }
 
     async update(req, res, next) {
         try {
             const { id } = req.params;
             const body = req.body;
-            const result = await this.#service.editCategory(id, body)
+            await this.#service.editCategory(id, body);
 
-            res.json(result);
-        } catch (error) {
-
-        }
+            res.json({ message: CategoryMessage.Updated });
+        } catch (error) {}
     }
 
     async getCategory(req, res, next) {
         try {
             const { id } = req.params;
-            const result = await this.#service.checkExistById(id)
+            const result = await this.#service.checkExistById(id);
 
             res.json(result);
-        } catch (error) {
-
-        }
+        } catch (error) {}
     }
 
     async getCategoryTitle(req, res, next) {

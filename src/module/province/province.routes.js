@@ -12,6 +12,7 @@ router
     .delete(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.deleteMany);
 router
     .route("/:id")
+    .get(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.getOne)
     .put(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.update)
     .delete(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.delete);
 

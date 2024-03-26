@@ -10,11 +10,12 @@ const controller = new CouponController();
 router.use(AccessTokenGuard, RefreshTokenGuard);
 router
     .route("/")
-    .post(isAdminGuard, validate(CreateCouponValidator), controller.create)
     .get(isAdminGuard, controller.getAll)
+    .post(isAdminGuard, validate(CreateCouponValidator), controller.create)
     .delete(isAdminGuard, controller.deleteMany);
 router
     .route("/:id")
+    .get(isAdminGuard, controller.getOneById)
     .put(isAdminGuard, validate(CreateCouponValidator), controller.update)
     .delete(isAdminGuard, controller.deleteOne);
 

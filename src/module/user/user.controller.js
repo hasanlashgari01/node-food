@@ -15,7 +15,20 @@ class UserController {
             const { _id: userId } = req.user;
 
             await this.#service.checkExistUser(userId);
-            await this.#service.updateProfile(userId, req.body);
+            await this.#service.updateProfile(userId, req.body, req.file);
+
+            res.status(200).json({ message: UserMessage.ProfileUpdateSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeAvatar(req, res, next) {
+        try {
+            const { _id: userId } = req.user;
+
+            await this.#service.checkExistUser(userId);
+            await this.#service.removeAvatar(userId);
 
             res.status(200).json({ message: UserMessage.ProfileUpdateSuccess });
         } catch (error) {

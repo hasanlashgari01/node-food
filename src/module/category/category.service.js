@@ -16,20 +16,13 @@ class CategoryService {
     }
 
     async create(categoryDto) {
-        if (categoryDto?.parent) {
-            if (!isValidObjectId(categoryDto?.parent)) throw new createHttpError.BadRequest(CategoryMessage.IdNotValid);
-            const isExistCategory = await this.checkExistById(categoryDto.parent);
-            categoryDto.parent = isExistCategory._id;
-            categoryDto.parents = await this.getCategoryParents(isExistCategory);
-        }
-        if (!categoryDto?.slug) {
-            categoryDto.slug = slugify(categoryDto.name);
-        } else {
+        if (categoryDto?.slug) {
             categoryDto.slug = slugify(categoryDto.slug);
             await this.alreadyExistBySlug(categoryDto.slug);
         }
 
         const category = await this.#model.create(categoryDto);
+
         return category;
     }
 
@@ -37,8 +30,8 @@ class CategoryService {
         if (!isValidObjectId(id)) throw new createHttpError.BadRequest(CategoryMessage.IdNotValid);
         const update = await this.checkExistById(id);
 
-        const category = await this.#model.updateOne({_id: id}, categoryDto);
-        return category;
+        const category = await this.#model.updateOne({ _id: id }, categoryDto);
+        if (category.matchedCount === 0) throw new createHttpError.BadRequest(CategoryMessage.Unknown);
     }
 
     async getTitles() {
@@ -69,11 +62,13 @@ class CategoryService {
     }
 
     async getCategoryParents(category) {
-        const parents = [...new Set(
-            [category._id.toString()]
-                .concat(category.parents.map(id => id.toString()))
-                .map(id => new Types.ObjectId(id))
-        )];
+        const parents = [
+            ...new Set(
+                [category._id.toString()]
+                    .concat(category.parents.map((id) => id.toString()))
+                    .map((id) => new Types.ObjectId(id))
+            ),
+        ];
 
         return parents;
     }

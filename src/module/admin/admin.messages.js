@@ -6,6 +6,8 @@ const AdminMessage = {
     RestaurantRejectFailed: "رد شدن رستوران با مشکل مواجه شد",
     RestaurantBanSuccess: "رستوران با موفقیت بن شد",
     RestaurantBanFailed: "بن شدن رستوران با مشکل مواجه شد",
+    RestaurantUnBanSuccess: "رستوران از لیست بن حذف شد",
+    RestaurantUnBanFailed: "حذف  رستوران از لیست بن با مشکل مواجه شد",
     RestaurantRemoveBanSuccess: "رستوران با موفقیت از لیست بن حذف شد",
     RestaurantRemoveBanFailed: "حذف شدن رستوران از لیست بن با مشکل مواجه شد",
     RestaurantIsNotBanned: "این رستوران بن نشده است",

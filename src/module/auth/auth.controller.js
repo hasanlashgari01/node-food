@@ -2,6 +2,7 @@ const autoBind = require("auto-bind");
 const AuthService = require("./auth.service");
 const AuthMessage = require("./auth.messages");
 const { CookieNames } = require("../../common/constant/cookie.enum");
+const { setRefreshToken, setAccessToken } = require("../../common/utils/auth");
 
 class AuthController {
     #service;
@@ -24,13 +25,12 @@ class AuthController {
 
     async checkOtp(req, res, next) {
         try {
-            const { accessToken, refreshToken } = await this.#service.checkOtp(req.body);
+            const { payload } = await this.#service.checkOtp(req.body);
 
-            return res
-                .cookie(CookieNames.AccessToken, accessToken, { httpOnly: true, secure: true })
-                .cookie(CookieNames.RefreshToken, refreshToken, { httpOnly: true, secure: true })
-                .status(201)
-                .json({ message: AuthMessage.VerifyOtpSuccessfully });
+            await setAccessToken(res, payload)
+            await setRefreshToken(res, payload)
+
+            res.status(201).json({ message: AuthMessage.VerifyOtpSuccessfully });
         } catch (error) {
             next(error);
         }

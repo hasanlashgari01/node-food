@@ -1,5 +1,6 @@
 const autoBind = require("auto-bind");
 const HomeService = require("./home.service");
+const cookieParser = require("cookie-parser");
 
 class HomeController {
     #service;
@@ -21,8 +22,8 @@ class HomeController {
 
     async getFoodsParty(req, res, next) {
         try {
-            const { user_province } = req?.cookies;
-            const foods = await this.#service.getAllFoodParty(user_province);
+            const { province } = req?.query;
+            const foods = await this.#service.getAllFoodParty(province);
 
             res.json({ count: foods.length, foods });
         } catch (error) {
@@ -42,8 +43,8 @@ class HomeController {
 
     async getListFoodsParty(req, res, next) {
         try {
-            const { user_province } = req?.cookies;
-            const foods = await this.#service.getListFoodsParty(user_province);
+            const { province } = req?.query;
+            const foods = await this.#service.getListFoodsParty(province);
 
             res.json({ count: foods.length, foods });
         } catch (error) {
@@ -53,8 +54,8 @@ class HomeController {
 
     async getNewestRestaurant(req, res, next) {
         try {
-            const { user_province } = req?.cookies;
-            const restaurants = await this.#service.getNewestRestaurant(user_province);
+            const { province } = req.query;
+            const restaurants = await this.#service.getNewestRestaurant(province);
 
             res.json({ count: restaurants.length, restaurants });
         } catch (error) {
@@ -64,8 +65,8 @@ class HomeController {
 
     async getRestaurants(req, res, next) {
         try {
-            const { user_province } = req?.cookies;
-            const restaurants = await this.#service.getRestaurantByProvince(user_province);
+            const { province } = req?.query;
+            const restaurants = await this.#service.getRestaurantByProvince(province);
 
             res.json({ count: restaurants.length, restaurants });
         } catch (error) {
@@ -75,8 +76,8 @@ class HomeController {
 
     async getBestRestaurants(req, res, next) {
         try {
-            const { user_province } = req?.cookies;
-            const restaurants = await this.#service.getBestRestaurants(user_province);
+            const { province } = req?.query;
+            const restaurants = await this.#service.getBestRestaurants(province);
 
             res.json({ count: restaurants.length, restaurants });
         } catch (error) {

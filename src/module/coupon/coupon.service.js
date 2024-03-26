@@ -31,7 +31,17 @@ class CouponService {
         if (!coupon) throw createHttpError.InternalServerError(CouponMessage.InternalServerError);
     }
 
+    async getOneById(couponId) {
+        await this.checkValidCouponId(couponId);
+
+        const result = await this.#model.findById(couponId);
+        if (!result) throw createHttpError.NotFound(CouponMessage.NotFound);
+
+        return result;
+    }
+
     async update(couponId, couponDto) {
+        console.log(couponId);
         const { code, type, amount, status, startDate, expireDate, usageCount, usageLimit, foodIds, userIds } =
             couponDto;
 

@@ -22,10 +22,21 @@ class CouponController {
         }
     }
 
+    async getOneById(req, res, next) {
+        try {
+            const { id } = req.params;
+            const result = await this.#service.getOneById(id);
+
+            res.json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async update(req, res, next) {
         try {
             const { id } = req.params;
-            await this.#service.checkIsCreator(req.user, id);
+            console.log(id);
             await this.#service.update(id, req.body);
 
             res.json({ message: CouponMessage.CouponUpdatedSuccess });

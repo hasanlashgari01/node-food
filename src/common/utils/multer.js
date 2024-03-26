@@ -10,10 +10,11 @@ const privatePath = "./private/uploads";
 
 const foodUpload = () => upload(false, "food", 1).single("cover");
 const menuUpload = () => upload(false, "menu", 1).single("image");
+const avatarUpload = () => upload(false, "user", 1).single("avatarUrl");
 const restaurantUpload = () => {
     return upload(false, "restaurant", 1).fields([
         { name: "logo", maxCount: 1 },
-        { name: "cover", maxCount: 1 }
+        { name: "cover", maxCount: 1 },
     ]);
 };
 
@@ -38,8 +39,7 @@ const storage = (isPrivate, directory) => {
                 removeFile(directory, fileName);
                 cb(err);
             }
-
-        }
+        },
     });
 };
 
@@ -60,8 +60,8 @@ const generateFileName = () => {
 const upload = (isPrivate, dir, size) => {
     return multer({
         storage: storage(isPrivate, dir),
-        limits: { fileSize: 1024 * 1024 * size } // 1 MB
+        limits: { fileSize: 1024 * 1024 * size }, // 1 MB
     });
 };
 
-module.exports = { foodUpload, menuUpload, restaurantUpload };
+module.exports = { foodUpload, menuUpload, restaurantUpload, avatarUpload };

@@ -47,6 +47,16 @@ class ProvinceController {
         }
     }
 
+    async getOne(req, res, next) {
+        try {
+            const province = await this.#service.getOne(req.params);
+
+            res.json(province);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async update(req, res, next) {
         try {
             await this.#service.update(req.params, req.body);

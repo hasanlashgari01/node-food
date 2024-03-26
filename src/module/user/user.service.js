@@ -25,23 +25,32 @@ class UserService {
         this.#kindFoodModel = KindOfFoodModel;
     }
 
-    async updateProfile(userId, userDto) {
-        const { fullName, avatar, biography, age } = userDto;
+    async updateProfile(userId, userDto, fileDto) {
+        const { fullName, biography, age, email, mobile, theme, gender } = userDto;
+        console.log(age);
         const updateResult = await this.#model.updateOne(
             { _id: userId },
             {
                 fullName,
-                avatar,
+                avatar: fileDto?.filename,
                 biography,
-                age,
+                age: age ? Number(age) : age,
+                email,
+                mobile,
+                gender,
+                settings: { theme },
             }
         );
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(UserMessage.ProfileUpdateSuccess);
+    }
 
+    async removeAvatar(userId) {
+        const updateResult = await this.#model.updateOne({ _id: userId }, { avatar: "" });
         if (!updateResult.modifiedCount) throw createHttpError.BadRequest(UserMessage.ProfileUpdateSuccess);
     }
 
     async updatePassword(userId, userDto) {
-        const { currentPassword } = userDto;
+        const { currentPassword, newPassword } = userDto;
 
         const user = await this.#model.findById(userId).select("password");
         if (!user) throw createHttpError.NotFound(UserMessage.UserNotExist);
@@ -49,7 +58,7 @@ class UserService {
         if (!isMatch) throw createHttpError.BadRequest(UserMessage.CurrentPasswordIsWrong);
 
         const salt = await bcrypt.genSaltSync(10);
-        const hashedPassword = await bcrypt.hashSync(password, salt);
+        const hashedPassword = await bcrypt.hashSync(newPassword, salt);
         const updateResult = await this.#model.updateOne({ _id: userId }, { password: hashedPassword });
         if (!updateResult.modifiedCount) throw createHttpError.BadRequest(UserMessage.PasswordUpdateFailed);
     }

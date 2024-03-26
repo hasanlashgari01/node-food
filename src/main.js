@@ -16,12 +16,12 @@ const main = async () => {
     // configs
     await connectToDB(); // connect to DataBase
 
-    app.use(cors());
+    app.use(cors({ origin: true, credentials: true }));
     app.use("/public/uploads", express.static(path.join(__dirname, "public", "uploads")));
     app.use(morgan("dev"));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
+    app.use(cookieParser());
     app.use(AppRouter);
 
     SwaggerConfig(app); // use swagger configuration

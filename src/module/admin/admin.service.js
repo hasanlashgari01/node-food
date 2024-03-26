@@ -46,12 +46,16 @@ class AdminService {
 
     async allRestaurantBanned() {
         const restaurantBannedCount = await this.#banRestaurantModel.find().count();
-        const restaurantsBanned = await this.#banRestaurantModel
+        let restaurantsBanned = await this.#banRestaurantModel
             .find()
             .select("-__v")
             .populate("restaurantId", "name phone email province category")
             .lean();
-        console.log(restaurantsBanned);
+
+        restaurantsBanned = restaurantsBanned.map((item) => {
+            let restaurant = item.restaurantId;
+            return { ...restaurant };
+        });
 
         return { restaurantBannedCount, restaurantsBanned };
     }
@@ -73,9 +77,16 @@ class AdminService {
             );
     }
 
-    async banRestaurant(id) {
-        const banResult = await this.#banRestaurantModel.create({ restaurantId: id });
-        if (!banResult) throw createHttpError.BadRequest(AdminMessage.RestaurantBanFailed);
+    async banRestaurant(id, isBan) {
+        let banResult = null;
+        if (isBan) {
+            banResult = await this.#banRestaurantModel.deleteOne({ restaurantId: id });
+            if (!banResult.deletedCount) throw createHttpError.BadRequest(AdminMessage.RestaurantUnBanFailed);
+        } else {
+            banResult = await this.#banRestaurantModel.create({ restaurantId: id });
+            if (!banResult) throw createHttpError.BadRequest(AdminMessage.RestaurantBanFailed);
+        }
+        return banResult;
     }
 
     async removeRestaurantBan(id) {
@@ -96,9 +107,10 @@ class AdminService {
         return restaurant;
     }
 
-    async checkIsBanRestaurant(id) {
+    async checkIsBanRestaurant(id, showError = true) {
         const isBanRestauRent = await this.#banRestaurantModel.findOne({ restaurantId: id });
-        if (isBanRestauRent) throw new createHttpError.NotFound(RestaurentMessage.RestaurantBanned);
+        if (showError && isBanRestauRent) throw new createHttpError.NotFound(RestaurentMessage.RestaurantBanned);
+        return isBanRestauRent;
     }
 
     async checkIsNotBanRestaurant(id) {
@@ -163,10 +175,10 @@ class AdminService {
     async banUserByAdmin(mobile, email, isBanUser) {
         let banResult;
         if (isBanUser) {
-            banResult = await this.#banUserModel.deleteOne({ mobile, email });
+            banResult = await this.#banUserModel.deleteOne({ mobile });
             if (!banResult.deletedCount) throw createHttpError.BadRequest(AdminMessage.UserUnBanFailed);
         } else {
-            banResult = await this.#banUserModel.create({ mobile, email });
+            banResult = await this.#banUserModel.create({ mobile });
             if (!banResult) throw createHttpError.BadRequest(AdminMessage.UserBanFailed);
         }
         return banResult;
@@ -180,9 +192,17 @@ class AdminService {
     }
 
     async checkIsUserOnBanList(mobile, email, showError = false) {
-        const isBanUser = await this.#banUserModel.findOne({ $or: [{ mobile }, { email }] });
-        if (isBanUser && showError) throw new createHttpError.BadRequest(AdminMessage.UserAlreadyOnBanList);
-        return isBanUser;
+        const isMobileUser = await this.#banUserModel.findOne({ mobile });
+        let isEmailUser;
+        if (email) {
+            isEmailUser = await this.#banUserModel.findOne({ email });
+        }
+        if (showError) {
+            if (isMobileUser || isEmailUser) {
+                throw new createHttpError.BadRequest(AdminMessage.UserAlreadyOnBanList);
+            }
+        }
+        return isMobileUser ?? isEmailUser;
     }
 
     async userBanListGuard(userDto) {

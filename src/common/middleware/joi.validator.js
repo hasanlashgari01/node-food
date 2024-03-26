@@ -5,6 +5,7 @@ const validate = (schema) => {
             next();
         } catch (error) {
             if (error.isJoi) {
+                console.log(error);
                 const errUnknown = {};
                 const errDetails = error.details[0];
 

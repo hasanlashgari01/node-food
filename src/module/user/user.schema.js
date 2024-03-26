@@ -10,14 +10,18 @@ const OtpSchema = new Schema({
 });
 
 const FoodSchema = new Schema({
-    quantity: { type: Number, required: true },
-    foodId: { type: ObjectId, ref: "KindOfFood", required: true },
+    quantity: { type: Number, required: true, default: null },
+    foodId: { type: ObjectId, ref: "KindOfFood", required: true, default: null },
     coupon: { type: ObjectId, ref: "Coupon", default: null },
 });
 
 const CartSchema = new Schema({
-    foods: { type: [FoodSchema], default: {} },
+    foods: { type: [FoodSchema], default: [] },
     coupon: { type: ObjectId, ref: "Coupon", default: null },
+});
+
+const SettingSchema = new Schema({
+    theme: { type: String, enum: ["AUTO", "LIGHT", "DARK"], default: "AUTO" },
 });
 
 const UserSchema = new Schema(
@@ -42,12 +46,13 @@ const UserSchema = new Schema(
         resetLink: { type: String, default: null },
         foods: [{ type: ObjectId, ref: "Food" }],
         cart: { type: CartSchema, default: {} },
+        settings: SettingSchema,
     },
     { timestamps: true, toJSON: { virtuals: true } }
 );
 
 UserSchema.virtual("avatarUrl").get(function () {
-    if (this.avatar) return `${process.env.SERVER_URL}/${this.avatar}`;
+    if (this.avatar) return this.avatar;
     return null;
 });
 

@@ -41,6 +41,17 @@ class FilesController {
             next(error);
         }
     }
+
+    async getAvatar(req, res, next) {
+        try {
+            let { fileName } = req.params;
+            const result = await this.#service.getFile("user", fileName);
+
+            res.sendFile(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = FilesController;

@@ -17,7 +17,7 @@ const checkOtpValidatorSchema = Joi.object({
         .regex(/^[0-9]{11}$/)
         .when("signUpMethod", { is: "mobile", then: Joi.required() }).label("شماره تلفن مجاز نیست"),
     email: Joi.string().email().when("signUpMethod", { is: "email", then: Joi.required() }).label("ایمیل مجاز نیست"),
-    code: Joi.string().min(5).max(5).required().label("کد باید 5 رقمی باشد"),
+    code: Joi.string().min(5).max(6).required().label("کد باید 5 رقمی باشد"),
 });
 
 module.exports = { sendOtpValidatorSchema, checkOtpValidatorSchema };

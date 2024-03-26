@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
 const CreateCouponValidator = Joi.object({
-    code: Joi.string().min(3).max(255).required().label("کد کوپن معتبر نیست"),
+    code: Joi.string().min(3).max(20).required().label("کد کوپن معتبر نیست"),
     type: Joi.string().valid("fixedProduct", "percent").required().label("نوع کوپن معتبر نیست"),
     amount: Joi.number()
         .when("type", {

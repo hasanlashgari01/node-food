@@ -60,8 +60,14 @@ class AdminController {
         try {
             const { id } = req.params;
             await this.#service.checkIsValidRestaurant(id);
-            await this.#service.checkIsBanRestaurant(id);
-            await this.#service.banRestaurant(id);
+            const restaurant = await this.#service.checkIsBanRestaurant(id, false);
+            const banResult = await this.#service.banRestaurant(id, restaurant);
+
+            res.status(banResult.deletedCount ? 200 : 201).json({
+                message: banResult.deletedCount
+                    ? AdminMessage.RestaurantUnBanSuccess
+                    : AdminMessage.RestaurantBanSuccess,
+            });
 
             res.json({ message: AdminMessage.RestaurantBanSuccess });
         } catch (error) {
