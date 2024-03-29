@@ -11,7 +11,7 @@ const OtpSchema = new Schema({
 
 const FoodSchema = new Schema({
     quantity: { type: Number, required: true, default: null },
-    foodId: { type: ObjectId, ref: "KindOfFood", required: true, default: null },
+    kindId: { type: ObjectId, ref: "KindOfFood", required: true, default: null },
     coupon: { type: ObjectId, ref: "Coupon", default: null },
 });
 

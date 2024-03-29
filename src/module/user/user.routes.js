@@ -30,10 +30,11 @@ router.patch("/food/comment/:id/like", controller.addLikeFoodComment);
 router.patch("/food/comment/:id/unlike", controller.removeLikeFoodComment);
 router.route("/food/:id/bookmark").patch(controller.bookmarkFood).delete(controller.removeBookmarkFood);
 // cart
-router.route("/cart").delete(controller.emptyCart);
+router.route("/cart").get(controller.getCart).delete(controller.emptyCart);
 router.put("/cart/increment", controller.incrementCart);
 router.put("/cart/decrement", controller.decrementCart);
 // comments
 router.route("/comments").get(controller.getComments);
+router.route("/offers").get(controller.getOffers);
 
 module.exports = { UserRouter: router };

@@ -8,6 +8,7 @@ const UserMessage = require("./user.messages");
 const { isValidObjectId } = require("mongoose");
 const FoodCommentsModel = require("../food/food-comment.schema");
 const KindOfFoodModel = require("../food/food-kind.schema");
+const CouponModel = require("../coupon/coupon.schema");
 
 class UserService {
     #model;
@@ -16,6 +17,7 @@ class UserService {
     #foodCommentsModel;
     #foodModel;
     #kindFoodModel;
+    #couponModel;
     constructor() {
         this.#model = UserModel;
         this.#restaurantModel = RestaurantModel;
@@ -23,11 +25,11 @@ class UserService {
         this.#foodCommentsModel = FoodCommentsModel;
         this.#foodModel = FoodModel;
         this.#kindFoodModel = KindOfFoodModel;
+        this.#couponModel = CouponModel;
     }
 
     async updateProfile(userId, userDto, fileDto) {
         const { fullName, biography, age, email, mobile, theme, gender } = userDto;
-        console.log(age);
         const updateResult = await this.#model.updateOne(
             { _id: userId },
             {
@@ -69,7 +71,7 @@ class UserService {
 
         const userResult = await this.#model
             .findById(userId)
-            .select("-otp -__v")
+            .select("-otp -cart -__v")
             .populate("likedFoods", selectFoodFields)
             .populate("bookmarkedFoods", selectFoodFields)
             .populate("likedRestaurants", selectRestaurantFields)
@@ -289,13 +291,23 @@ class UserService {
         if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
     }
 
-    async checkExistKindFood({ id, foodId }) {
-        if (!isValidObjectId(id ?? foodId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
-        const food = await this.#kindFoodModel.findById(id ?? foodId);
+    async checkExistKindFood({ kindId }) {
+        if (!isValidObjectId(kindId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
+        const food = await this.#kindFoodModel.findById(kindId);
         if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
     }
 
     // * Cart
+    async getCart(userDto) {
+        const { _id: userId } = userDto;
+        const cart = await this.#model
+            .findById(userId)
+            .select("cart")
+            .populate("cart.foods.kindId")
+            .populate("cart.coupon");
+        return cart;
+    }
+
     async incrementCart(userDto, foodDto, resultExistFood) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
@@ -304,7 +316,7 @@ class UserService {
 
         if (resultExistFood) {
             result = await this.#model.updateOne(
-                { _id: userId, "cart.foods.foodId": foodId },
+                { _id: userId, "cart.foods._id": foodId },
                 { $inc: { "cart.foods.$.quantity": 1 } }
             );
         } else {
@@ -325,7 +337,7 @@ class UserService {
             result = await this.#model.updateOne({ _id: userId }, { $pull: { "cart.foods": { foodId } } });
         } else {
             result = await this.#model.updateOne(
-                { _id: userId, "cart.foods.foodId": foodId },
+                { _id: userId, "cart.foods._id": foodId },
                 { $inc: { "cart.foods.$.quantity": -1 } }
             );
         }
@@ -335,12 +347,9 @@ class UserService {
     async checkIsFoodInCart(userDto, foodDto) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
-        if (!isValidObjectId(userId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
 
-        const {
-            cart: { foods },
-        } = await this.#model.findOne({ $and: [{ _id: userId }] }).select("cart");
-        const result = foods?.find((food) => food?.foodId?.toString() === foodId);
+        const { cart } = await this.#model.findOne({ _id: userId, "cart.foods._id": foodId }).select("cart.foods");
+        const result = cart.foods.find((food) => food._id.toString() === foodId);
 
         return result;
     }
@@ -355,12 +364,23 @@ class UserService {
     // * Comments
     async getComments(userDto) {
         const { _id: userId } = userDto;
-        console.log(userId);
 
         const foodComments = await this.#foodCommentsModel.find({ authorId: userId });
         const restaurantComments = await this.#restaurantCommentsModel.find({ authorId: userId });
 
         return { foodComments, restaurantComments };
+    }
+
+    // * Offers
+    async getOffers(userDto) {
+        const { _id: userId } = userDto;
+
+        const offers = await this.#couponModel
+            .find({ userIds: { $in: userId } })
+            .select("code amount status startDate expireDate foodIds")
+            .populate("foodIds");
+
+        return { offers };
     }
 }
 

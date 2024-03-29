@@ -249,10 +249,20 @@ class UserController {
     }
 
     // * Cart
+    async getCart(req, res, next) {
+        try {
+            const cart = await this.#service.getCart(req.user);
+
+            res.status(200).json(cart);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async incrementCart(req, res, next) {
         try {
-            await this.#service.checkExistKindFood(req.body);
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);
+            await this.#service.checkExistKindFood(result);
             await this.#service.incrementCart(req.user, req.body, result);
 
             res.json({ message: UserMessage.IncrementCartSuccess });
@@ -263,8 +273,8 @@ class UserController {
 
     async decrementCart(req, res, next) {
         try {
-            await this.#service.checkExistKindFood(req.body);
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);
+            await this.#service.checkExistKindFood(result);
             await this.#service.decrementCart(req.user, req.body, result);
 
             res.json({ message: UserMessage.DecrementCartSuccess });
@@ -288,7 +298,18 @@ class UserController {
         try {
             const { foodComments, restaurantComments } = await this.#service.getComments(req.user);
 
-            res.json([...foodComments, ...restaurantComments]);
+            res.status(200).json([...foodComments, ...restaurantComments]);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // * Offers
+    async getOffers(req, res, next) {
+        try {
+            const { offers } = await this.#service.getOffers(req.user);
+
+            res.status(200).json(offers);
         } catch (error) {
             next(error);
         }
