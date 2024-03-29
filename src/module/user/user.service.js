@@ -351,6 +351,17 @@ class UserService {
         const result = await this.#model.updateOne({ _id: userId }, { $set: { "cart.foods": [] } });
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.EmptyCartFailed);
     }
+
+    // * Comments
+    async getComments(userDto) {
+        const { _id: userId } = userDto;
+        console.log(userId);
+
+        const foodComments = await this.#foodCommentsModel.find({ authorId: userId });
+        const restaurantComments = await this.#restaurantCommentsModel.find({ authorId: userId });
+
+        return { foodComments, restaurantComments };
+    }
 }
 
 module.exports = UserService;

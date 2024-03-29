@@ -33,5 +33,7 @@ router.route("/food/:id/bookmark").patch(controller.bookmarkFood).delete(control
 router.route("/cart").delete(controller.emptyCart);
 router.put("/cart/increment", controller.incrementCart);
 router.put("/cart/decrement", controller.decrementCart);
+// comments
+router.route("/comments").get(controller.getComments);
 
 module.exports = { UserRouter: router };

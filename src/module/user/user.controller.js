@@ -282,6 +282,17 @@ class UserController {
             next(error);
         }
     }
+
+    // * Comments
+    async getComments(req, res, next) {
+        try {
+            const { foodComments, restaurantComments } = await this.#service.getComments(req.user);
+
+            res.json([...foodComments, ...restaurantComments]);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;

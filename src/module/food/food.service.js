@@ -3,27 +3,27 @@ const { isValidObjectId } = require("mongoose");
 const FoodModel = require("./food.schema");
 const RestaurantModel = require("../restaurant/restaurant.schema");
 const MenuModel = require("../menu/menu.schema");
-const UserModel = require("../user/user.schema");
 const FoodMessage = require("./food.messages");
 const MenuMessage = require("../menu/menu.messages");
 const RestaurantMessage = require("../restaurant/restaurant.messages");
 const KindOfFoodModel = require("./food-kind.schema");
 const FoodCommentsModel = require("./food-comment.schema");
+const RestaurantCommentsModel = require("../restaurant/restaurant-comment.schema");
 
 class FoodService {
     #model;
     #kindOfFoodModel;
     #foodCommentsModel;
+    #restaurantCommentsModel;
     #restaurantModel;
     #menuModel;
-    #userModel;
     constructor() {
         this.#model = FoodModel;
         this.#kindOfFoodModel = KindOfFoodModel;
         this.#foodCommentsModel = FoodCommentsModel;
+        this.#restaurantCommentsModel = RestaurantCommentsModel;
         this.#restaurantModel = RestaurantModel;
         this.#menuModel = MenuModel;
-        this.#userModel = UserModel;
     }
 
     async create(foodDto, userDto, fileDto) {
@@ -121,6 +121,16 @@ class FoodService {
         return { comments };
     }
 
+    async changeRestaurantCommentStatus(commentDto) {
+        const { _id: commentId, isAccepted } = commentDto;
+
+        const updateResult = await this.#restaurantCommentsModel.updateOne(
+            { _id: commentId },
+            { isAccepted: !isAccepted }
+        );
+        if (!updateResult.modifiedCount) throw createHttpError.BadRequest(FoodMessage.CommentUpdateFailed);
+    }
+
     async changeCommentStatus(commentDto) {
         const { _id: commentId, isAccepted } = commentDto;
 
@@ -128,8 +138,13 @@ class FoodService {
         if (!updateResult.modifiedCount) throw createHttpError.BadRequest(FoodMessage.CommentUpdateFailed);
     }
 
-    async checkExistComment(commentId) {
-        const comment = await this.#foodCommentsModel.findById(commentId);
+    async checkExistComment(commentId, isFood = true) {
+        let comment = null;
+        if (isFood) {
+            comment = await this.#foodCommentsModel.findById(commentId);
+        } else {
+            comment = await this.#restaurantCommentsModel.findById(commentId);
+        }
         if (!comment) throw createHttpError.NotFound(FoodMessage.CommentNotExist);
         return { comment };
     }

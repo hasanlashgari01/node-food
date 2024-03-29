@@ -75,6 +75,19 @@ class FoodController {
         }
     }
 
+    async changeRestaurantCommentStatus(req, res, next) {
+        try {
+            const { id } = req.params;
+
+            const { comment } = await this.#service.checkExistComment(id, false);
+            await this.#service.changeRestaurantCommentStatus(comment);
+
+            res.json({ message: FoodMessage.CommentUpdateSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async changeCommentStatus(req, res, next) {
         try {
             const { id } = req.params;

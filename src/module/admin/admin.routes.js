@@ -16,6 +16,7 @@ router.route("/restaurant/banned").get(controller.getAllRestaurantBanned);
 router.route("/restaurant/status/:isValid").get(controller.getAllRestaurantWithStatus);
 router.route("/restaurant/comment").get(controller.getRestaurantComments);
 router.route("/restaurant/comment/:id").get(controller.rejectRestaurantCommentAndBanUser);
+router.patch("/restaurant/comment/:id/status", foodController.changeRestaurantCommentStatus);
 router.route("/restaurant/:id/status").get(controller.changeRestaurantValid);
 router.route("/restaurant/:id/ban").get(controller.banRestaurant).delete(controller.removeRestaurantBan);
 router.route("/restaurant/:id").get(controller.getRestaurant);
