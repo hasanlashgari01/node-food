@@ -36,5 +36,6 @@ router.put("/cart/decrement", controller.decrementCart);
 // comments
 router.route("/comments").get(controller.getComments);
 router.route("/offers").get(controller.getOffers);
+router.get("/home", controller.getDashboard);
 
 module.exports = { UserRouter: router };

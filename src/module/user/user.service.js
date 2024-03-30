@@ -9,6 +9,7 @@ const { isValidObjectId } = require("mongoose");
 const FoodCommentsModel = require("../food/food-comment.schema");
 const KindOfFoodModel = require("../food/food-kind.schema");
 const CouponModel = require("../coupon/coupon.schema");
+const OrderModel = require("../order/order.schema");
 
 class UserService {
     #model;
@@ -18,6 +19,7 @@ class UserService {
     #foodModel;
     #kindFoodModel;
     #couponModel;
+    #orderModel;
     constructor() {
         this.#model = UserModel;
         this.#restaurantModel = RestaurantModel;
@@ -26,6 +28,7 @@ class UserService {
         this.#foodModel = FoodModel;
         this.#kindFoodModel = KindOfFoodModel;
         this.#couponModel = CouponModel;
+        this.#orderModel = OrderModel;
     }
 
     async updateProfile(userId, userDto, fileDto) {
@@ -381,6 +384,21 @@ class UserService {
             .populate("foodIds");
 
         return { offers };
+    }
+
+    async getDashboard(userDto) {
+        const { _id: userId } = userDto;
+
+        const successOrders = await this.#orderModel.find({ _id: userId, status: "COMPLETED" }).countDocuments();
+        const failedOrders = await this.#orderModel.find({ _id: userId, status: "CANCELED" }).countDocuments();
+        const foodComments = await this.#foodCommentsModel.find({ _id: userId, isAccepted: true }).countDocuments();
+        const restaurantComments = await this.#restaurantCommentsModel
+            .find({ _id: userId, isAccepted: true })
+            .countDocuments();
+
+        const countComments = foodComments + restaurantComments;
+
+        return { successOrders, failedOrders, countComments };
     }
 }
 

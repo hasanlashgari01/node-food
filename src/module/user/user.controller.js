@@ -314,6 +314,16 @@ class UserController {
             next(error);
         }
     }
+
+    async getDashboard(req, res, next) {
+        try {
+            const result = await this.#service.getDashboard(req.user);
+
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = UserController;
