@@ -388,12 +388,13 @@ class UserService {
 
     async getDashboard(userDto) {
         const { _id: userId } = userDto;
+        console.log(userId);
 
-        const successOrders = await this.#orderModel.find({ _id: userId, status: "COMPLETED" }).countDocuments();
-        const failedOrders = await this.#orderModel.find({ _id: userId, status: "CANCELED" }).countDocuments();
-        const foodComments = await this.#foodCommentsModel.find({ _id: userId, isAccepted: true }).countDocuments();
+        const successOrders = await this.#orderModel.find({ user: userId, status: "COMPLETED" }).countDocuments();
+        const failedOrders = await this.#orderModel.find({ user: userId, status: "CANCELED" }).countDocuments();
+        const foodComments = await this.#foodCommentsModel.find({ authorId: userId, isAccepted: true }).countDocuments();
         const restaurantComments = await this.#restaurantCommentsModel
-            .find({ _id: userId, isAccepted: true })
+            .find({ authorId: userId, isAccepted: true })
             .countDocuments();
 
         const countComments = foodComments + restaurantComments;
