@@ -8,6 +8,7 @@ const { CreateCouponValidator } = require("./coupon.validation");
 const controller = new CouponController();
 
 router.use(AccessTokenGuard, RefreshTokenGuard);
+router.route("/code/:code").get(controller.getByCode);
 router
     .route("/")
     .get(isAdminGuard, controller.getAll)

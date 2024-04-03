@@ -23,28 +23,28 @@ class OrderService {
 
     async create(bodyDto, userDto) {
         const { _id: userId } = userDto;
-        const { province, address, payment, paymentDate, coupon } = bodyDto;
+        const { province, address, payment, paymentDate, coupon, delivery, total, mobile } = bodyDto;
 
-        const { cart: cartDto } = await this.#userModel.findById(userId, "cart").populate("cart.foods.foodId");
+        const { cart: cartDto } = await this.#userModel.findById(userId, "cart").populate("cart.foods.kindId");
         if (!cartDto) throw createHttpError.NotFound(OrderMessage.NotExistCart);
-        const totalPrice = await this.calculateTotal(cartDto.foods);
         const foods = cartDto.foods.map((food) => food.foodId);
-        const couponResult = await this.checkExistCoupon(coupon);
-        await this.checkCouponForUser(userId, couponResult);
 
         const order = await this.#model.create({
             user: userId,
             foods: foods,
-            total: totalPrice,
+            total,
             province,
+            mobile,
             address,
             payment,
             paymentDate,
-            coupon: couponResult?.code ?? null,
-            couponAmount: couponResult?.amount ?? null,
+            couponAmount: coupon ?? null,
             orderDate: Date.now(),
+            delivery,
         });
-        return order;
+        if (!order) throw createHttpError.BadRequest(OrderMessage.CreateFailed);
+        await this.#userModel.updateOne({ _id: userId }, { $set: { cart: { foods: [], total: 0 } } });
+        return { order: order._id };
     }
 
     async getAll(userDto) {

@@ -9,6 +9,20 @@ class CouponService {
         this.#model = CouponModel;
     }
 
+    async getByCode(code) {
+        const result = await this.#model.findOne({ code });
+        if (!result) throw createHttpError.NotFound(CouponMessage.NotFound);
+        if (result.status === "expired" || result.status === "notActive")
+            throw createHttpError.BadRequest(CouponMessage.CouponExpired);
+        if (result.usageCount === 0) throw createHttpError.BadRequest(CouponMessage.CouponExpired);
+        if (result.userIds.length >= 1) {
+            if (!result.userIds.includes(result.creator.toString())) {
+                throw createHttpError.BadRequest(CouponMessage.NotValid);
+            }
+        }
+        return result;
+    }
+
     async create(userDto, couponDto) {
         const { _id: userId } = userDto;
         const { code, type, amount, status, startDate, expireDate, usageCount, usageLimit, foodIds, userIds } =

@@ -1,5 +1,6 @@
 const OrderMessage = {
     CreateSuccess: "سفارش با موفقیت ثبت شد",
+    CreateFailed: "عملیات ثبت سفارش با شکست مواجه شد",
     PaymentSuccess: "عملیات پرداخت با موفقیت انجام شد",
     PaymentFailed: "عملیات پرداخت با شکست مواجه شد",
     OrderPaid: "سفارش پرداخت شده است",

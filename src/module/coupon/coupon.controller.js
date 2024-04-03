@@ -10,6 +10,17 @@ class CouponController {
         this.#service = new CouponService();
     }
 
+    async getByCode(req, res, next) {
+        try {
+            const { code } = req.params;
+            const coupon = await this.#service.getByCode(code);
+
+            res.status(200).json(coupon);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async create(req, res, next) {
         try {
             const { code } = req.body;
