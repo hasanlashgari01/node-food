@@ -33,6 +33,7 @@ router.route("/food/:id/bookmark").patch(controller.bookmarkFood).delete(control
 router.route("/cart").get(controller.getCart).delete(controller.emptyCart);
 router.put("/cart/increment", controller.incrementCart);
 router.put("/cart/decrement", controller.decrementCart);
+router.route("/cart/:foodId").put(controller.removeFoodFromCart);
 // comments
 router.route("/comments").get(controller.getComments);
 router.route("/offers").get(controller.getOffers);

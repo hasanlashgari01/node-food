@@ -259,6 +259,17 @@ class UserController {
         }
     }
 
+    async removeFoodFromCart(req, res, next) {
+        try {
+            await this.#service.checkIsFoodInCart(req.user, req.params);
+            await this.#service.removeFoodFromCart(req.user, req.params);
+
+            res.status(200).json({ message: UserMessage.RemoveFoodFromCartSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async incrementCart(req, res, next) {
         try {
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);

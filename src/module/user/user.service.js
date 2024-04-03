@@ -311,6 +311,17 @@ class UserService {
         return cart;
     }
 
+    async removeFoodFromCart(userDto, foodDto) {
+        const { _id: userId } = userDto;
+        const { foodId } = foodDto;
+        console.log(foodId);
+        const result = await this.#model.updateOne(
+            { _id: userId, "cart.foods._id": foodId },
+            { $pull: { "cart.foods": { _id: foodId } } }
+        );
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.RemoveFoodFromCartFailed);
+    }
+
     async incrementCart(userDto, foodDto, resultExistFood) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
@@ -392,7 +403,9 @@ class UserService {
 
         const successOrders = await this.#orderModel.find({ user: userId, status: "COMPLETED" }).countDocuments();
         const failedOrders = await this.#orderModel.find({ user: userId, status: "CANCELED" }).countDocuments();
-        const foodComments = await this.#foodCommentsModel.find({ authorId: userId, isAccepted: true }).countDocuments();
+        const foodComments = await this.#foodCommentsModel
+            .find({ authorId: userId, isAccepted: true })
+            .countDocuments();
         const restaurantComments = await this.#restaurantCommentsModel
             .find({ authorId: userId, isAccepted: true })
             .countDocuments();

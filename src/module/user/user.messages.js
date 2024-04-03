@@ -34,6 +34,8 @@ const UserMessage = {
     DecrementCartFailed: "کم کردن از سبد خرید با مشکل مواجه شد",
     EmptyCartSuccess: "سبد خرید خالی شد",
     EmptyCartFailed: "خالی کردن سبد خرید با مشکل مواجه شد",
+    RemoveFoodFromCartSuccess: "غذا از سبد خرید حذف شد",
+    RemoveFoodFromCartFailed: "حذف غذا از سبد خرید با مشکل مواجه شد",
     IdNotValid: "شناسه صحیح نمی باشد",
 };
 
