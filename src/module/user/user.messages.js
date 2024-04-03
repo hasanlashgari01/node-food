@@ -36,6 +36,13 @@ const UserMessage = {
     EmptyCartFailed: "خالی کردن سبد خرید با مشکل مواجه شد",
     RemoveFoodFromCartSuccess: "غذا از سبد خرید حذف شد",
     RemoveFoodFromCartFailed: "حذف غذا از سبد خرید با مشکل مواجه شد",
+    AddressAdded: "آدرس با موفقیت ثبت شد",
+    AddressAddedFailed: "ثبت آدرس با مشکل مواجه شد",
+    AddressEdited: "آدرس با موفقیت ویرایش شد",
+    AddressEditFailed: "ویرایش آدرس با مشکل مواجه شد",
+    AddressRemoved: "آدرس با موفقیت حذف شد",
+    AddressRemoveFailed: "حذف آدرس با مشکل مواجه شد",
+    AddressNotExist: "آدرس وجود ندارد",
     IdNotValid: "شناسه صحیح نمی باشد",
 };
 

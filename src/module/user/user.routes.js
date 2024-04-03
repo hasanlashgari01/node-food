@@ -34,6 +34,9 @@ router.route("/cart").get(controller.getCart).delete(controller.emptyCart);
 router.put("/cart/increment", controller.incrementCart);
 router.put("/cart/decrement", controller.decrementCart);
 router.route("/cart/:foodId").put(controller.removeFoodFromCart);
+// address
+router.route("/address").get(controller.getAllAddress).post(controller.addAddress);
+router.route("/address/:id").get(controller.getAddress).put(controller.editAddress).patch(controller.removeAddress);
 // comments
 router.route("/comments").get(controller.getComments);
 router.route("/offers").get(controller.getOffers);

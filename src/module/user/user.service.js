@@ -10,9 +10,11 @@ const FoodCommentsModel = require("../food/food-comment.schema");
 const KindOfFoodModel = require("../food/food-kind.schema");
 const CouponModel = require("../coupon/coupon.schema");
 const OrderModel = require("../order/order.schema");
+const UserAddressModel = require("./user-address.schema");
 
 class UserService {
     #model;
+    #addressModel;
     #restaurantModel;
     #restaurantCommentsModel;
     #foodCommentsModel;
@@ -22,6 +24,7 @@ class UserService {
     #orderModel;
     constructor() {
         this.#model = UserModel;
+        this.#addressModel = UserAddressModel;
         this.#restaurantModel = RestaurantModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
         this.#foodCommentsModel = FoodCommentsModel;
@@ -373,6 +376,68 @@ class UserService {
 
         const result = await this.#model.updateOne({ _id: userId }, { $set: { "cart.foods": [] } });
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.EmptyCartFailed);
+    }
+
+    // * Address
+
+    async getAllAddress(userDto) {
+        const { _id: userId } = userDto;
+
+        return await this.#addressModel.findOne({ userId: userId }).lean();
+    }
+
+    async addAddress(userDto, addressDto) {
+        const { _id: userId } = userDto;
+        const { province, city, district, detail, coordinate, mobile, title } = addressDto;
+        console.log(addressDto);
+
+        let result = null;
+        const existAddress = await this.#addressModel.findOne({ userId });
+
+        if (existAddress) {
+            result = await this.#addressModel.updateOne(
+                { userId },
+                { $push: { address: { province, city, district, detail, coordinate, mobile, title } } }
+            );
+        } else {
+            result = await this.#addressModel.create({
+                userId,
+                address: { province, city, district, detail, coordinate, mobile, title },
+            });
+        }
+        if (!result) throw createHttpError.BadRequest(UserMessage.AddressAddedFailed);
+    }
+
+    async getAddress(userDto, addressDto) {
+        const { _id: userId } = userDto;
+        const { id: addressId } = addressDto;
+        return await this.#addressModel.findOne({ userId, "address._id": addressId }, { "address.$": 1 }).lean();
+    }
+
+    async editAddress(userDto, paramsDto, addressDto) {
+        const { _id: userId } = userDto;
+        const { id: addressId } = paramsDto;
+        const { province, city, district, detail, coordinate, mobile, title } = addressDto;
+
+        const result = await this.#addressModel.updateOne(
+            { userId, "address._id": addressId },
+            { $set: { "address.$": { province, city, district, detail, coordinate, mobile, title } } }
+        );
+
+        console.log(result);
+
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.AddressEditFailed);
+    }
+
+    async removeAddress(userDto, addressDto) {
+        const { _id: userId } = userDto;
+        const { id: addressId } = addressDto;
+
+        const result = await this.#addressModel.updateOne({ userId }, { $pull: { address: { _id: addressId } } });
+
+        console.log(result);
+
+        if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.AddressRemoveFailed);
     }
 
     // * Comments

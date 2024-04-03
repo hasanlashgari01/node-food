@@ -304,6 +304,58 @@ class UserController {
         }
     }
 
+    // * Address
+
+    async getAllAddress(req, res, next) {
+        try {
+            const result = await this.#service.getAllAddress(req.user);
+
+            res.status(200).send(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async addAddress(req, res, next) {
+        try {
+            await this.#service.addAddress(req.user, req.body);
+
+            res.status(201).json({ message: UserMessage.AddressAdded });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getAddress(req, res, next) {
+        try {
+            const result = await this.#service.getAddress(req.user, req.params);
+            
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async editAddress(req, res, next) {
+        try {
+            await this.#service.editAddress(req.user, req.params, req.body);
+
+            res.status(200).json({ message: UserMessage.AddressEdited });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeAddress(req, res, next) {
+        try {
+            await this.#service.removeAddress(req.user, req.params);
+
+            res.status(201).json({ message: UserMessage.AddressRemoved });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     // * Comments
     async getComments(req, res, next) {
         try {
