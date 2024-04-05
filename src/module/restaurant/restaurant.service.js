@@ -71,10 +71,12 @@ class RestaurantService {
     }
 
     async getRestaurantBySlug(slug) {
-        const restaurant = await this.#model.findOne({ slug });
+        const restaurant = await this.#model.findOne({ slug }).select("-phone -email -createdAt -updatedAt -__v");
         if (!restaurant) throw new createHttpError.NotFound(RestaurantMessage.NotFound);
+        if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurantMessage.NotFound);
+        const menu = await this.#menuModel.find({ restaurantId: restaurant._id }, "-__v").populate("foods", "-__v");
 
-        return restaurant;
+        return { restaurant, menu };
     }
 
     async isValidRestaurant(id) {
