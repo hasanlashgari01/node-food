@@ -273,7 +273,6 @@ class UserController {
     async incrementCart(req, res, next) {
         try {
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);
-            await this.#service.checkExistKindFood(result);
             await this.#service.incrementCart(req.user, req.body, result);
 
             res.json({ message: UserMessage.IncrementCartSuccess });
@@ -285,7 +284,6 @@ class UserController {
     async decrementCart(req, res, next) {
         try {
             const result = await this.#service.checkIsFoodInCart(req.user, req.body);
-            await this.#service.checkExistKindFood(result);
             await this.#service.decrementCart(req.user, req.body, result);
 
             res.json({ message: UserMessage.DecrementCartSuccess });
@@ -329,7 +327,7 @@ class UserController {
     async getAddress(req, res, next) {
         try {
             const result = await this.#service.getAddress(req.user, req.params);
-            
+
             res.status(200).json(result);
         } catch (error) {
             next(error);

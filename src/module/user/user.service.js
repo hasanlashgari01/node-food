@@ -297,27 +297,21 @@ class UserService {
         if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
     }
 
-    async checkExistKindFood({ kindId }) {
-        if (!isValidObjectId(kindId)) throw createHttpError.BadRequest(UserMessage.IdNotValid);
-        const food = await this.#kindFoodModel.findById(kindId);
-        if (!food) throw createHttpError.NotFound(UserMessage.FoodNotExist);
-    }
-
     // * Cart
     async getCart(userDto) {
         const { _id: userId } = userDto;
-        const cart = await this.#model
+        const { cart } = await this.#model
             .findById(userId)
             .select("cart")
-            .populate("cart.foods.kindId")
+            .populate("cart.foods.food")
             .populate("cart.coupon");
+
         return cart;
     }
 
     async removeFoodFromCart(userDto, foodDto) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
-        console.log(foodId);
         const result = await this.#model.updateOne(
             { _id: userId, "cart.foods._id": foodId },
             { $pull: { "cart.foods": { _id: foodId } } }
@@ -325,33 +319,35 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.RemoveFoodFromCartFailed);
     }
 
-    async incrementCart(userDto, foodDto, resultExistFood) {
+    async incrementCart(userDto, foodDto, {existByFood}) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
 
         let result = null;
 
-        if (resultExistFood) {
+        console.log("existByFood => ", existByFood);
+        if (existByFood) {
             result = await this.#model.updateOne(
                 { _id: userId, "cart.foods._id": foodId },
                 { $inc: { "cart.foods.$.quantity": 1 } }
             );
         } else {
-            result = await this.#model.updateOne({ _id: userId }, { $push: { "cart.foods": { quantity: 1, foodId } } });
+            result = await this.#model.updateOne(
+                { _id: userId },
+                { $push: { "cart.foods": { quantity: 1, food: foodId } } }
+            );
         }
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.IncrementCartFailed);
     }
 
-    async decrementCart(userDto, foodDto, resultExistFood) {
+    async decrementCart(userDto, foodDto, { existById }) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
 
-        if (!resultExistFood) throw createHttpError.BadRequest(UserMessage.FoodNotExist);
-
         let result = null;
 
-        if (resultExistFood.quantity === 1) {
-            result = await this.#model.updateOne({ _id: userId }, { $pull: { "cart.foods": { foodId } } });
+        if (existById.quantity === 1) {
+            result = await this.#model.updateOne({ _id: userId }, { $pull: { "cart.foods": { _id: foodId } } });
         } else {
             result = await this.#model.updateOne(
                 { _id: userId, "cart.foods._id": foodId },
@@ -365,10 +361,14 @@ class UserService {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
 
-        const { cart } = await this.#model.findOne({ _id: userId, "cart.foods._id": foodId }).select("cart.foods");
-        const result = cart.foods.find((food) => food._id.toString() === foodId);
+        console.log(foodId);
 
-        return result;
+        const { cart } = await this.#model.findById(userId).select("cart.foods");
+        let existById = cart.foods.find((food) => food._id.toString() === foodId);
+        let existByFood = cart.foods.find((food) => food.food.toString() === foodId);
+        console.log(existById, existByFood);
+
+        return { existById, existByFood };
     }
 
     async emptyCart(userDto) {
@@ -389,7 +389,6 @@ class UserService {
     async addAddress(userDto, addressDto) {
         const { _id: userId } = userDto;
         const { province, city, district, detail, coordinate, mobile, title } = addressDto;
-        console.log(addressDto);
 
         let result = null;
         const existAddress = await this.#addressModel.findOne({ userId });
@@ -424,8 +423,6 @@ class UserService {
             { $set: { "address.$": { province, city, district, detail, coordinate, mobile, title } } }
         );
 
-        console.log(result);
-
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.AddressEditFailed);
     }
 
@@ -434,8 +431,6 @@ class UserService {
         const { id: addressId } = addressDto;
 
         const result = await this.#addressModel.updateOne({ userId }, { $pull: { address: { _id: addressId } } });
-
-        console.log(result);
 
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.AddressRemoveFailed);
     }
@@ -464,7 +459,6 @@ class UserService {
 
     async getDashboard(userDto) {
         const { _id: userId } = userDto;
-        console.log(userId);
 
         const successOrders = await this.#orderModel.find({ user: userId, status: "COMPLETED" }).countDocuments();
         const failedOrders = await this.#orderModel.find({ user: userId, status: "CANCELED" }).countDocuments();
