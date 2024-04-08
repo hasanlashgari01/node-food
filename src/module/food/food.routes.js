@@ -11,7 +11,13 @@ router.patch("/comment/:id/status", AccessTokenGuard, RefreshTokenGuard, control
 router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, controller.allComments);
 router.route("/kind/many/:id").delete(controller.deleteKindMany);
 router.route("/kind/:id").delete(controller.deleteKind);
-router.route("/").post(AccessTokenGuard, RefreshTokenGuard, foodUpload(), validate(FoodValidator), controller.create);
-router.route("/:id", validate(FoodUpdateValidator)).patch(controller.update).delete(controller.delete);
+router
+    .route("/:id")
+    .post(AccessTokenGuard, RefreshTokenGuard, foodUpload(), validate(FoodValidator), controller.create);
+router
+    .route("/:id")
+    .get(controller.getOne)
+    .put(AccessTokenGuard, RefreshTokenGuard, foodUpload(), validate(FoodUpdateValidator), controller.update)
+    .delete(AccessTokenGuard, RefreshTokenGuard, controller.delete);
 
 module.exports = { FoodRouter: router };

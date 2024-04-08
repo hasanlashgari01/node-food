@@ -10,12 +10,12 @@ const DiscountSchema = new Schema({
 
 const FoodSchema = new Schema({
     title: { type: String, required: true },
-    image: { type: String },
+    image: { type: String, default: null },
     description: { type: String, required: true },
     rate: { type: Number, required: true, default: 0 },
     price: { type: Number, required: true, default: 0 },
     weight: { type: Number, required: true },
-    // restaurantId: { type: ObjectId, ref: "Restaurant", required: true },
+    restaurantId: { type: ObjectId, ref: "Restaurant", required: true },
     menuId: { type: ObjectId, ref: "Menu", required: true },
     kindId: { type: [ObjectId], ref: "KindOfFood" },
     discount: DiscountSchema,

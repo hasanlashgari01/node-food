@@ -16,9 +16,8 @@ router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, checkResuatrantA
 router.route("/:id/food").get(controller.getAllFoods);
 router
     .route("/:id/food/discount")
-    .get(controller.getAllFoodsHaveDiscount)
+    .get(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getAllFoodsHaveDiscount)
     .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountFoods)
-    .patch(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.changeDiscountFoods)
     .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountFoods);
 router
     .route("/:id/discount")

@@ -169,17 +169,8 @@ class RestaurantController {
 
     async applyDiscountFoods(req, res, next) {
         try {
+            console.log(req.body);
             await this.#service.applyDiscountFoods(req.params, req.body);
-
-            res.json({ message: RestaurantMessage.ApplyDiscountSuccess });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async changeDiscountFoods(req, res, next) {
-        try {
-            await this.#service.changeDiscountFoods(req.params, req.body);
 
             res.json({ message: RestaurantMessage.ApplyDiscountSuccess });
         } catch (error) {

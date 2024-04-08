@@ -21,13 +21,13 @@ class RestaurantService {
     }
 
     async create(restaurantDto, userDto, fileDto) {
+        const { title, slug, restaurantId } = restaurantDto;
         const genrateSlug = await slugify(slug);
         const isExistSlug = await this.#model.findOne({ slug: genrateSlug });
         if (isExistSlug) throw new createHttpError.BadRequest(MenuMessage.AlreadyExist);
         const resultCreateMenu = await this.#model.create({
             title,
-            image: fileDto.filename,
-            slug: genrateSlug,
+            slug: genrateSlug.toLowerCase(),
             restaurantId,
         });
         if (!resultCreateMenu) throw new createHttpError.InternalServerError(MenuMessage.CreateFailed);
@@ -36,8 +36,13 @@ class RestaurantService {
     async update(id, restaurantDto) {
         if (Object.keys(restaurantDto).length <= 1)
             throw createHttpError.BadRequest(RestaurantMessage.EditFieldsNotEmpty);
-        const update = await this.#model.updateOne({ _id: id }, { title, image, slug });
-        if (update.modifiedCount === 0) throw new createHttpError.BadRequest(MenuMessage.EditFailed);
+        const { title, slug } = restaurantDto;
+        const genrateSlug = await slugify(slug);
+        const isExistSlug = await this.#model.findOne({ slug: genrateSlug });
+        if (isExistSlug && isExistSlug._id != id) throw new createHttpError.BadRequest(MenuMessage.AlreadyExist);
+        const update = await this.#model.updateOne({ _id: id }, { title, slug: genrateSlug.toLowerCase() });
+        if (update.modifiedCount === 0 && update.matchedCount === 0)
+            throw new createHttpError.BadRequest(MenuMessage.EditFailed);
     }
 
     async delete(id) {

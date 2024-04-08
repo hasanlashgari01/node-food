@@ -3,7 +3,7 @@ const ObjectId = Schema.Types.ObjectId;
 
 const MenuSchema = new Schema({
     title: { type: String, required: true },
-    image: { type: String, required: true },
+    image: { type: String, required: false },
     slug: { type: String, required: true, unique: true },
     restaurantId: { type: ObjectId, ref: "Restaurant", required: true },
     foods: { type: [ObjectId], ref: "Food", required: true },

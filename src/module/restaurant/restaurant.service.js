@@ -124,7 +124,9 @@ class RestaurantService {
     async getAllFoods(menusId) {
         const foods = await this.#foodModel
             .find({ menuId: { $in: menusId } })
-            .select("-__v -menuId -description")
+            .select("-__v -description")
+            .populate("menuId")
+            .select("-foods -__v")
             .lean();
 
         return { foods };
@@ -187,23 +189,11 @@ class RestaurantService {
         if (percent == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
 
         await this.isValidRestaurant(restaurantId);
-        const result = await this.#kindOfFoodModel.updateMany(
-            { _id: { $in: foodsId }, restaurantId },
+        const result = await this.#foodModel.updateMany(
+            { restaurantId },
             { discount: { percent, startDate, endDate, amount } }
         );
-        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
-    }
-
-    async changeDiscountFoods(restaurantDto, discountDto) {
-        const { foodsId, percent, startDate, endDate, amount } = discountDto;
-        const { id: restaurantId } = restaurantDto;
-        if (percent == 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountNotValid);
-
-        await this.isValidRestaurant(restaurantId);
-        const result = await this.#kindOfFoodModel.updateMany(
-            { _id: { $in: foodsId }, restaurantId },
-            { discount: { percent, startDate, endDate, amount } }
-        );
+        console.log(result);
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
     }
 

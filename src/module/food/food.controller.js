@@ -19,10 +19,21 @@ class FoodController {
         }
     }
 
+    async getOne(req, res, next) {
+        try {
+            const { id } = req.params;
+            const food = await this.#service.getOne(id);
+
+            res.json(food);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async update(req, res, next) {
         try {
             const { id } = req.params;
-            await this.#service.update(id, req.body, req.user);
+            await this.#service.update(id, req.body, req.file);
 
             res.json({ message: FoodMessage.EditSuccess });
         } catch (error) {

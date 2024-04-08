@@ -27,10 +27,21 @@ class FoodService {
     }
 
     async create(foodDto, userDto, fileDto) {
-        const { title, description, menuId } = foodDto;
+        const { title, description, menuId, price, weight, percent, startDate, endDate, amount, restaurantId } =
+            foodDto;
+        await this.isValidRestaurant(restaurantId);
         const menu = await this.isValidMenu(menuId);
         await this.isAdmin(menu, userDto);
-        const resultCreateFood = await this.#model.create({ title, image: fileDto.filename, description, menuId });
+        const resultCreateFood = await this.#model.create({
+            title,
+            image: fileDto?.filename || null,
+            description,
+            menuId,
+            price,
+            weight,
+            discount: { percent, startDate, endDate, amount },
+            restaurantId,
+        });
         if (!resultCreateFood) throw new createHttpError.InternalServerError(FoodMessage.CreateFailed);
         const resultPushMenuID = await this.#menuModel.updateOne(
             { _id: menuId },
@@ -39,17 +50,36 @@ class FoodService {
         if (resultPushMenuID.modifiedCount === 0) throw createHttpError.BadRequest(MenuMessage.CreatedFailed);
     }
 
-    async update() {}
+    async getOne(id) {
+        const result = await this.#model.findById(id);
+        if (!result) throw new createHttpError.NotFound(FoodMessage.NotExist);
+        return result;
+    }
+
+    async update(id, foodDto, fileDto) {
+        const { title, description, menuId, price, weight, percent, startDate, endDate, amount } = foodDto;
+
+        const resultCreateFood = await this.#model.updateOne(
+            { _id: id },
+            {
+                title,
+                image: fileDto?.filename ?? null,
+                description,
+                menuId,
+                price,
+                weight,
+                discount: { percent, startDate, endDate, amount },
+            }
+        );
+        if (!resultCreateFood) throw new createHttpError.InternalServerError(FoodMessage.EditFailed);
+        await this.#menuModel.updateOne({ foods: id }, { $pull: { foods: id } });
+        const resultPushMenuID = await this.#menuModel.updateOne({ _id: menuId }, { $push: { foods: id } });
+        if (resultPushMenuID.modifiedCount === 0) throw createHttpError.BadRequest(MenuMessage.EditFailed);
+    }
 
     async delete(id, userDto) {
-        const { menuId } = await this.isValidFood(id);
-        const menu = await this.isValidMenu(menuId);
-        await this.isAdmin(menu, userDto);
         const result = await this.#model.findByIdAndDelete(id);
-        await this.#kindOfFoodModel.deleteOne(result.kindId);
         if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurantMessage.NotExist);
-        const resultPopMenuID = await this.#menuModel.updateOne({ _id: menuId }, { $pull: { foods: id } });
-        if (resultPopMenuID.modifiedCount === 0) throw createHttpError.BadRequest(MenuMessage.DeleteFailed);
     }
 
     async deleteKind(id, userDto) {

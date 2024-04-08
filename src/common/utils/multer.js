@@ -8,7 +8,7 @@ const { removeFile } = require("./file");
 const publicPath = "./public/uploads";
 const privatePath = "./private/uploads";
 
-const foodUpload = () => upload(false, "food", 1).single("cover");
+const foodUpload = () => upload(false, "food", 1).single("image");
 const menuUpload = () => upload(false, "menu", 1).single("image");
 const avatarUpload = () => upload(false, "user", 1).single("avatarUrl");
 const restaurantUpload = () => {

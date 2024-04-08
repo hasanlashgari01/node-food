@@ -26,11 +26,7 @@ class MenuController {
     async update(req, res, next) {
         try {
             const { id } = req.params;
-            const { restaurantId } = req.body;
-            const userDto = req.user;
-            await this.#service.checkIsBanRestaurant(restaurantId);
-            await this.#service.isValidRestaurant(restaurantId);
-            await this.#service.isRestaurantAdmin(restaurantId, userDto);
+            
             await this.#service.update(id, req.body);
 
             res.json({ message: MenuMessage.EditSuccess });

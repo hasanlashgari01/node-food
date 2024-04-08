@@ -1,7 +1,7 @@
 const validate = (schema) => {
     return async (req, res, next) => {
         try {
-            await schema.validateAsync(req.body);
+            await schema.validate(req.body);
             next();
         } catch (error) {
             if (error.isJoi) {
