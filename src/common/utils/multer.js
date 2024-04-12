@@ -11,12 +11,8 @@ const privatePath = "./private/uploads";
 const foodUpload = () => upload(false, "food", 1).single("image");
 const menuUpload = () => upload(false, "menu", 1).single("image");
 const avatarUpload = () => upload(false, "user", 1).single("avatarUrl");
-const restaurantUpload = () => {
-    return upload(false, "restaurant", 1).fields([
-        { name: "logo", maxCount: 1 },
-        { name: "cover", maxCount: 1 },
-    ]);
-};
+const logoUpload = () => upload(false, "restaurant", 1).single("logo");
+const coverUpload = () => upload(false, "restaurant", 2).single("cover");
 
 const storage = (isPrivate, directory) => {
     return multer.diskStorage({
@@ -64,4 +60,4 @@ const upload = (isPrivate, dir, size) => {
     });
 };
 
-module.exports = { foodUpload, menuUpload, restaurantUpload, avatarUpload };
+module.exports = { foodUpload, menuUpload, logoUpload, coverUpload, avatarUpload };

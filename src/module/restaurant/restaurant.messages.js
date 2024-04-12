@@ -7,6 +7,10 @@ const RestaurantMessage = {
     DeleteSuccess: "رستوران با موفقیت حذف شد",
     DeleteFailed: "حذف رستوران با مشکل مواجه شد",
     IdNotValid: "شناسه رستوران صحیح نمی باشد",
+    Liked: "رستوران با موفقیت لایک شد",
+    Unliked: "رستوران از لیست لایک ها حذف شد",
+    Bookmarked: "رستوران نشان شد",
+    Unbookmarked: "رستوران از لیست نشان ها حذف شد",
     AlreadyExist: "رستوران وجود دارد",
     NotExist: "رستوران وجود ندارد",
     NotFound: "رستوران یافت نشد",
@@ -21,6 +25,10 @@ const RestaurantMessage = {
     DiscountRemovedSuccess: "تخفیف حذف شد",
     DiscountRemovedFailed: "تخفیف حذف نشد",
     DiscountNotValid: "درصد تخفیف صحیح نمی باشد",
+    UploadImageSuccess: "عکس با موفقیت آپلود شد",
+    UploadImageFailed: "آپلود عکس با مشکل مواجه شد",
+    DeleteImageSuccess: "عکس با موفقیت حذف شد",
+    DeleteImageFailed: " عملیات حذف عکس با مشکل مواجه شد",
 };
 
 module.exports = RestaurantMessage;

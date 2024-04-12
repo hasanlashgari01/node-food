@@ -9,11 +9,15 @@ const RestaurantMessage = require("../restaurant/restaurant.messages");
 const KindOfFoodModel = require("./food-kind.schema");
 const FoodCommentsModel = require("./food-comment.schema");
 const RestaurantCommentsModel = require("../restaurant/restaurant-comment.schema");
+const FoodLikesModel = require("./food-likes");
+const FoodBookmarksModel = require("./food-bookmarks");
 
 class FoodService {
     #model;
     #kindOfFoodModel;
     #foodCommentsModel;
+    #foodLikeModel;
+    #foodBookmarkModel;
     #restaurantCommentsModel;
     #restaurantModel;
     #menuModel;
@@ -21,9 +25,43 @@ class FoodService {
         this.#model = FoodModel;
         this.#kindOfFoodModel = KindOfFoodModel;
         this.#foodCommentsModel = FoodCommentsModel;
+        this.#foodLikeModel = FoodLikesModel;
+        this.#foodBookmarkModel = FoodBookmarksModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
         this.#restaurantModel = RestaurantModel;
         this.#menuModel = MenuModel;
+    }
+
+    async toggleLike(paramsDto, userDto) {
+        const { id: foodId } = paramsDto;
+        const { _id: userId } = userDto;
+        const isLiked = !!(await this.#foodLikeModel.findOne({ foodId, userId }));
+        let message = null;
+        if (!isLiked) {
+            await this.#foodLikeModel.create({ foodId, userId });
+            message = FoodMessage.Liked;
+        } else {
+            await this.#foodLikeModel.deleteOne({ foodId, userId });
+            message = FoodMessage.Unliked;
+        }
+
+        return { message };
+    }
+
+    async toggleBookmark(paramsDto, userDto) {
+        const { id: foodId } = paramsDto;
+        const { _id: userId } = userDto;
+        const isBookmarked = !!(await this.#foodBookmarkModel.findOne({ foodId, userId }));
+        let message = null;
+        if (!isBookmarked) {
+            await this.#foodBookmarkModel.create({ foodId, userId });
+            message = FoodMessage.Bookmarked;
+        } else {
+            await this.#foodBookmarkModel.deleteOne({ foodId, userId });
+            message = FoodMessage.Unbookmarked;
+        }
+
+        return { message };
     }
 
     async create(foodDto, userDto, fileDto) {

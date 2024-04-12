@@ -20,7 +20,7 @@ class RestaurantService {
         this.#userModel = UserModel;
     }
 
-    async create(restaurantDto, userDto, fileDto) {
+    async create(restaurantDto) {
         const { title, slug, restaurantId } = restaurantDto;
         const genrateSlug = await slugify(slug);
         const isExistSlug = await this.#model.findOne({ slug: genrateSlug });

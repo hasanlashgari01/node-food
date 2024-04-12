@@ -7,6 +7,8 @@ const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth
 
 const controller = new FoodController();
 
+router.route("/:id/like").patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleLike);
+router.route("/:id/bookmark").patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleBookmark);
 router.patch("/comment/:id/status", AccessTokenGuard, RefreshTokenGuard, controller.changeCommentStatus);
 router.get("/:id/comment", AccessTokenGuard, RefreshTokenGuard, controller.allComments);
 router.route("/kind/many/:id").delete(controller.deleteKindMany);

@@ -10,6 +10,26 @@ class FoodController {
         this.#service = new FoodService();
     }
 
+    async toggleLike(req, res, next) {
+        try {
+            const { message } = await this.#service.toggleLike(req.params, req.user);
+
+            res.json({ message });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async toggleBookmark(req, res, next) {
+        try {
+            const { message } = await this.#service.toggleBookmark(req.params, req.user);
+
+            res.json({ message });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async create(req, res, next) {
         try {
             await this.#service.create(req.body, req.user, req.file);

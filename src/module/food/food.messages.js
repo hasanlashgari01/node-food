@@ -14,6 +14,10 @@ const FoodMessage = {
     CommentUpdateSuccess: "کامنت با موفقیت آپدیت شد",
     CommentUpdateFailed: "ویرایش کامنت با مشکل مواجه شد",
     CommentNotExist: "کامنت یافت نشد",
+    Liked: "غذا با موفقیت لایک شد",
+    Unliked: "غذا از لیست لایک ها حذف شد",
+    Bookmarked: "غذا نشان شد",
+    Unbookmarked: "غذا از لیست نشان ها حذف شد",
 };
 
 module.exports = FoodMessage;

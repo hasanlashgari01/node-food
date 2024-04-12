@@ -83,6 +83,16 @@ class UserController {
         }
     }
 
+    async getWishlist(req, res, next) {
+        try {
+            const result = await this.#service.getWishlist(req.user);
+
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async addCommentFood(req, res, next) {
         try {
             await this.#service.checkExistFood(req.body);

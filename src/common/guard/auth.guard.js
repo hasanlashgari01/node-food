@@ -1,4 +1,3 @@
-const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const createHttpError = require("http-errors");
 const UserModel = require("../../module/user/user.schema");
@@ -15,7 +14,9 @@ const AccessTokenGuard = async (req, res, next) => {
 
         const decoded = jwt.verify(accessToken, String(process.env.ACCESS_TOKEN_SECRET_KEY));
         if (typeof decoded === "object") {
-            const user = await UserModel.findById(decoded?._id).select("-otp -accessToken -password -verifiedAccount").lean();
+            const user = await UserModel.findById(decoded?._id)
+                .select("-otp -accessToken -password -verifiedAccount -__v")
+                .lean();
 
             req.user = user;
         }
@@ -33,7 +34,9 @@ const RefreshTokenGuard = async (req, res, next) => {
 
         const decoded = jwt.verify(token, String(process.env.REFRESH_TOKEN_SECRET_KEY));
         if (typeof decoded === "object") {
-            const user = await UserModel.findById(decoded?._id).select("-otp -accessToken -password -verifiedAccount").lean();
+            const user = await UserModel.findById(decoded?._id)
+                .select("-otp -accessToken -password -verifiedAccount -__v")
+                .lean();
             if (!user) throw createHttpError.Unauthorized(AuthorizationMessage.Login);
 
             const payload = { _id: user?._id, mobile: user.mobile, email: user.email };
@@ -51,4 +54,29 @@ const RefreshTokenGuard = async (req, res, next) => {
     }
 };
 
-module.exports = { AccessTokenGuard, RefreshTokenGuard };
+const PublicGuard = async (req, res, next) => {
+    try {
+        const token = req?.cookies?.refreshToken;
+        if (!token) return next();
+
+        const decoded = jwt.verify(token, String(process.env.REFRESH_TOKEN_SECRET_KEY));
+
+        if (typeof decoded === "object") {
+            const user = await UserModel.findById(decoded?._id)
+                .select("-otp -accessToken -password -verifiedAccount -__v")
+                .lean();
+
+            const payload = { _id: user?._id, mobile: user.mobile, email: user.email };
+            const accessToken = generateAccessToken(payload);
+            res.cookie("accessToken", accessToken, { httpOnly: true, secure: true }).status(201);
+
+            req.user = user;
+            return next();
+        }
+    } catch (error) {
+        if (error?.name === "TokenExpiredError") return next();
+        next(error);
+    }
+};
+
+module.exports = { AccessTokenGuard, RefreshTokenGuard, PublicGuard };

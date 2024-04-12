@@ -1,14 +1,16 @@
 const router = require("express").Router();
 const RestaurantController = require("./restaurant.controller");
 const validate = require("../../common/middleware/joi.validator");
-const { RestaurantValidator } = require("./restaurant.validation");
-const { restaurantUpload } = require("../../common/utils/multer");
-const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth.guard");
+const { RestaurantValidator, UpdateRestaurantValidator } = require("./restaurant.validation");
+const { logoUpload, coverUpload } = require("../../common/utils/multer");
+const { AccessTokenGuard, RefreshTokenGuard, PublicGuard } = require("../../common/guard/auth.guard");
 const { checkResuatrantAdmin } = require("../../common/guard/checkResuatrantAdmin.guard");
 
 const controller = new RestaurantController();
 
-router.route("/slug/:slug").get(controller.getRestaurantBySlug);
+router.route("/slug/:slug").get(PublicGuard, controller.getRestaurantBySlug);
+router.route("/:id/like").patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleLike);
+router.route("/:id/bookmark").patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleBookmark);
 router.patch("/comment/:id/status", AccessTokenGuard, RefreshTokenGuard, controller.changeCommentStatus);
 router.get("/:id/menu", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusByAdmin);
 router.get("/:id/menu/empty", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusEmpty);
@@ -24,13 +26,25 @@ router
     .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountToAllFoods)
     .patch(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.changeDiscountToAllFoods)
     .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountToAllFoods);
-router
-    .route("/")
-    .post(AccessTokenGuard, RefreshTokenGuard, restaurantUpload(), validate(RestaurantValidator), controller.create);
+router.route("/").post(AccessTokenGuard, RefreshTokenGuard, validate(RestaurantValidator), controller.create);
 router
     .route("/:id")
     .get(controller.getOne)
-    .patch(AccessTokenGuard, RefreshTokenGuard, controller.update)
+    .patch(
+        AccessTokenGuard,
+        RefreshTokenGuard,
+        checkResuatrantAdmin,
+        validate(UpdateRestaurantValidator),
+        controller.update
+    )
     .delete(AccessTokenGuard, RefreshTokenGuard, controller.delete);
+router
+    .route("/:id/logo", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin)
+    .patch(logoUpload(), controller.uploadLogo)
+    .delete(controller.removeLogo);
+router
+    .route("/:id/cover", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin)
+    .patch(coverUpload(), controller.uploadCover)
+    .delete(controller.removeCover);
 
 module.exports = { RestaurantRouter: router };

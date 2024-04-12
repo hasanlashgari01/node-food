@@ -11,15 +11,22 @@ const KindOfFoodModel = require("../food/food-kind.schema");
 const CouponModel = require("../coupon/coupon.schema");
 const OrderModel = require("../order/order.schema");
 const UserAddressModel = require("./user-address.schema");
+const RestaurantLikesModel = require("../restaurant/restaurant-likes");
+const RestaurantBookmarksModel = require("../restaurant/restaurant-bookmarks");
+const FoodLikesModel = require("../food/food-likes");
+const FoodBookmarksModel = require("../food/food-bookmarks");
 
 class UserService {
     #model;
     #addressModel;
     #restaurantModel;
     #restaurantCommentsModel;
+    #restaurantLikeModel;
+    #restaurantBookmarkModel;
     #foodCommentsModel;
+    #foodLikeModel;
+    #foodBookmarkModel;
     #foodModel;
-    #kindFoodModel;
     #couponModel;
     #orderModel;
     constructor() {
@@ -27,9 +34,12 @@ class UserService {
         this.#addressModel = UserAddressModel;
         this.#restaurantModel = RestaurantModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
+        this.#restaurantLikeModel = RestaurantLikesModel;
+        this.#restaurantBookmarkModel = RestaurantBookmarksModel;
         this.#foodCommentsModel = FoodCommentsModel;
+        this.#foodLikeModel = FoodLikesModel;
+        this.#foodBookmarkModel = FoodBookmarksModel;
         this.#foodModel = FoodModel;
-        this.#kindFoodModel = KindOfFoodModel;
         this.#couponModel = CouponModel;
         this.#orderModel = OrderModel;
     }
@@ -101,6 +111,45 @@ class UserService {
     async changeRateForRestaurant(commentId, { rate }) {
         const result = await this.#restaurantCommentsModel.updateOne({ _id: commentId }, { rate });
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.CommentEditedFailed);
+    }
+
+    async getWishlist(userDto) {
+        const { _id: userId } = userDto;
+        const restaurantLikes = await this.#restaurantLikeModel
+            .find({ userId })
+            .populate("restaurantId", "name slug logo")
+            .select("restaurantId")
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
+        const restaurantBookmarks = await this.#restaurantBookmarkModel
+            .find({ userId })
+            .populate("restaurantId", "name slug logo")
+            .select("restaurantId")
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
+        const foodLikes = await this.#foodLikeModel
+            .find({ userId })
+            .populate("foodId", "title image price restaurantId")
+            .select("foodId")
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
+        const foodBookmarks = await this.#foodBookmarkModel
+            .find({ userId })
+            .populate("foodId", "title image price restaurantId")
+            .select("foodId")
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
+
+        return {
+            restaurantLikes,
+            restaurantBookmarks,
+            foodLikes,
+            foodBookmarks,
+        };
     }
 
     async addCommentForFood(commentDto, userDto) {
@@ -319,7 +368,7 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.RemoveFoodFromCartFailed);
     }
 
-    async incrementCart(userDto, foodDto, {existByFood}) {
+    async incrementCart(userDto, foodDto, { existByFood }) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
 

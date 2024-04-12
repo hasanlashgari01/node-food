@@ -14,7 +14,8 @@ router
 router.get("/whoami", controller.whoAmI);
 // restaurant
 router.patch("/restaurant/:id/comment", controller.changeRateForRestaurant);
-router.route("/restaurant/:id/like").patch(controller.likeRestaurant).delete(controller.removeLikeRestaurant);
+// router.route("/restaurant/:id/like").patch(controller.likeRestaurant).delete(controller.removeLikeRestaurant);
+router.get("/whishlist", AccessTokenGuard, RefreshTokenGuard, controller.getWishlist);
 router.patch("/restaurant/comment/:id/like", controller.addLikeRestaurantComment);
 router.patch("/restaurant/comment/:id/unlike", controller.removeLikeRestaurantComment);
 router.patch("/restaurant/comment", controller.addCommentRestaurant);

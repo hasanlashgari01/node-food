@@ -35,6 +35,26 @@ class RestaurantController {
         }
     }
 
+    async toggleLike(req, res, next) {
+        try {
+            const { message } = await this.#service.toggleLike(req.params, req.user);
+
+            res.json({ message });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async toggleBookmark(req, res, next) {
+        try {
+            const { message } = await this.#service.toggleBookmark(req.params, req.user);
+
+            res.json({ message });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async update(req, res, next) {
         try {
             const { id } = req.params;
@@ -60,7 +80,7 @@ class RestaurantController {
     async getRestaurantBySlug(req, res, next) {
         try {
             const { slug } = req.params;
-            const restaurant = await this.#service.getRestaurantBySlug(slug);
+            const restaurant = await this.#service.getRestaurantBySlug(slug, req.user);
 
             res.json(restaurant);
         } catch (error) {
@@ -183,6 +203,46 @@ class RestaurantController {
             await this.#service.removeDiscountFoods(req.params, req.body);
 
             res.json({ message: RestaurantMessage.DiscountRemovedSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async uploadLogo(req, res, next) {
+        try {
+            await this.#service.uploadLogo(req.params, req.file);
+
+            res.json({ message: RestaurantMessage.UploadImageSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeLogo(req, res, next) {
+        try {
+            await this.#service.removeLogo(req.params);
+
+            res.json({ message: RestaurantMessage.DeleteImageSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async uploadCover(req, res, next) {
+        try {
+            await this.#service.uploadCover(req.params, req.file);
+
+            res.json({ message: RestaurantMessage.UploadImageSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async removeCover(req, res, next) {
+        try {
+            await this.#service.removeCover(req.params);
+
+            res.json({ message: RestaurantMessage.DeleteImageSuccess });
         } catch (error) {
             next(error);
         }

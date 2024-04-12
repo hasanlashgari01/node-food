@@ -9,10 +9,15 @@ const MenuModel = require("../menu/menu.schema");
 const FoodModel = require("../food/food.schema");
 const UserModel = require("../user/user.schema");
 const KindOfFoodModel = require("../food/food-kind.schema");
+const { randomId } = require("../../common/utils/func");
+const RestaurantLikesModel = require("./restaurant-likes");
+const RestaurantBookmarksModel = require("./restaurant-bookmarks");
 
 class RestaurantService {
     #model;
     #restaurantCommentsModel;
+    #restaurantLikeModel;
+    #restaurantBookmarkModel;
     #menuModel;
     #foodModel;
     #userModel;
@@ -21,6 +26,8 @@ class RestaurantService {
     constructor() {
         this.#model = RestaurantModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
+        this.#restaurantLikeModel = RestaurantLikesModel;
+        this.#restaurantBookmarkModel = RestaurantBookmarksModel;
         this.#menuModel = MenuModel;
         this.#foodModel = FoodModel;
         this.#userModel = UserModel;
@@ -29,14 +36,9 @@ class RestaurantService {
 
     async create(restaurantDto, userDto) {
         const { name, order_start, order_end, average_delivery_time } = restaurantDto;
-        const slugTranslate = await translatte(name, { from: "fa", to: "en" });
-        const slugifyText = slugify(slugTranslate.text, { lower: true });
 
         const resultCreateRestaurant = await this.#model.create({
             ...restaurantDto,
-            slug: slugifyText,
-            order: { order_start, order_end },
-            details: { average_delivery_time },
             author: userDto._id,
         });
         if (!resultCreateRestaurant) throw new createHttpError.InternalServerError(RestaurantMessage.CreateFailed);
@@ -55,11 +57,81 @@ class RestaurantService {
         return { restaurant, menu };
     }
 
+    async toggleLike(paramsDto, userDto) {
+        const { id: restaurantId } = paramsDto;
+        const { _id: userId } = userDto;
+        const isLiked = !!(await this.#restaurantLikeModel.findOne({ restaurantId, userId }));
+        let message = null;
+        if (!isLiked) {
+            await this.#restaurantLikeModel.create({ restaurantId, userId });
+            message = RestaurantMessage.Liked;
+        } else {
+            await this.#restaurantLikeModel.deleteOne({ restaurantId, userId });
+            message = RestaurantMessage.Unliked;
+        }
+
+        return { message };
+    }
+
+    async toggleBookmark(paramsDto, userDto) {
+        const { id: restaurantId } = paramsDto;
+        const { _id: userId } = userDto;
+        const isBookmarked = !!(await this.#restaurantBookmarkModel.findOne({ restaurantId, userId }));
+        let message = null;
+        if (!isBookmarked) {
+            await this.#restaurantBookmarkModel.create({ restaurantId, userId });
+            message = RestaurantMessage.Bookmarked;
+        } else {
+            await this.#restaurantBookmarkModel.deleteOne({ restaurantId, userId });
+            message = RestaurantMessage.Unbookmarked;
+        }
+
+        return { message };
+    }
+
     async update(id, restaurantDto, userDto) {
         if (id === userDto._id.toString()) throw createHttpError.BadRequest(RestaurantMessage.NotAdmin);
         await this.isValidRestaurant(id);
-        if (!Object.keys(restaurantDto).length) throw createHttpError.BadRequest(RestaurantMessage.EditFieldsNotEmpty);
-        const update = await this.#model.updateOne({ _id: id }, restaurantDto);
+        const {
+            name,
+            logo,
+            cover,
+            provinceName,
+            order_start,
+            order_end,
+            average_delivery_time,
+            send_outside_city,
+            categories,
+        } = restaurantDto;
+
+        const slugTranslate = await translatte(name, { from: "fa", to: "en" });
+        const slugifyText = slugify(slugTranslate.text, { lower: true });
+        const isExistSlug = await this.#model.findOne({ slug: slugifyText });
+        if (isExistSlug) {
+            slugifyText += `-${randomId()}`;
+        }
+
+        const update = await this.#model.updateOne(
+            { _id: id },
+            {
+                name,
+                logo,
+                cover,
+                slug: slugifyText,
+                categories,
+                province: {
+                    name: provinceName,
+                },
+                order: {
+                    start: order_start,
+                    end: order_end,
+                },
+                details: {
+                    average_delivery_time,
+                    send_outside_city,
+                },
+            }
+        );
         if (update.modifiedCount === 0) throw new createHttpError.BadRequest(RestaurantMessage.EditFailed);
     }
 
@@ -70,13 +142,20 @@ class RestaurantService {
         if (result.deletedCount === 0) throw new createHttpError.NotFound(RestaurantMessage.NotExist);
     }
 
-    async getRestaurantBySlug(slug) {
+    async getRestaurantBySlug(slug, userDto) {
+        let isLiked = false;
+        let isBookmarked = false;
         const restaurant = await this.#model.findOne({ slug }).select("-phone -email -createdAt -updatedAt -__v");
         if (!restaurant) throw new createHttpError.NotFound(RestaurantMessage.NotFound);
         if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurantMessage.NotFound);
+        if (userDto) {
+            const { _id: userId } = userDto;
+            isLiked = !!(await this.#restaurantLikeModel.findOne({ restaurantId: restaurant._id, userId }));
+            isBookmarked = !!(await this.#restaurantBookmarkModel.findOne({ restaurantId: restaurant._id, userId }));
+        }
         const menu = await this.#menuModel.find({ restaurantId: restaurant._id }, "-__v").populate("foods", "-__v");
 
-        return { restaurant, menu };
+        return { restaurant: { ...restaurant._doc, isLiked, isBookmarked }, menu };
     }
 
     async isValidRestaurant(id) {
@@ -207,6 +286,30 @@ class RestaurantService {
             { discount: { percent: 0, startDate: null, endDate: null, amount: 0 } }
         );
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.DiscountRemovedFailed);
+    }
+
+    async uploadLogo({ id: restaurantId }, fileDto) {
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#model.updateOne({ _id: restaurantId }, { logo: fileDto?.filename });
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.UploadImageFailed);
+    }
+
+    async removeLogo({ id: restaurantId }) {
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#model.updateOne({ _id: restaurantId }, { logo: "" });
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.DeleteImageFailed);
+    }
+
+    async uploadCover({ id: restaurantId }, fileDto) {
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#model.updateOne({ _id: restaurantId }, { cover: fileDto?.filename });
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.UploadImageFailed);
+    }
+
+    async removeCover({ id: restaurantId }) {
+        await this.isValidRestaurant(restaurantId);
+        const result = await this.#model.updateOne({ _id: restaurantId }, { cover: "" });
+        if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.DeleteImageFailed);
     }
 }
 
