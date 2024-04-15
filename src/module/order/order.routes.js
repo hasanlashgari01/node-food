@@ -13,7 +13,7 @@ router.route("/restaurant/:id").get(checkResuatrantAdmin, controller.getAllOrder
 router.route("/restaurant/:id/order/:orderId").get(checkResuatrantAdmin, controller.getOrder);
 // * User
 router.route("/").get(controller.getAll).post(controller.create);
-router.route("/:id").put(controller.payOrder).patch(controller.cancelOrder);
+router.route("/:id").get(controller.getOne).put(controller.payOrder).patch(controller.cancelOrder);
 // * Admin
 router.use(isAdminGuard);
 router.route("/orders").get(controller.getOrdersByAdmin);

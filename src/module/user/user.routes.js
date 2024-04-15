@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const UserController = require("./user.controller");
-const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth.guard");
+const { AccessTokenGuard, RefreshTokenGuard, PublicGuard } = require("../../common/guard/auth.guard");
 const { avatarUpload } = require("../../common/utils/multer");
 
 const controller = new UserController();

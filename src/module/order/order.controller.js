@@ -10,6 +10,16 @@ class OrderController {
         this.#service = new OrderService();
     }
 
+    async getOne(req, res, next) {
+        try {
+            const order = await this.#service.getOne(req.params, req.user);
+
+            res.json(order);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async create(req, res, next) {
         try {
             await this.#service.create(req.body, req.user, req.body.food, req.body.restaurant);

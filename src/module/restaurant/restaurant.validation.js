@@ -28,4 +28,11 @@ const imageValidator = Joi.object({
     cover: Joi.string().optional().label("عکس معتبر نیست"),
 });
 
-module.exports = { RestaurantValidator, UpdateRestaurantValidator };
+const commentValidator = Joi.object({
+    body: Joi.string().min(3).max(1000).required().label("متن نظر معتبر نیست"),
+    rate: Joi.number().min(0).max(5).required().label("امتیاز معتبر نیست"),
+    restaurantId: Joi.string().required().label("شناسه رستوران معتبر نیست"),
+    authorId: Joi.string().required().label("شناسه نویسنده معتبر نیست"),
+});
+
+module.exports = { RestaurantValidator, UpdateRestaurantValidator, commentValidator };

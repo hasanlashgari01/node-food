@@ -84,6 +84,7 @@ class RestaurantController {
 
             res.json(restaurant);
         } catch (error) {
+            console.log("🚀 ~ RestaurantController ~ getRestaurantBySlug ~ error:", error);
             next(error);
         }
     }
@@ -113,9 +114,50 @@ class RestaurantController {
     async getCommentsByAdmin(req, res, next) {
         try {
             const { id } = req.params;
-            const { comments } = await this.#service.getCommentsByAdmin(id);
+            const { comments } = await this.#service.getCommentsByAdmin(id, req.user);
 
             res.json({ count: comments.length, comments });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getComments(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { comments } = await this.#service.getComments(id, req.user);
+
+            res.json({ count: comments.length, comments });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getCommentById(req, res, next) {
+        try {
+            const comment = await this.#service.getCommentById(req.params);
+
+            res.json(comment);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async createComment(req, res, next) {
+        try {
+            await this.#service.createComment(req.body, req.user);
+
+            res.json({ message: RestaurantMessage.CommentCreatedSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async toggleLikeComment(req, res, next) {
+        try {
+            const { message } = await this.#service.toggleLikeComment(req.params, req.user);
+
+            res.json({ message });
         } catch (error) {
             next(error);
         }

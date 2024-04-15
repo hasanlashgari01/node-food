@@ -5,33 +5,43 @@ const RestaurantModel = require("../restaurant/restaurant.schema");
 const OrderMessage = require("./order.messages");
 const CouponModel = require("../coupon/coupon.schema");
 const UserModel = require("../user/user.schema");
-const KindOfFoodModel = require("../food/food-kind.schema");
+const FoodModel = require("../food/food.schema");
 
 class OrderService {
     #model;
     #restaurantModel;
     #couponModel;
     #userModel;
-    #kindFoodModel;
+    #foodModel;
     constructor() {
         this.#model = OrderModel;
         this.#restaurantModel = RestaurantModel;
         this.#couponModel = CouponModel;
         this.#userModel = UserModel;
-        this.#kindFoodModel = KindOfFoodModel;
+        this.#foodModel = FoodModel;
+    }
+
+    async getOne(paramsDto, userDto) {
+        const { id } = paramsDto;
+        const { _id: userId } = userDto;
+        if (!isValidObjectId(id)) throw createHttpError.BadRequest(OrderMessage.InvalidId);
+        const order = await this.#model.findById(id).lean();
+        if (!order || order.user != userId.toString()) throw createHttpError.NotFound(OrderMessage.NotFound);
+
+        return order;
     }
 
     async create(bodyDto, userDto) {
         const { _id: userId } = userDto;
         const { province, address, payment, paymentDate, coupon, delivery, total, mobile } = bodyDto;
 
-        const { cart: cartDto } = await this.#userModel.findById(userId, "cart").populate("cart.foods.kindId");
+        const { cart: cartDto } = await this.#userModel.findById(userId, "cart").populate("cart.foods.food");
         if (!cartDto) throw createHttpError.NotFound(OrderMessage.NotExistCart);
         const foods = cartDto.foods.map((food) => food.foodId);
 
         const order = await this.#model.create({
             user: userId,
-            foods: foods,
+            foods,
             total,
             province,
             mobile,
@@ -49,30 +59,38 @@ class OrderService {
 
     async getAll(userDto) {
         const { _id: userId } = userDto;
+        const orders = await this.#model
+            .find({ user: userId }, "-__v")
+            .populate("foods", "-__v -restaurantId -foodId")
+            .lean();
 
-        return await this.#model.find({ user: userId }, "-__v").populate("foods", "-__v -restaurantId -foodId").lean();
+        return orders;
     }
 
-    async payOrder(orderDto, userDto) {
-        const { id: orderId } = orderDto;
+    async payOrder(paramsDto, userDto) {
+        const { id: orderId } = paramsDto;
         const { _id: userId } = userDto;
 
-        const validOrder = await this.checkValidOrder(orderId, userId);
-        await this.checkIsPayment(validOrder);
+        const order = await this.getOne(paramsDto, userDto);
+        if (order.timeToPay && Date.now() > order.timeToPay) {
+            await this.#model.updateOne({ _id: id }, { status: "CANCELLED", cancelDate: Date.now(), isExpired: true });
+            throw createHttpError.Conflict(OrderMessage.OrderExpired);
+        }
+        if (order.paymentStatus === "PAID") throw createHttpError.Conflict(OrderMessage.OrderPaid);
+        if (order.status === "CANCELED") throw createHttpError.Conflict(OrderMessage.OrderCanceled);
         const result = await this.#model.updateOne(
             { _id: orderId, user: userId },
-            { status: "PENDING", paymentStatus: "PAID", paymentDate: Date.now() }
+            { status: "COMPLETED", paymentStatus: "PAID", paymentDate: Date.now() }
         );
         if (!result.modifiedCount) throw createHttpError.BadRequest(OrderMessage.PaymentFailed);
     }
 
-    async cancelOrder(orderDto, userDto) {
-        const { id: orderId } = orderDto;
+    async cancelOrder(paramsDto, userDto) {
+        const { id: orderId } = paramsDto;
         const { _id: userId } = userDto;
 
-        const validOrder = await this.checkValidOrder(orderId, userId);
-        await this.checkIsPayment(validOrder);
-        await this.checkIsCancel(validOrder);
+        const order = await this.getOne(paramsDto, userDto);
+        await this.checkIsPayment(order);
 
         const result = await this.#model.updateOne(
             { _id: orderId, user: userId },
@@ -85,13 +103,13 @@ class OrderService {
         const { id: restaurantId } = restaurantDto;
 
         const restaurant = await this.#restaurantModel.findById(restaurantId).select("_id").lean();
-        const kindFoods = await this.#kindFoodModel.find({ restaurantId: restaurant._id }).select("_id").lean();
+        const foods = await this.#foodModel.find({ restaurantId: restaurant._id }).select("_id").lean();
         const queryResult = await this.checkQueryIsValid(queryDto);
         let orders = [];
         if (Object.keys(queryDto).length > 0) {
             orders = await this.#model
                 .find({
-                    foods: { $in: kindFoods },
+                    foods: { $in: foods },
                     $or: [{ ...queryResult }],
                 })
                 .select("-__v")
@@ -100,7 +118,7 @@ class OrderService {
                 .lean();
         } else {
             orders = await this.#model
-                .find({ foods: { $in: kindFoods } }, "-__v")
+                .find({ foods: { $in: foods } }, "-__v")
                 .populate("user", "fullName mobile")
                 .populate("foods", "-__v -restaurantId -foodId")
                 .lean();
@@ -116,7 +134,7 @@ class OrderService {
 
     async getAllOrdersByAdmin(queryDto) {
         const queryResult = await this.checkQueryIsValid(queryDto);
-        let orders = [];
+        let orders = null;
         if (Object.keys(queryDto).length > 0) {
             orders = await this.#model
                 .find({ $or: [{ ...queryResult }] })
@@ -126,7 +144,8 @@ class OrderService {
                 .lean();
         } else {
             orders = await this.#model
-                .find({}, "-__v")
+                .find()
+                .select("-__v")
                 .populate("user", "fullName mobile")
                 .populate("foods", "-__v -restaurantId -foodId")
                 .lean();

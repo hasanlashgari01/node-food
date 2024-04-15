@@ -2,14 +2,14 @@ const jwt = require("jsonwebtoken");
 const createHttpError = require("http-errors");
 const UserModel = require("../../module/user/user.schema");
 const AuthorizationMessage = require("../messages/auth.message");
-const { generateAccessToken } = require("../utils/auth");
+const { generateAccessToken, setAccessToken } = require("../utils/auth");
 require("dotenv").config();
 
 const AccessTokenGuard = async (req, res, next) => {
     try {
-        const refreshToken = req?.cookies?.refreshToken;
+        const refreshToken = req?.signedCookies["refreshToken"];
         if (!refreshToken) throw createHttpError.Unauthorized(AuthorizationMessage.Login);
-        const accessToken = req?.cookies?.accessToken;
+        const accessToken = req?.signedCookies["accessToken"];
         if (!accessToken) return next();
 
         const decoded = jwt.verify(accessToken, String(process.env.ACCESS_TOKEN_SECRET_KEY));
@@ -29,7 +29,7 @@ const AccessTokenGuard = async (req, res, next) => {
 
 const RefreshTokenGuard = async (req, res, next) => {
     try {
-        const token = req?.cookies?.refreshToken;
+        const token = req?.signedCookies["refreshToken"];
         if (!token) throw createHttpError.Unauthorized(AuthorizationMessage.Login);
 
         const decoded = jwt.verify(token, String(process.env.REFRESH_TOKEN_SECRET_KEY));
@@ -40,8 +40,7 @@ const RefreshTokenGuard = async (req, res, next) => {
             if (!user) throw createHttpError.Unauthorized(AuthorizationMessage.Login);
 
             const payload = { _id: user?._id, mobile: user.mobile, email: user.email };
-            const accessToken = generateAccessToken(payload);
-            res.cookie("accessToken", accessToken, { httpOnly: true, secure: true }).status(201);
+            setAccessToken(res, payload);
 
             req.user = user;
             return next();
@@ -56,24 +55,23 @@ const RefreshTokenGuard = async (req, res, next) => {
 
 const PublicGuard = async (req, res, next) => {
     try {
-        const token = req?.cookies?.refreshToken;
-        if (!token) return next();
+        const refreshToken = req?.signedCookies?.refreshToken;
+        if (!refreshToken) return next();
 
-        const decoded = jwt.verify(token, String(process.env.REFRESH_TOKEN_SECRET_KEY));
-
-        if (typeof decoded === "object") {
-            const user = await UserModel.findById(decoded?._id)
+        const decodedRefreshToken = await jwt.verify(refreshToken, String(process.env.REFRESH_TOKEN_SECRET_KEY));
+        if (!decodedRefreshToken) return next();
+        if (typeof decodedRefreshToken === "object") {
+            const user = await UserModel.findById(decodedRefreshToken?._id)
                 .select("-otp -accessToken -password -verifiedAccount -__v")
                 .lean();
 
             const payload = { _id: user?._id, mobile: user.mobile, email: user.email };
-            const accessToken = generateAccessToken(payload);
-            res.cookie("accessToken", accessToken, { httpOnly: true, secure: true }).status(201);
-
+            setAccessToken(res, payload);
             req.user = user;
-            return next();
         }
+        next();
     } catch (error) {
+        console.log("🚀 ~ PublicGuard ~ error:", error);
         if (error?.name === "TokenExpiredError") return next();
         next(error);
     }

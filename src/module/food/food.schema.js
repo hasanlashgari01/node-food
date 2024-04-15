@@ -19,6 +19,8 @@ const FoodSchema = new Schema({
     menuId: { type: ObjectId, ref: "Menu", required: true },
     kindId: { type: [ObjectId], ref: "KindOfFood" },
     discount: DiscountSchema,
+    isLiked: { type: Boolean, default: false },
+    isBookmarked: { type: Boolean, default: false },
 });
 
 const FoodModel = models.Food || model("Food", FoodSchema);

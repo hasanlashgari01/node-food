@@ -12,24 +12,33 @@ const KindOfFoodModel = require("../food/food-kind.schema");
 const { randomId } = require("../../common/utils/func");
 const RestaurantLikesModel = require("./restaurant-likes");
 const RestaurantBookmarksModel = require("./restaurant-bookmarks");
+const FoodLikesModel = require("../food/food-likes");
+const FoodBookmarksModel = require("../food/food-bookmarks");
+const RestaurantCommentLikesModel = require("./comment-likes.schema");
 
 class RestaurantService {
     #model;
     #restaurantCommentsModel;
+    #restaurantCommentLikeModel;
     #restaurantLikeModel;
     #restaurantBookmarkModel;
     #menuModel;
     #foodModel;
+    #foodLikeModel;
+    #foodBookmarkModel;
     #userModel;
     #kindOfFoodModel;
 
     constructor() {
         this.#model = RestaurantModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
+        this.#restaurantCommentLikeModel = RestaurantCommentLikesModel;
         this.#restaurantLikeModel = RestaurantLikesModel;
         this.#restaurantBookmarkModel = RestaurantBookmarksModel;
         this.#menuModel = MenuModel;
         this.#foodModel = FoodModel;
+        this.#foodLikeModel = FoodLikesModel;
+        this.#foodBookmarkModel = FoodBookmarksModel;
         this.#userModel = UserModel;
         this.#kindOfFoodModel = KindOfFoodModel;
     }
@@ -143,19 +152,52 @@ class RestaurantService {
     }
 
     async getRestaurantBySlug(slug, userDto) {
+        const userId = userDto?._id;
         let isLiked = false;
         let isBookmarked = false;
-        const restaurant = await this.#model.findOne({ slug }).select("-phone -email -createdAt -updatedAt -__v");
-        if (!restaurant) throw new createHttpError.NotFound(RestaurantMessage.NotFound);
+
+        if (!slug) throw new createHttpError.BadRequest(RestaurantMessage.NotFound);
+        const restaurant = await this.#model
+            .findOne({ slug, isValid: true })
+            .select("-phone -email -createdAt -updatedAt -__v");
+        if (!Boolean(restaurant)) throw new createHttpError.NotFound(RestaurantMessage.NotFound);
         if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurantMessage.NotFound);
-        if (userDto) {
-            const { _id: userId } = userDto;
+
+        let menus = null;
+        try {
+            menus = await this.#menuModel
+                .find({ restaurantId: restaurant._id }, "-__v")
+                .populate("foods", "-kindId -__v", { price: { $gte: 1 } });
+        } catch (error) {
+            throw new Error(`Failed to fetch menus: ${error.message}`);
+        }
+
+        if (Boolean(userId)) {
             isLiked = !!(await this.#restaurantLikeModel.findOne({ restaurantId: restaurant._id, userId }));
             isBookmarked = !!(await this.#restaurantBookmarkModel.findOne({ restaurantId: restaurant._id, userId }));
-        }
-        const menu = await this.#menuModel.find({ restaurantId: restaurant._id }, "-__v").populate("foods", "-__v");
 
-        return { restaurant: { ...restaurant._doc, isLiked, isBookmarked }, menu };
+            if (Boolean(userId)) {
+                for (const menu of menus) {
+                    for (const food of menu.foods) {
+                        let isLiked = false;
+                        let isBookmarked = false;
+
+                        isLiked = !!(await this.#foodLikeModel.findOne({ foodId: food._id, userId }));
+                        isBookmarked = !!(await this.#foodBookmarkModel.findOne({ foodId: food._id, userId }));
+
+                        food.isLiked = isLiked;
+                        food.isBookmarked = isBookmarked;
+                    }
+                }
+            }
+        }
+
+        const restaurantData = {
+            restaurant: { ...restaurant._doc, isLiked, isBookmarked },
+            menus,
+        };
+
+        return restaurantData;
     }
 
     async isValidRestaurant(id) {
@@ -176,12 +218,85 @@ class RestaurantService {
         return { menus };
     }
 
-    async getCommentsByAdmin(id) {
+    async getCommentsByAdmin(id, userDto) {
+        const userId = userDto?._id;
+
         const comments = await this.#restaurantCommentsModel
             .find({ restaurantId: id }, "-__v")
-            .populate("authorId", "fullName mobile");
+            .populate("authorId", "fullName mobile avatar")
+            .sort({ createdAt: -1 });
 
         return { comments };
+    }
+
+    async getComments(id, userDto) {
+        const userId = userDto?._id;
+
+        const comments = await this.#restaurantCommentsModel
+            .find({ restaurantId: id, isAccepted: true }, "-__v")
+            .populate("authorId", "fullName mobile avatar")
+            .sort({ createdAt: -1 });
+
+        if (Boolean(userId)) {
+            for (const comment of comments) {
+                comment.likes = await this.#restaurantCommentLikeModel
+                    .find({ commentId: comment._id, userId })
+                    .countDocuments()
+                    .lean();
+                comment.isLiked = !!(await this.#restaurantCommentLikeModel.findOne({
+                    commentId: comment._id,
+                    userId,
+                }));
+            }
+        } else {
+            for (const comment of comments) {
+                comment.likes = await this.#restaurantCommentLikeModel
+                    .find({ commentId: comment._id })
+                    .countDocuments()
+                    .lean();
+            }
+        }
+
+        return { comments };
+    }
+
+    async getCommentById(paramsDto) {
+        const { id: commentId } = paramsDto;
+
+        const comment = await this.#restaurantCommentsModel
+            .findById(commentId)
+            .populate("authorId", "fullName avatar");
+        if (!comment) throw createHttpError.NotFound(RestaurantMessage.CommentNotExist);
+        return comment;
+    }
+
+    async createComment(commentDto) {
+        const { body, rate, restaurantId, authorId } = commentDto;
+
+        const comment = await this.#restaurantCommentsModel.create({
+            body,
+            rate,
+            authorId,
+            restaurantId,
+        });
+        if (!comment) throw createHttpError.BadRequest(RestaurantMessage.CommentCreatedFailed);
+    }
+
+    async toggleLikeComment(commentDto, userDto) {
+        const { id: commentId } = commentDto;
+        const { _id: userId } = userDto;
+
+        const isLiked = !!(await this.#restaurantCommentLikeModel.findOne({ commentId, userId }));
+
+        let message = null;
+        if (isLiked) {
+            await this.#restaurantCommentLikeModel.deleteOne({ commentId, userId });
+            message = RestaurantMessage.Unliked;
+        } else {
+            await this.#restaurantCommentLikeModel.create({ commentId, userId });
+            message = RestaurantMessage.Liked;
+        }
+        return { message };
     }
 
     async changeCommentStatus(commentDto) {

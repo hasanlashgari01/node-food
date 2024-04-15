@@ -4,7 +4,7 @@ const OrderMessage = {
     PaymentSuccess: "عملیات پرداخت با موفقیت انجام شد",
     PaymentFailed: "عملیات پرداخت با شکست مواجه شد",
     OrderPaid: "سفارش پرداخت شده است",
-    OrderCancelSuccess: "سفارش با موفقیت لغو شد",
+    OrderCancelSuccess: "سفارش لغو شد",
     OrderCancelFailed: "عملیات لغو سفارش با شکست مواجه شد",
     OrderCanceled: "سفارش لغو شده است",
     OrderDelivered: "سفارش ارسال شده است",
@@ -17,6 +17,7 @@ const OrderMessage = {
     NotExistCoupon: "کد تخفیف وارد شده یافت نشد",
     NotExist: "سفارش وجود ندارد",
     IdNotValid: "شناسه صحیح نمی باشد",
+    OrderExpired: "زمان پرداخت سفارش منقضی شده است",
 };
 
 module.exports = OrderMessage;

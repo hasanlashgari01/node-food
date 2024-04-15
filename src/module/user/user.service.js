@@ -368,14 +368,15 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.RemoveFoodFromCartFailed);
     }
 
-    async incrementCart(userDto, foodDto, { existByFood }) {
+    async incrementCart(userDto, foodDto, { existById, existByFood }) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
+        console.log("🚀 ~ UserService ~ incrementCart ~ foodId:", foodId);
 
         let result = null;
 
-        console.log("existByFood => ", existByFood);
-        if (existByFood) {
+        if (existById || existByFood) {
+            console.log(1);
             result = await this.#model.updateOne(
                 { _id: userId, "cart.foods._id": foodId },
                 { $inc: { "cart.foods.$.quantity": 1 } }
@@ -389,14 +390,15 @@ class UserService {
         if (!result.modifiedCount) throw createHttpError.BadRequest(UserMessage.IncrementCartFailed);
     }
 
-    async decrementCart(userDto, foodDto, { existById }) {
+    async decrementCart(userDto, foodDto, { existById, existByFood }) {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
-
+        
         let result = null;
-
-        if (existById.quantity === 1) {
+        
+        if (existById?.quantity === 1 || existByFood?.quantity === 1) {
             result = await this.#model.updateOne({ _id: userId }, { $pull: { "cart.foods": { _id: foodId } } });
+            console.log(result);
         } else {
             result = await this.#model.updateOne(
                 { _id: userId, "cart.foods._id": foodId },
@@ -410,12 +412,9 @@ class UserService {
         const { _id: userId } = userDto;
         const { foodId } = foodDto;
 
-        console.log(foodId);
-
         const { cart } = await this.#model.findById(userId).select("cart.foods");
         let existById = cart.foods.find((food) => food._id.toString() === foodId);
         let existByFood = cart.foods.find((food) => food.food.toString() === foodId);
-        console.log(existById, existByFood);
 
         return { existById, existByFood };
     }

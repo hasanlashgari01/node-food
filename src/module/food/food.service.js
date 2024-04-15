@@ -106,9 +106,15 @@ class FoodService {
                 menuId,
                 price,
                 weight,
-                discount: { percent, startDate, endDate, amount },
+                discount: {
+                    percent: percent ? percent : 0,
+                    startDate: startDate ? startDate : null,
+                    endDate: endDate ? endDate : null,
+                    amount,
+                },
             }
         );
+        console.log("🚀 ~ FoodService ~ update ~ resultCreateFood:", resultCreateFood);
         if (!resultCreateFood) throw new createHttpError.InternalServerError(FoodMessage.EditFailed);
         await this.#menuModel.updateOne({ foods: id }, { $pull: { foods: id } });
         const resultPushMenuID = await this.#menuModel.updateOne({ _id: menuId }, { $push: { foods: id } });
