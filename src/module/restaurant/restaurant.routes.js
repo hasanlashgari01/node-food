@@ -8,39 +8,21 @@ const { checkResuatrantAdmin } = require("../../common/guard/checkResuatrantAdmi
 
 const controller = new RestaurantController();
 
-router.route("/comment/:id").get(AccessTokenGuard, RefreshTokenGuard, controller.getCommentById);
-router.route("/slug/:slug").get(PublicGuard, controller.getRestaurantBySlug);
-router.route("/:id/like").patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleLike);
-router.route("/:id/bookmark").patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleBookmark);
-router.patch("/comment/:id/status", AccessTokenGuard, RefreshTokenGuard, controller.changeCommentStatus);
-router.get("/:id/menu", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusByAdmin);
-router.get("/:id/menu/empty", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getMenusEmpty);
-router.get(
-    "/:id/comment/admin",
-    AccessTokenGuard,
-    RefreshTokenGuard,
-    checkResuatrantAdmin,
-    controller.getCommentsByAdmin
-);
+// mix
 router
-    .route("/comment")
-    .post(AccessTokenGuard, RefreshTokenGuard, validate(commentValidator), controller.createComment);
+    .route("/:id/logo", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin)
+    .patch(logoUpload(), controller.uploadLogo)
+    .delete(controller.removeLogo);
 router
     .route("/:id/comment")
     .get(PublicGuard, controller.getComments)
     .patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleLikeComment);
+router.get("/popular", controller.getPopularRestaurants);
+// router.get("/")
 router.route("/:id/food").get(controller.getAllFoods);
-router
-    .route("/:id/food/discount")
-    .get(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.getAllFoodsHaveDiscount)
-    .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountFoods)
-    .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountFoods);
-router
-    .route("/:id/discount")
-    .put(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.applyDiscountToAllFoods)
-    .patch(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.changeDiscountToAllFoods)
-    .delete(AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin, controller.removeDiscountToAllFoods);
-router.route("/").post(AccessTokenGuard, RefreshTokenGuard, validate(RestaurantValidator), controller.create);
+router.get("/:id/similar", controller.getSuggestionSimilarById);
+router.get("/:id/popular", controller.getSuggestionPopularById);
+router.get("/:id/news", controller.getNews);
 router
     .route("/:id")
     .get(controller.getOne)
@@ -50,15 +32,32 @@ router
         checkResuatrantAdmin,
         validate(UpdateRestaurantValidator),
         controller.update
-    )
-    .delete(AccessTokenGuard, RefreshTokenGuard, controller.delete);
+    );
+// public
+router.route("/slug/:slug").get(PublicGuard, controller.getRestaurantBySlug);
+// auth
+router.use(AccessTokenGuard, RefreshTokenGuard);
+router.post("/", validate(RestaurantValidator), controller.create);
+router.route("/comment/:id").get(controller.getCommentById);
+router.patch("/comment/:id/status", controller.changeCommentStatus);
+router.post("/comment", validate(commentValidator), controller.createComment);
+router.route("/:id/like").patch(controller.toggleLike);
+router.route("/:id/bookmark").patch(controller.toggleBookmark);
+// admin restaurant
+router.use(checkResuatrantAdmin);
+router.get("/:id/menu", controller.getMenusByAdmin);
+router.get("/:id/menu/empty", controller.getMenusEmpty);
+router.get("/:id/comment/admin", controller.getCommentsByAdmin);
 router
-    .route("/:id/logo", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin)
-    .patch(logoUpload(), controller.uploadLogo)
-    .delete(controller.removeLogo);
+    .route("/:id/food/discount")
+    .get(controller.getAllFoodsHaveDiscount)
+    .put(controller.applyDiscountFoods)
+    .delete(controller.removeDiscountFoods);
 router
-    .route("/:id/cover", AccessTokenGuard, RefreshTokenGuard, checkResuatrantAdmin)
-    .patch(coverUpload(), controller.uploadCover)
-    .delete(controller.removeCover);
+    .route("/:id/discount")
+    .put(controller.applyDiscountToAllFoods)
+    .patch(controller.changeDiscountToAllFoods)
+    .delete(controller.removeDiscountToAllFoods);
+router.route("/:id/cover").patch(coverUpload(), controller.uploadCover).delete(controller.removeCover);
 
 module.exports = { RestaurantRouter: router };

@@ -26,4 +26,11 @@ const FoodUpdateValidator = Joi.object({
     amount: Joi.number().required().label("مقدار تخفیف معتبر نیست"),
 });
 
-module.exports = { FoodValidator, FoodUpdateValidator };
+const commentValidator = Joi.object({
+    body: Joi.string().min(3).max(1000).required().label("متن نظر معتبر نیست"),
+    rate: Joi.number().min(0).max(5).required().label("امتیاز معتبر نیست"),
+    foodId: Joi.string().required().label("شناسه غذا معتبر نیست"),
+    authorId: Joi.string().required().label("شناسه نویسنده معتبر نیست"),
+});
+
+module.exports = { FoodValidator, FoodUpdateValidator, commentValidator };

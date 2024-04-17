@@ -9,8 +9,9 @@ const FoodCommentSchema = new Schema(
         isAnswer: { type: Number, required: true, default: 0 },
         foodId: { type: ObjectId, ref: "Food", required: true },
         authorId: { type: ObjectId, ref: "User", required: true },
-        mainCommentID: { type: ObjectId, ref: "FoodComment" },
+        mainCommentID: { type: ObjectId, ref: "FoodComment", default: null },
         likes: { type: [ObjectId], ref: "User", default: [] },
+        isLiked: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

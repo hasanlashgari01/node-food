@@ -66,17 +66,6 @@ class RestaurantController {
         }
     }
 
-    async delete(req, res, next) {
-        try {
-            const { id } = req.params;
-            await this.#service.delete(id, req.user);
-
-            res.json({ message: RestaurantMessage.DeleteSuccess });
-        } catch (error) {
-            next(error);
-        }
-    }
-
     async getRestaurantBySlug(req, res, next) {
         try {
             const { slug } = req.params;
@@ -84,7 +73,6 @@ class RestaurantController {
 
             res.json(restaurant);
         } catch (error) {
-            console.log("🚀 ~ RestaurantController ~ getRestaurantBySlug ~ error:", error);
             next(error);
         }
     }
@@ -125,9 +113,9 @@ class RestaurantController {
     async getComments(req, res, next) {
         try {
             const { id } = req.params;
-            const { comments } = await this.#service.getComments(id, req.user);
+            const { count, comments } = await this.#service.getComments(id, req.user, req.query);
 
-            res.json({ count: comments.length, comments });
+            res.json({ count, comments });
         } catch (error) {
             next(error);
         }
@@ -158,6 +146,49 @@ class RestaurantController {
             const { message } = await this.#service.toggleLikeComment(req.params, req.user);
 
             res.json({ message });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getPopularRestaurants(req, res, next) {
+        try {
+            const restaurants = await this.#service.getPopularRestaurants(req.query);
+
+            res.json(restaurants);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSuggestionSimilarById(req, res, next) {
+        try {
+            const { id } = req.params;
+            const restaurants = await this.#service.getSuggestionSimilarById(id, req.query);
+
+            res.json(restaurants);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSuggestionPopularById(req, res, next) {
+        try {
+            const { id } = req.params;
+            const restaurants = await this.#service.getSuggestionPopularById(id, req.query);
+
+            res.json(restaurants);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getNews(req, res, next) {
+        try {
+            const { id } = req.params;
+            const foods = await this.#service.getNews(id, req.query);
+
+            res.json(foods);
         } catch (error) {
             next(error);
         }

@@ -162,6 +162,7 @@ class RestaurantService {
             .select("-phone -email -createdAt -updatedAt -__v");
         if (!Boolean(restaurant)) throw new createHttpError.NotFound(RestaurantMessage.NotFound);
         if (!restaurant.isValid) throw createHttpError.ServiceUnavailable(RestaurantMessage.NotFound);
+        await this.calculateRateAndSave(restaurant._id);
 
         let menus = null;
         try {
@@ -229,13 +230,18 @@ class RestaurantService {
         return { comments };
     }
 
-    async getComments(id, userDto) {
+    async getComments(id, userDto, queryDto) {
         const userId = userDto?._id;
+        const { page = 1, limit = 5 } = queryDto;
 
+        const count = await this.#restaurantCommentsModel.countDocuments({ restaurantId: id, isAccepted: true });
         const comments = await this.#restaurantCommentsModel
             .find({ restaurantId: id, isAccepted: true }, "-__v")
-            .populate("authorId", "fullName mobile avatar")
-            .sort({ createdAt: -1 });
+            .populate("authorId", "fullName avatar")
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .skip(page > 0 ? (page - 1) * limit : 0)
+            .lean();
 
         if (Boolean(userId)) {
             for (const comment of comments) {
@@ -257,15 +263,13 @@ class RestaurantService {
             }
         }
 
-        return { comments };
+        return { count, comments };
     }
 
     async getCommentById(paramsDto) {
         const { id: commentId } = paramsDto;
 
-        const comment = await this.#restaurantCommentsModel
-            .findById(commentId)
-            .populate("authorId", "fullName avatar");
+        const comment = await this.#restaurantCommentsModel.findById(commentId).populate("authorId", "fullName avatar");
         if (!comment) throw createHttpError.NotFound(RestaurantMessage.CommentNotExist);
         return comment;
     }
@@ -297,6 +301,98 @@ class RestaurantService {
             message = RestaurantMessage.Liked;
         }
         return { message };
+    }
+
+    async getPopularRestaurants(queryDto) {
+        const { province } = queryDto;
+
+        let popularFoods = [];
+        if (province) {
+            popularFoods = await this.#model
+                .find({ "province.englishTitle": province, score: { $gte: 3 } })
+                .sort({ score: -1 })
+                .lean();
+        } else {
+            popularFoods = await this.#model
+                .find({ score: { $gte: 3 } })
+                .sort({ score: -1 })
+                .lean();
+        }
+
+        return popularFoods;
+    }
+
+    async getSuggestionSimilarById(id, queryDto) {
+        const { province } = queryDto;
+        if (!isValidObjectId(id)) throw createHttpError.NotFound(RestaurantMessage.NotExist);
+        const restaurant = await this.#model.findById(id);
+        if (!restaurant) throw createHttpError.NotFound(RestaurantMessage.NotFound);
+        const similarRestaurants = await this.#model
+            .find(
+                {
+                    _id: { $ne: id },
+                    categories: { $in: restaurant.categories },
+                    isValid: true,
+                    "province.englishTitle": province ?? restaurant.province.englishTitle,
+                },
+                "name logo slug score"
+            )
+            .limit(6);
+
+        return similarRestaurants;
+    }
+
+    async getSuggestionPopularById(id, queryDto) {
+        const { province } = queryDto;
+        if (!isValidObjectId(id)) throw createHttpError.NotFound(RestaurantMessage.NotExist);
+        const restaurant = await this.#model.findById(id);
+        if (!restaurant) throw createHttpError.NotFound(RestaurantMessage.NotFound);
+
+        const popularRestaurants = await this.#model
+            .find({
+                _id: { $ne: id },
+                "province.englishTitle": province || "tehran",
+                score: { $gte: 3 },
+            })
+            .limit(6)
+            .lean();
+
+        return popularRestaurants;
+    }
+
+    async getDiscountFoods(id) {
+        const restaurantId = await this.recursiveRestaurantId(id);
+
+        const discountFoods = await this.#model
+            .find(
+                {
+                    restaurantId,
+                    price: { $gte: 0 },
+                    "discount.percent": { $gt: 0 },
+                    _id: { $ne: id },
+                },
+                "-__v -kindId -description"
+            )
+            .populate("menuId", "title slug")
+            .limit(6)
+            .lean();
+
+        return discountFoods;
+    }
+
+    async getNews(id, queryDto) {
+        const { province } = queryDto;
+        if (!isValidObjectId(id)) throw createHttpError.NotFound(RestaurantMessage.NotExist);
+        const restaurant = await this.#model.findById(id);
+        if (!restaurant) throw createHttpError.NotFound(RestaurantMessage.NotFound);
+
+        const newRestaurants = await this.#model
+            .find({ _id: { $ne: id }, "province.englishTitle": province || "tehran" }, "name logo slug score")
+            .sort({ createdAt: -1 })
+            .limit(6)
+            .lean();
+
+        return newRestaurants;
     }
 
     async changeCommentStatus(commentDto) {
@@ -387,7 +483,6 @@ class RestaurantService {
             { restaurantId },
             { discount: { percent, startDate, endDate, amount } }
         );
-        console.log(result);
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.ApplyDiscountFailed);
     }
 
@@ -425,6 +520,20 @@ class RestaurantService {
         await this.isValidRestaurant(restaurantId);
         const result = await this.#model.updateOne({ _id: restaurantId }, { cover: "" });
         if (result.modifiedCount === 0) throw createHttpError.BadRequest(RestaurantMessage.DeleteImageFailed);
+    }
+
+    async calculateRateAndSave(id) {
+        const commentsCount = await this.#restaurantCommentsModel.countDocuments({
+            restaurantId: id,
+            isAccepted: true,
+        });
+        const commentsRate = await this.#restaurantCommentsModel
+            .find({ restaurantId: id, isAccepted: true })
+            .select("rate");
+        const calculateRate = commentsRate.reduce((a, b) => a + b.rate, 0) / commentsCount;
+        const rate = calculateRate.toFixed(2);
+
+        const result = await this.#model.updateOne({ _id: id }, { score: isNaN(rate) ? 0 : rate });
     }
 }
 

@@ -42,7 +42,7 @@ class FoodController {
     async getOne(req, res, next) {
         try {
             const { id } = req.params;
-            const food = await this.#service.getOne(id);
+            const food = await this.#service.getOne(id, req.user);
 
             res.json(food);
         } catch (error) {
@@ -95,12 +95,97 @@ class FoodController {
         }
     }
 
+    async getCommentById(req, res, next) {
+        try {
+            const comment = await this.#service.getCommentById(req.params);
+
+            res.json(comment);
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async allComments(req, res, next) {
         try {
             const { id } = req.params;
             const { comments } = await this.#service.getAllComments(id);
 
             res.json({ count: comments.length, comments });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async createComment(req, res, next) {
+        try {
+            await this.#service.createComment(req.body, req.user);
+
+            res.json({ message: FoodMessage.CommentCreatedSuccess });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getComments(req, res, next) {
+        try {
+            const { id } = req.params;
+            const { count, comments } = await this.#service.getComments(id, req.user, req.query);
+
+            res.json({ count, comments });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async toggleLikeComment(req, res, next) {
+        try {
+            const { message } = await this.#service.toggleLikeComment(req.params, req.user);
+
+            res.json({ message });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSuggestionSimilar(req, res, next) {
+        try {
+            const { id } = req.params;
+            const foods = await this.#service.getSuggestionSimilar(id);
+
+            res.json(foods);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSuggestionPopular(req, res, next) {
+        try {
+            const { id } = req.params;
+            const foods = await this.#service.getSuggestionPopular(id);
+
+            res.json(foods);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getSuggestionDiscount(req, res, next) {
+        try {
+            const { id } = req.params;
+            const foods = await this.#service.getSuggestionDiscount(id);
+
+            res.json(foods);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getNews(req, res, next) {
+        try {
+            const { id } = req.params;
+            const foods = await this.#service.getNews(id);
+
+            res.json(foods);
         } catch (error) {
             next(error);
         }

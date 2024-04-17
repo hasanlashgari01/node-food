@@ -11,6 +11,8 @@ const FoodMessage = {
     NotExist: "غذا وجود ندارد",
     NotFound: "غذا یافت نشد",
     NotAdmin: "فقط مدیریت رستوران دسترسی دارد",
+    CommentCreatedSuccess: "کامنت با موفقیت ایجاد شد",
+    CommentCreatedFailed: "ایجاد کامنت با مشکل مواجه شد",
     CommentUpdateSuccess: "کامنت با موفقیت آپدیت شد",
     CommentUpdateFailed: "ویرایش کامنت با مشکل مواجه شد",
     CommentNotExist: "کامنت یافت نشد",

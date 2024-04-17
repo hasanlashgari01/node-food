@@ -11,11 +11,13 @@ const FoodCommentsModel = require("./food-comment.schema");
 const RestaurantCommentsModel = require("../restaurant/restaurant-comment.schema");
 const FoodLikesModel = require("./food-likes");
 const FoodBookmarksModel = require("./food-bookmarks");
+const FoodCommentLikesModel = require("./comment-likes.schema");
 
 class FoodService {
     #model;
     #kindOfFoodModel;
     #foodCommentsModel;
+    #foodCommentLikeModel;
     #foodLikeModel;
     #foodBookmarkModel;
     #restaurantCommentsModel;
@@ -25,6 +27,7 @@ class FoodService {
         this.#model = FoodModel;
         this.#kindOfFoodModel = KindOfFoodModel;
         this.#foodCommentsModel = FoodCommentsModel;
+        this.#foodCommentLikeModel = FoodCommentLikesModel;
         this.#foodLikeModel = FoodLikesModel;
         this.#foodBookmarkModel = FoodBookmarksModel;
         this.#restaurantCommentsModel = RestaurantCommentsModel;
@@ -88,10 +91,23 @@ class FoodService {
         if (resultPushMenuID.modifiedCount === 0) throw createHttpError.BadRequest(MenuMessage.CreatedFailed);
     }
 
-    async getOne(id) {
-        const result = await this.#model.findById(id);
-        if (!result) throw new createHttpError.NotFound(FoodMessage.NotExist);
-        return result;
+    async getOne(id, userDto) {
+        const userId = userDto?._id;
+        let isLiked = false;
+        let isBookmarked = false;
+
+        const food = await this.#model.findById(id).populate("menuId", "title slug restaurantId");
+        if (!food) throw new createHttpError.NotFound(FoodMessage.NotExist);
+        await this.calculateRateAndSave(food._id);
+
+        if (Boolean(userId)) {
+            isLiked = !!(await this.#foodLikeModel.findOne({ foodId: id, userId }));
+            isBookmarked = !!(await this.#foodBookmarkModel.findOne({ foodId: id, userId }));
+        }
+
+        const foodData = { ...food._doc, isLiked, isBookmarked };
+
+        return foodData;
     }
 
     async update(id, foodDto, fileDto) {
@@ -187,12 +203,149 @@ class FoodService {
         return isAdmin;
     }
 
+    async getCommentById(paramsDto) {
+        const { id: commentId } = paramsDto;
+
+        const comment = await this.#foodCommentsModel.findById(commentId).populate("authorId", "fullName avatar");
+        if (!comment) throw createHttpError.NotFound(FoodMessage.CommentNotExist);
+
+        return comment;
+    }
+
     async getAllComments(id) {
         const comments = await this.#foodCommentsModel
             .find({ foodId: id }, "-__v")
             .populate("authorId", "fullName mobile");
 
         return { comments };
+    }
+
+    async createComment(commentDto) {
+        const { body, rate, foodId, authorId } = commentDto;
+
+        const comment = await this.#foodCommentsModel.create({
+            body,
+            rate,
+            authorId,
+            foodId,
+        });
+        if (!comment) throw createHttpError.BadRequest(FoodMessage.CommentCreatedFailed);
+    }
+
+    async getComments(id, userDto, queryDto) {
+        const userId = userDto?._id;
+        const { page = 1, limit = 5 } = queryDto;
+
+        const count = await this.#foodCommentsModel.countDocuments({ foodId: id, isAccepted: true });
+        const comments = await this.#foodCommentsModel
+            .find({ foodId: id, isAccepted: true }, "-__v")
+            .populate("authorId", "fullName avatar")
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .skip(page > 0 ? (page - 1) * limit : 0)
+            .lean();
+
+        if (Boolean(userId)) {
+            for (const comment of comments) {
+                comment.likes = await this.#foodCommentLikeModel
+                    .find({ commentId: comment._id, userId })
+                    .countDocuments()
+                    .lean();
+                comment.isLiked = !!(await this.#foodCommentLikeModel.findOne({
+                    commentId: comment._id,
+                    userId,
+                }));
+            }
+        } else {
+            for (const comment of comments) {
+                comment.likes = await this.#foodCommentLikeModel
+                    .find({ commentId: comment._id })
+                    .countDocuments()
+                    .lean();
+            }
+        }
+
+        return { count, comments };
+    }
+
+    async toggleLikeComment(commentDto, userDto) {
+        const { id: commentId } = commentDto;
+        const { _id: userId } = userDto;
+
+        const isLiked = !!(await this.#foodCommentLikeModel.findOne({ commentId, userId }));
+
+        let message = null;
+        if (isLiked) {
+            await this.#foodCommentLikeModel.deleteOne({ commentId, userId });
+            message = FoodMessage.Unliked;
+        } else {
+            await this.#foodCommentLikeModel.create({ commentId, userId });
+            message = FoodMessage.Liked;
+        }
+        return { message };
+    }
+
+    async getSuggestionSimilar(id) {
+        const menuId = await this.recursiveMenuId(id);
+
+        const similarFoods = await this.#model
+            .find({ menuId, _id: { $ne: id } }, "-__v -kindId -description")
+            .limit(6)
+            .lean();
+        return similarFoods;
+    }
+
+    async getSuggestionPopular(id) {
+        const restaurantId = await this.recursiveRestaurantId(id);
+
+        const popularFoods = await this.#model
+            .find(
+                {
+                    restaurantId,
+                    rate: { $gte: 3 },
+                    price: { $gte: 0 },
+                    _id: { $ne: id },
+                },
+                "-__v -kindId -description"
+            )
+            .populate("menuId", "title slug")
+            .limit(6)
+            .lean();
+
+        return popularFoods;
+    }
+
+    async getSuggestionDiscount(id) {
+        const restaurantId = await this.recursiveRestaurantId(id);
+
+        const discountFoods = await this.#model
+            .find(
+                {
+                    restaurantId,
+                    price: { $gte: 0 },
+                    "discount.percent": { $gt: 0 },
+                    _id: { $ne: id },
+                },
+                "-__v -kindId -description"
+            )
+            .populate("menuId", "title slug")
+            .limit(6)
+            .lean();
+
+        return discountFoods;
+    }
+
+    async getNews(id) {
+        const restaurantId = await this.recursiveRestaurantId(id);
+
+        const newFoods = await this.#model
+            .find({ restaurantId, _id: { $ne: id } }, "-__v -kindId -description")
+            .populate("menuId", "title slug")
+            .sort({ createdAt: -1 })
+            .limit(6)
+            .lean();
+
+        return newFoods;
     }
 
     async changeRestaurantCommentStatus(commentDto) {
@@ -221,6 +374,34 @@ class FoodService {
         }
         if (!comment) throw createHttpError.NotFound(FoodMessage.CommentNotExist);
         return { comment };
+    }
+
+    async recursiveRestaurantId(id) {
+        if (!isValidObjectId(id)) throw createHttpError.NotFound(FoodMessage.NotExist);
+        const food = await this.#model.findOne({ _id: id }).select("restaurantId");
+        if (!Boolean(food)) throw createHttpError.NotFound(FoodMessage.NotFound);
+
+        return food.restaurantId;
+    }
+
+    async recursiveMenuId(id) {
+        if (!isValidObjectId(id)) throw createHttpError.NotFound(FoodMessage.NotExist);
+        const food = await this.#model.findOne({ _id: id }).select("menuId");
+        if (!Boolean(food)) throw createHttpError.NotFound(FoodMessage.NotFound);
+
+        return food.menuId;
+    }
+
+    async calculateRateAndSave(id) {
+        const commentsCount = await this.#foodCommentsModel.countDocuments({
+            foodId: id,
+            isAccepted: true,
+        });
+        const commentsRate = await this.#foodCommentsModel.find({ foodId: id, isAccepted: true }).select("rate");
+        const calculateRate = commentsRate.reduce((a, b) => a + b.rate, 0) / commentsCount;
+        const rate = calculateRate.toFixed(2);
+
+        const result = await this.#model.updateOne({ _id: id }, { rate: isNaN(rate) ? 0 : rate });
     }
 }
 
