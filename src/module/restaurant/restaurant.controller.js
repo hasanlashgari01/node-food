@@ -161,6 +161,17 @@ class RestaurantController {
         }
     }
 
+    async getNewsRestaurants(req, res, next) {
+        try {
+            const foods = await this.#service.getNewsRestaurants(req.query);
+
+            res.json(foods);
+        } catch (error) {
+            console.log("🚀 ~ RestaurantController ~ getNewsRestaurants ~ error:", error);
+            next(error);
+        }
+    }
+
     async getSuggestionSimilarById(req, res, next) {
         try {
             const { id } = req.params;

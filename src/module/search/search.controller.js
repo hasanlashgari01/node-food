@@ -9,11 +9,12 @@ class SearchController {
         this.#service = new SearchService();
     }
 
-    async searchRestaurant(req, res, next) {
+    async searchRestaurantAndFood(req, res, next) {
         try {
-            const result = await this.#service.searchRestaurant(req.body);
+            const { restaurants, foods } = await this.#service.searchRestaurantAndFood(req.query);
+            const count = restaurants.length + foods.length;
 
-            res.send({ count: result.length, result });
+            res.send({ count, restaurants, foods });
         } catch (error) {
             next(error);
         }

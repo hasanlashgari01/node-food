@@ -6,14 +6,10 @@ const { isAdminGuard } = require("../../common/guard/admin.guard");
 const controller = new ProvinceController();
 
 router.route("/").get(controller.getAll).post(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.create);
-router
-    .route("/many")
-    .post(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.createMany)
-    .delete(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.deleteMany);
-router
-    .route("/:id")
-    .get(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.getOne)
-    .put(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.update)
-    .delete(AccessTokenGuard, RefreshTokenGuard, isAdminGuard, controller.delete);
+router.route("/list").get(controller.getListProvince);
+// admin
+router.use(AccessTokenGuard, RefreshTokenGuard, isAdminGuard);
+router.route("/many").post(controller.createMany).delete(controller.deleteMany);
+router.route("/:id").get(controller.getOne).put(controller.update).delete(controller.delete);
 
 module.exports = { ProvinceRouter: router };

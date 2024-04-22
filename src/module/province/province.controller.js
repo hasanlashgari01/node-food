@@ -21,6 +21,16 @@ class ProvinceController {
         }
     }
 
+    async getListProvince(req, res, next) {
+        try {
+            const provinces = await this.#service.getListProvince(req.query);
+
+            res.json({ count: provinces.length, provinces });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async create(req, res, next) {
         try {
             await this.#service.create(req.body);

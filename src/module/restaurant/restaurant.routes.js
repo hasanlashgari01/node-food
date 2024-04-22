@@ -18,7 +18,7 @@ router
     .get(PublicGuard, controller.getComments)
     .patch(AccessTokenGuard, RefreshTokenGuard, controller.toggleLikeComment);
 router.get("/popular", controller.getPopularRestaurants);
-// router.get("/")
+router.get("/news", controller.getNewsRestaurants);
 router.route("/:id/food").get(controller.getAllFoods);
 router.get("/:id/similar", controller.getSuggestionSimilarById);
 router.get("/:id/popular", controller.getSuggestionPopularById);

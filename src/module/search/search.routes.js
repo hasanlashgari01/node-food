@@ -4,7 +4,7 @@ const { AccessTokenGuard, RefreshTokenGuard } = require("../../common/guard/auth
 
 const controller = new SearchController();
 
-router.post("/restaurant", controller.searchRestaurant);
+router.get("/restaurant", controller.searchRestaurantAndFood);
 router.use(AccessTokenGuard, RefreshTokenGuard);
 router.post("/admin/users", controller.searchUser);
 

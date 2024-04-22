@@ -1,7 +1,5 @@
 const router = require("express").Router();
 const CategoryController = require("./category.controller");
-const validate = require("../../common/middleware/joi.validator");
-const { CategoryValidator } = require("./category.validation");
 
 const controller = new CategoryController();
 

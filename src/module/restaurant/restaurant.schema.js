@@ -19,7 +19,7 @@ const RestaurantSchema = new Schema(
             average_delivery_time: { type: Number, default: 0 },
             send_outside_city: { type: Boolean, default: false },
         },
-        categories: { type: [ObjectId], ref: "Category", default: [] },
+        categories: { type: [ObjectId], ref: "Categories", default: [] },
         isValid: { type: Boolean, default: false },
         author: { type: ObjectId, ref: "User", required: true },
     },

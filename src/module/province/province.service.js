@@ -14,6 +14,10 @@ class ProvinceService {
         return await this.#model.find({}).select("-__v").sort({ name: 1 }).lean();
     }
 
+    async getListProvince(queryDto) {
+        return await this.#model.find({}).select("-__v").sort({ name: 1 }).lean();
+    }
+
     async create(bodyDto) {
         const { name, englishTitle } = bodyDto;
         if (!name && !englishTitle) throw new createHttpError.BadRequest(ProvinceMessage.FieldsNotEmpty);

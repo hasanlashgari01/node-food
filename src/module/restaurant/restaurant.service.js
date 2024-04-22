@@ -311,15 +311,29 @@ class RestaurantService {
             popularFoods = await this.#model
                 .find({ "province.englishTitle": province, score: { $gte: 3 } })
                 .sort({ score: -1 })
+                .limit(10)
                 .lean();
         } else {
             popularFoods = await this.#model
                 .find({ score: { $gte: 3 } })
                 .sort({ score: -1 })
+                .limit(10)
                 .lean();
         }
 
         return popularFoods;
+    }
+
+    async getNewsRestaurants(queryDto) {
+        const { province } = queryDto;
+
+        const newRestaurants = await this.#model
+            .find({ "province.englishTitle": province || "tehran" }, "name logo slug score")
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .lean();
+
+        return newRestaurants;
     }
 
     async getSuggestionSimilarById(id, queryDto) {
